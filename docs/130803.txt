@@ -1,0 +1,43 @@
+PASS
+(Network 기반 Keyboard, Mouse 공유 프로그램 )
+
+1. 구성도
+
+2. 기능
+   - Win To Win, Win To Android, Android To Win 의 Master PC( Win OS )를 중심으로 한 
+     각 OS의 Input Device Control
+   - Socket 통신을 이용한 Control
+   - ClipBoard 공유
+   - Drag & Drop 방식의 File Share System
+   - USB Connection 에서 원하는 Device 에 Drive 개념의 USB Drive Share System
+
+3. 진행해야 할 내용
+   - 개발 계획서 작성                         - 패킷 정보 정의 
+   - Window Keyboard 및 Mouse 제어            - Linux Keyboard 및 Mouse 제어
+   - Android Keyboard 및 Mouse 제어           - Android Porting
+   - 각 OS의 Socket Programing( File 전송, ClipBoard 공유 )
+   - Socket 통신을 이용한 USB 공유 기법       - Android Framework
+
+4. Feed Back 내용
+   - 박민철 회원님 : 
+   - 신성호 회원님 : 
+   - 정민우 회원님 : 
+   - Memdroid SIG장님 : 약간의 기능 추가 요구( WIFI 제어 등 ), 만들면 꼭 써보고 싶다.
+   - 자치회장님 : 기능 쪽이 빈약, 우리만의 장점 모색
+   - 박찬형 회원님 : 
+5. 기술 조사 내용 
+   - USB 관련
+     ○ http://wiki.eltima.com/user-guides/usb-to-ethernet/command-line.html
+        - USB Network Gate for Windows/Linux
+     ○ http://www.incentivespro.com/oem.html - USB Redirector OEM License
+     ○ http://wiki.wdlxtv.com/Share_USB_Device - Share USB Drive With Anything
+     ○ http://usbip.sourceforge.net/ - USB/IP Project
+     ○ http://hardroid.net/profiles/blogs/android-usb-host - Android USB Host
+     ○ http://www.incentivespro.com/usb-server.html - Share USB devices With Linux( Program )
+     ○ http://codemuri.tistory.com/entry/Androidscreencaset-화면-캡처-및-마우스-키보드-제어
+        - 화면 캡처 및 마우스 키보드 제어
+     ○ http://developer.android.com/guide/topics/connectivity/usb/host.html#api - USB Host
+     ○ https://play.google.com/store/apps/details?id=os.devwom.usbsharer - Android USB Share
+
+   - Android 마우스 제어 관련
+     ○ http://blog.daum.net/baramjin/16011039 - 안드로이드에서 마우스 이벤트 처리
