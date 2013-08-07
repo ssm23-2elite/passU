@@ -33,7 +33,7 @@
         </receiver>
 
         <activity
-            android:name=".Intro"
+            android:name=".Splash"
             android:theme="@android:style/Theme.NoTitleBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -55,11 +55,11 @@
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
-            android:name=".GUI"
+            android:name="org.ssm232elite.passu.android.mouse.GUI"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar" />
         <activity
-            android:name=".PassUMain"
+            android:name=".PassU"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar" />
     </application>

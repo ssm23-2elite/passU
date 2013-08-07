@@ -1,4 +1,6 @@
-package org.ssm232elite.passu.android;
+package org.ssm232elite.passu.android.mouse;
+
+import org.ssm232elite.passu.android.Singleton;
 
 import android.app.Activity;
 import android.content.Context;

@@ -13,19 +13,19 @@ import android.widget.Toast;
  * ¿ªÇÒ : Checking Rooting => Install Busybox
  * @author Jake Yoon
  */
-public class Intro extends Activity implements InstallDriverListener {
+public class Splash extends Activity implements InstallDriverListener {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_intro);
+        setContentView(R.layout.layout_splash);
         
 		InstallDriverTask install = new InstallDriverTask(this, this);
 		install.execute();
     }
     
     private void amove() {
-    	startActivity(new Intent(Intro.this, PassUMain.class));
+    	startActivity(new Intent(Splash.this, PassU.class));
 		onDestroy();
 		finish();
 	}

@@ -19,7 +19,6 @@ public class AR extends Application {
 	public static String phon_lcd_size;
 	public static String phon_model;
 	public static String phon_os_vrsn;
-	public static String svc_id;
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -30,6 +29,5 @@ public class AR extends Application {
 		phon_lcd_size = AR.width + "*" + AR.height;
 		phon_model = Build.MODEL;
 		phon_os_vrsn = Build.VERSION.RELEASE;
-		svc_id = "SNSDIARY";
 	}
 }

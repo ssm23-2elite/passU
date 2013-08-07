@@ -1,5 +1,7 @@
 package org.ssm232elite.passu.android;
 
+import org.ssm232elite.passu.android.mouse.GUI;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -10,7 +12,7 @@ import android.widget.Toast;
 
 import com.google.android.gcm.GCMRegistrar;
 
-public class PassUMain extends PreferenceActivity{
+public class PassU extends PreferenceActivity{
 	private final String SENDER_ID = "96418752374";
 	private Preference mFirst;
 	private CheckBoxPreference mSecond;
@@ -42,6 +44,6 @@ public class PassUMain extends PreferenceActivity{
 
 		addPreferencesFromResource(R.xml.layout_main);
 		
-		startActivity(new Intent(PassUMain.this, GUI.class));
+		startActivity(new Intent(PassU.this, GUI.class));
 	}
 }

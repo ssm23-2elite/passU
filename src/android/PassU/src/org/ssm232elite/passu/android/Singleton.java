@@ -1,6 +1,8 @@
 package org.ssm232elite.passu.android;
 
 
+import org.ssm232elite.passu.android.mouse.GUI;
+
 import android.app.Application;
 import android.app.Instrumentation;
 import android.content.Context;
