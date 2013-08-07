@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="setting_activity_top_title" >
+
+    <PreferenceCategory
+        android:key="mouse"
+        android:title="Mouse" >
+        <Preference
+            android:key="mouse_icon"
+            android:selectable="true"
+            android:title="Cursor icon" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="keyboard"
+        android:title="KeyBoard" >
+        <ListPreference
+            android:dialogTitle="Keyboard Layout"
+            android:entries="@array/layouts"
+            android:entryValues="@array/layout_values"
+            android:key="keyboard_layout"
+            android:title="Keyboard Layout" />
+
+        <Preference
+            android:key="keyboard_keymapping"
+            android:selectable="true"
+            android:title="Key mapping" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="power"
+        android:title="Power" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="power_screen_on"
+            android:widgetLayout="@layout/layout_checkbox"
+            android:title="Screen on" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="about"
+        android:title="About" >
+        <Preference
+            android:key="about"
+            android:selectable="false"
+            android:title="passU		(version: 1.0.0)" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

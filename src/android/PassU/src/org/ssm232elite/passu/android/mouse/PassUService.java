@@ -1,5 +1,7 @@
-package org.ssm232elite.passu.android;
+package org.ssm232elite.passu.android.mouse;
 
+import org.ssm232elite.passu.android.R;
+import org.ssm232elite.passu.android.R.drawable;
 import org.ssm232elite.passu.android.network.ServerConnectionListener;
 
 import android.app.Service;
@@ -17,7 +19,7 @@ import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-public class CursorService extends Service implements ServerConnectionListener {
+public class PassUService extends Service implements ServerConnectionListener {
     private OverlayView mView;
     
     public void Update(final int x, final int y, final boolean autoenable) {

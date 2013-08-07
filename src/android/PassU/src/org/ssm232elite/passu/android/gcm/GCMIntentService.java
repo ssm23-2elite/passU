@@ -1,6 +1,6 @@
 package org.ssm232elite.passu.android.gcm;
 
-import org.ssm232elite.passu.android.Singleton;
+import org.ssm232elite.passu.android.mouse.Singleton;
 import org.ssm232elite.passu.android.natives.InputHandler;
 import org.ssm232elite.passu.android.network.KeyEventListener;
 

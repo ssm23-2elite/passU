@@ -44,7 +44,7 @@
 
         <service android:name="org.ssm232elite.passu.android.gcm.GCMIntentService" >
         </service>
-        <service android:name="org.ssm232elite.passu.android.CursorService" >
+        <service android:name="org.ssm232elite.passu.android.mouse.PassUService" >
             <intent-filter>
                 <action android:name="org.ssm232elite.passu.android.CursorService" />
             </intent-filter>
@@ -55,13 +55,17 @@
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
-            android:name="org.ssm232elite.passu.android.mouse.GUI"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.NoTitleBar" />
-        <activity
             android:name=".PassU"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar" />
+        <activity
+            android:name=".mouse.PassUMouse"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar" />
+        <activity
+            android:name=".setting.PassUSetting"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

@@ -1,22 +1,21 @@
 package org.ssm232elite.passu.android;
 
-import org.ssm232elite.passu.android.mouse.GUI;
+import org.ssm232elite.passu.android.setting.PassUSetting;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gcm.GCMRegistrar;
 
-public class PassU extends PreferenceActivity{
+public class PassU extends Activity{
 	private final String SENDER_ID = "96418752374";
-	private Preference mFirst;
-	private CheckBoxPreference mSecond;
-
+	private Button btn_connect;
+	private Button btn_setting;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -26,24 +25,23 @@ public class PassU extends PreferenceActivity{
 			GCMRegistrar.checkManifest(this);
 			final String regId = GCMRegistrar.getRegistrationId(this);
 
-			Log.w("LOG", regId);
-
 			if (regId.equals("")) {
-
 				GCMRegistrar.register(this, SENDER_ID);
-				Toast.makeText( this, "등록성공", Toast.LENGTH_SHORT).show();
-
-			} else {
-
-				Log.v("TAG", "Already registered");
-
-			}
+			} 
 		} catch ( Exception e ) {
 			Toast.makeText( this, "GCM Error", Toast.LENGTH_SHORT).show();
 		}
 
-		addPreferencesFromResource(R.xml.layout_main);
+		setContentView(R.layout.layout_main);
 		
-		startActivity(new Intent(PassU.this, GUI.class));
+		btn_connect = (Button)findViewById(R.id.btn_connect);
+		btn_setting = (Button)findViewById(R.id.btn_setting);
+		
+		btn_setting.setOnClickListener( new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				startActivity(new Intent(PassU.this, PassUSetting.class));
+			}
+		});
 	}
 }

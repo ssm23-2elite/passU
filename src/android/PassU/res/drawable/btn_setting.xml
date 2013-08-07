@@ -7,6 +7,6 @@
 	</item>
 	<item android:state_selected="true" android:drawable="@drawable/btn_setting2">
 	</item>
-	<item android:drawable="@drawable/btn_setting">
+	<item android:drawable="@drawable/btn_setting1">
 	</item>
 </selector>

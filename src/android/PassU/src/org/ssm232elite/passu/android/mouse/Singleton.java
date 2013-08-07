@@ -1,7 +1,6 @@
-package org.ssm232elite.passu.android;
+package org.ssm232elite.passu.android.mouse;
 
 
-import org.ssm232elite.passu.android.mouse.GUI;
 
 import android.app.Application;
 import android.app.Instrumentation;
@@ -36,16 +35,13 @@ import android.view.WindowManager;
 
 
 public class Singleton extends Application {
-	private static 		Singleton				m_Instance;
-	 // screen metrics
-	private				float					m_fDensity 					= 0;
-	private				int						m_nScreenW 					= 0,
-												m_nScreenH 					= 0;					
-	
-	public 				GUI						m_guiInst					= null;
+	private static Singleton m_Instance;
+	// screen metrics
+	private	float m_fDensity = 0;		
 
-	public				CursorService			m_CurService				= null;
-	
+	public PassUMouse m_guiInst	= null;
+	public PassUService	m_CurService = null;
+
 	/*---------------------------------------------------------------------------------------------
 	 * Singleton Init instance
 	 *--------------------------------------------------------------------------------------------*/
@@ -67,7 +63,5 @@ public class Singleton extends Application {
 	{
 		super.onCreate();
 	}
-	
-	
 }
 
