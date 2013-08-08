@@ -10,4 +10,28 @@
         <item>2</item>
         <item>3</item>
     </string-array>
+    
+    <string-array name="mapping">
+        <item>Back</item>
+        <item>Menu</item>
+        <item>Home</item>
+        <item>Search</item>
+        <item>Power</item>
+        <item>Call log</item>
+        <item>Play/Stop Music</item>
+        <item>Play prev Music</item>
+        <item>Play next Music</item>
+    </string-array>
+    <string-array name="mapping_values">
+        <item>Back</item>
+        <item>Menu</item>
+        <item>Home</item>
+        <item>Search</item>
+        <item>Power</item>
+        <item>Calllog</item>
+        <item>PlayStopMusic</item>
+        <item>PlayprevMusic</item>
+        <item>PlaynextMusic</item>
+    </string-array>
+    
 </resources>
