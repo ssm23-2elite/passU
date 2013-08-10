@@ -16,6 +16,7 @@ public class PassU extends Activity{
 	private final String SENDER_ID = "96418752374";
 	private Button btn_connect;
 	private Button btn_setting;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -36,6 +37,15 @@ public class PassU extends Activity{
 		
 		btn_connect = (Button)findViewById(R.id.btn_connect);
 		btn_setting = (Button)findViewById(R.id.btn_setting);
+		
+		btn_connect.setOnClickListener( new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Toast.makeText(PassU.this, "접속을 시도합니다.",  Toast.LENGTH_SHORT).show();
+			}
+		});
 		
 		btn_setting.setOnClickListener( new OnClickListener() {
 			@Override
