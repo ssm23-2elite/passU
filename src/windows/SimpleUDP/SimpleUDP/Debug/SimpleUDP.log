@@ -1,0 +1,19 @@
+﻿빌드 시작: 2013-08-10 오후 9:25:07
+     1>2 노드의 "C:\Users\Jake\Downloads\SimpleUDP\SimpleUDP\SimpleUDP.vcxproj" 프로젝트(Build 대상)입니다.
+     1>ClCompile:
+         D:\Util\Visual Studio 2012\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0600 /D _MBCS /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /Gy- /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp".\Debug\SimpleUDP.pch" /Fo".\Debug\\" /Fd".\Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt SimpleUDPDlg.cpp
+         SimpleUDPDlg.cpp
+       Link:
+         D:\Util\Visual Studio 2012\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:".\Debug\SimpleUDP.exe" /INCREMENTAL /NOLOGO /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"D:\Util\Visual Studio 2012\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:".\Debug\SimpleUDP.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\Debug\SimpleUDP.lib" /MACHINE:X86 /SAFESEH .\Debug\SimpleUDP.res
+         .\Debug\ClientSend.obj
+         .\Debug\SimpleUDP.obj
+         .\Debug\SimpleUDPDlg.obj
+         .\Debug\StdAfx.obj
+         LINK : C:\Users\Jake\Downloads\SimpleUDP\SimpleUDP\Debug\SimpleUDP.pdb 프로그램 데이터베이스가 없습니다. 전체 링크를 수행하고 있습니다.
+     1>ClientSend.obj : warning LNK4075: '/EDITANDCONTINUE'이(가) '/SAFESEH' 사양으로 인해 무시됩니다.
+         SimpleUDP.vcxproj -> C:\Users\Jake\Downloads\SimpleUDP\SimpleUDP\.\Debug\SimpleUDP.exe
+     1>"C:\Users\Jake\Downloads\SimpleUDP\SimpleUDP\SimpleUDP.vcxproj" 프로젝트를 빌드했습니다(Build 대상).
+
+빌드했습니다.
+
+경과 시간: 00:00:00.53

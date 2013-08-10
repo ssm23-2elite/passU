@@ -43,7 +43,10 @@ int main(void){
 		return -1;
 
 	// socket 생성
-	SOCKET sock = socket(AF_INET, SOCK_DGRAM, 0);
+	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+
+	// SOCK_STREAM : 데이터가 보낸 순서대로 도착
+	// SOCK_DGRAM : 데이터가 보낸 순서대로 도착하지 않을 수도 있음
 	if( sock == INVALID_SOCKET) err_msg("socket() error", TRUE);
 
 	// BIND
