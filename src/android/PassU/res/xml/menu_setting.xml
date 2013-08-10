@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="setting_activity_top_title" >
+
+    <PreferenceCategory
+        android:key="mouse"
+        android:title="MOUSE" >
+        <Preference
+            android:key="mouse_icon"
+            android:selectable="true"
+            android:title="Cursor icon" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="keyboard"
+        android:title="KEYBOARD" >
+        <ListPreference
+            android:dialogTitle="Keyboard layout"
+            android:entries="@array/layouts"
+            android:entryValues="@array/layout_values"
+            android:key="keyboard_layout"
+            android:title="Keyboard layout" />
+        <PreferenceScreen
+            android:key="keyboard_keymapping"
+            android:selectable="true"
+            android:summary="Set android key mapping"
+            android:title="Key mapping" >
+            <ListPreference
+	            android:dialogTitle="Right click"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:key="mapping_right"
+	            android:summary="Back"
+	            android:title="Right click" />
+            <ListPreference
+	            android:dialogTitle="F1"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:key="mapping_f1"
+	            android:summary="Menu"
+	            android:title="F1" />
+            <ListPreference
+	            android:dialogTitle="F2"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:key="mapping_f2"
+	            android:summary="Home"
+	            android:title="F2" />
+            <ListPreference
+	            android:dialogTitle="F3"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:key="mapping_f3"
+	            android:summary="Search"
+	            android:title="F3" />
+            <ListPreference
+	            android:dialogTitle="F4"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:key="mapping_f4"
+	            android:summary="Power"
+	            android:title="F4" />
+            <ListPreference
+	            android:dialogTitle="F5"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:key="mapping_f5"
+	            android:summary="Call log"
+	            android:title="F5" />
+            <ListPreference
+	            android:dialogTitle="F6"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:key="mapping_f6"
+	            android:summary="Play/Stop Music"
+	            android:title="F6" />
+            <ListPreference
+	            android:dialogTitle="F7"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:key="mapping_f7"
+	            android:summary="Play prev Music"
+	            android:title="F7" />
+            <ListPreference
+	            android:dialogTitle="F8"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:key="mapping_f8"
+	            android:summary="Play next Music"
+	            android:title="F8" />
+            <ListPreference
+	            android:dialogTitle="F9"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:key="mapping_f9"
+	            android:title="F9" />
+            <ListPreference
+	            android:dialogTitle="F10"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:title="F10" />
+            <ListPreference
+	            android:dialogTitle="F11"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:key="mapping_f11"
+	            android:title="F11" />
+            <ListPreference
+	            android:dialogTitle="F12"
+	            android:entries="@array/mapping"
+	            android:entryValues="@array/mapping_values"
+	            android:key="mapping_f12"
+	            android:title="F12" />
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="power"
+        android:title="POWER" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="power_screen_on"
+            android:summary="Screen on when connect to server"
+            android:title="Screen on"
+            android:widgetLayout="@layout/layout_checkbox" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="about"
+        android:title="About" >
+        <Preference
+            android:key="about"
+            android:selectable="false"
+            android:title="passU		(version: 1.0.0)" />
+    </PreferenceCategory>
+</PreferenceScreen>
