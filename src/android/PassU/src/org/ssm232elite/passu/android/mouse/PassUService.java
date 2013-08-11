@@ -1,147 +1,167 @@
 package org.ssm232elite.passu.android.mouse;
 
-import org.ssm232elite.passu.android.R;
-import org.ssm232elite.passu.android.R.drawable;
-import org.ssm232elite.passu.android.network.ServerConnectionListener;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+
+import org.ssm232elite.passu.android.AR;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.MotionEvent;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 
-public class PassUService extends Service implements ServerConnectionListener {
-    private OverlayView mView;
-    
-    public void Update(final int x, final int y, final boolean autoenable) {
-    	mView.Update(x,y);
-    	if ((x!=0 || y!= 0) && autoenable && !mView.isCursorShown() ) 
-    		ShowCursor(true); //will also post invalidate
-    	else
-    		mView.postInvalidate();
-    }
-    
-    public void ShowCursor(boolean status) {
-    	mView.ShowCursor(status);
-    	mView.postInvalidate();
-    }
-    
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-    
-    public int getX() {
-    	return mView.x;
-    }
+import com.googlecode.androidannotations.annotations.EService;
 
-    public int getY() {
-    	return mView.y;
-    }
-    
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Singleton.getInstance().m_CurService = this;
-
-		Log.d("CursorService", "Service created");
-		
-        mView = new OverlayView(this);
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,//TYPE_SYSTEM_ALERT,//TYPE_SYSTEM_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, //will cover status bar as well!!!
-                PixelFormat.TRANSLUCENT);
-        params.gravity = Gravity.LEFT | Gravity.TOP;
-       //params.x = 100;
-        //params.y = 100;
-        params.setTitle("Cursor");
-        WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-        wm.addView(mView, params);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Singleton.getInstance().m_CurService = null;
-        if(mView != null) {
-            ((WindowManager) getSystemService(WINDOW_SERVICE)).removeView(mView);
-            mView = null;
-        }
-    }
-
-	@Override
-	public void onServerConnected(String ipAddress) {
-		
-	}
+public class PassUService extends Service {
 	
-	@Override
-	public void onServerConnectionFailed() {
-		
-	}
+	private static final String LOG = "PassUService";
 	
+	private PassUMouseT mView;
+	private DatagramSocket socket;
+	private Boolean shouldRestartSocketListen = true;
+	private Thread UDPBroadcastThread;
+	static String UDP_BROADCAST = "UDPBroadcast";
+
 	@Override
-	public void onServerConnectionInterrupted() {
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		AR.getInstance().m_CurService = this;
+		Log.w(LOG, "onStartCommand");
 		
+		onViewInit();
+
+		shouldRestartSocketListen = true;
+		startListenForUDPBroadcast();
+		ShowCursor(true);
+		return super.onStartCommand(intent, flags, startId);
 	}
-	
-	@Override
-	public void onServerDisconnected() {
+
+	private void onViewInit() {
+		Log.w(LOG, "onViewInit");
 		
+		mView = new PassUMouseT(this);
+		WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+				WindowManager.LayoutParams.WRAP_CONTENT,
+				WindowManager.LayoutParams.WRAP_CONTENT,
+				WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,//TYPE_SYSTEM_ALERT,//TYPE_SYSTEM_OVERLAY,
+				WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
+				WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, //will cover status bar as well!!!
+				PixelFormat.TRANSLUCENT);
+		params.gravity = Gravity.LEFT | Gravity.TOP;
+		params.setTitle("Cursor");
+		WindowManager wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+		wm.addView(mView, params);
+	}
+
+	void startListenForUDPBroadcast() {
+		Log.w(LOG, "startListenForUDPBroadcast");
+		
+		UDPBroadcastThread = new Thread(new Runnable() {
+			public void run() {
+				try {
+					InetAddress broadcastIP = InetAddress.getByName("127.0.0.1");
+					Integer port = 3737;
+					while (shouldRestartSocketListen) {
+						listenAndWaitAndThrowIntent(broadcastIP, port);
+					}
+					//if (!shouldListenForUDPBroadcast) throw new ThreadDeath();
+				} catch (Exception e) {
+					Log.i("UDP", "no longer listening for UDP broadcasts cause of error " + e.getMessage());
+				}
+			}
+		});
+		UDPBroadcastThread.start();
+	}
+
+	
+	/**
+	 * listenAndWaitAndThrowIntent
+	 * @param broadcastIP
+	 * @param port
+	 * @throws Exception
+	 */
+	private void listenAndWaitAndThrowIntent(InetAddress broadcastIP, Integer port) throws Exception {
+		Log.w(LOG, "listenAndWaitAndThrowIntent");
+		
+		byte[] recvBuf = new byte[1024];
+		if (socket == null || socket.isClosed()) {
+			socket = new DatagramSocket(port, broadcastIP);
+			socket.setBroadcast(true);
+		}
+		
+		DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
+		Log.e("UDP", "Waiting for UDP broadcast");
+		socket.receive(packet);
+
+		String senderIP = packet.getAddress().getHostAddress();
+		String message = new String(packet.getData()).trim();
+
+		if(message.equals("1")) {
+			Update(0, 10, true);
+			Log.w(LOG, "UP");
+		} else if (message.equals("2")) {
+			Update(0, -10, true);
+			Log.w(LOG, "DOWN");
+		} else if (message.equals("3")) {
+			Update(-10, 0, true);
+			Log.w(LOG, "LEFT");
+		} else if (message.equals("4")) {
+			Update(10, 0, true);
+			Log.w(LOG, "RIGHT");
+		}
+		Log.w(LOG, "broadcastData IP: " + senderIP + ", Message: " + message);
+		socket.close();
+	}
+
+	private void broadcastIntent(String senderIP, String message) {
+		/*Intent intent = new Intent(PassU.this);
+		intent.putExtra("sender", senderIP);
+		intent.putExtra("message", message);
+		sendBroadcast(intent);*/
+	}
+
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		AR.getInstance().m_CurService = null;
+		
+		Log.w(LOG, "onDestroy");
+		if(mView != null) {
+			((WindowManager) getSystemService(WINDOW_SERVICE)).removeView(mView);
+			mView = null;
+		}
+	}
+
+	public void Update(final int x, final int y, final boolean autoenable) {
+		Log.w(LOG, "Update x: " + x + ", y: " + y);
+		
+		mView.Update(x,y);
+		if ((x!=0 || y!= 0) && autoenable && !mView.isCursorShown() ) 
+			ShowCursor(true); //will also post invalidate
+		else
+			mView.postInvalidate();
+	}
+
+	public void ShowCursor(boolean status) {
+		mView.ShowCursor(status);
+		mView.postInvalidate();
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
+	}
+
+	public int getX() {
+		return mView.x;
+	}
+
+	public int getY() {
+		return mView.y;
 	}
 }
 
-class OverlayView extends ViewGroup {
-    private Paint mLoadPaint;
-    boolean mShowCursor;
-    
-    Bitmap	cursor;
-    public int x = 0,y = 0;
-    
-    public void Update(int nx, int ny) {
-    	x += nx; y += ny;
-    }
-    public void ShowCursor(boolean status) {
-    	mShowCursor = status;
-	}
-    public boolean isCursorShown() {
-    	return mShowCursor;
-    }
-    
-	public OverlayView(Context context) {
-        super(context);
-        cursor = BitmapFactory.decodeResource(context.getResources(), R.drawable.cursor);
-
-        mLoadPaint = new Paint();
-        mLoadPaint.setAntiAlias(true);
-        mLoadPaint.setTextSize(10);
-        mLoadPaint.setARGB(255, 255, 0, 0);
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        if (mShowCursor) 
-        	canvas.drawBitmap(cursor,x,y,null);
-    }
-
-    @Override
-    protected void onLayout(boolean arg0, int arg1, int arg2, int arg3, int arg4) {
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return true;
-    }
-}

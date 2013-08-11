@@ -7,6 +7,12 @@ import org.ssm232elite.passu.android.util.CommandLine;
 import android.content.Context;
 import android.os.AsyncTask;
 
+
+/***
+ * 
+ * @author Jake Yoon
+ *
+ */
 public class InstallDriverTask extends AsyncTask<Void, Void, Integer>{
 	private Context context;
 	private InstallDriverListener litener;

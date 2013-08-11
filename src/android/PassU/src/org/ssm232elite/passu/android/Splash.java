@@ -7,25 +7,24 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.googlecode.androidannotations.annotations.AfterViews;
 import com.googlecode.androidannotations.annotations.EActivity;
 
 /**
- * Intro 무조건 실행됨
- * 역할 : Checking Rooting => Install Busybox
+ * Intro Activity for initialization
+ * Role : Checking Rooting => Install Busybox
  * @author Jake Yoon
  */
-@EActivity
+
+@EActivity(R.layout.layout_splash)
 public class Splash extends Activity implements InstallDriverListener {
 	
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_splash);
+    @AfterViews
+	void onInitialize() {
+		onSucceed();
         
-        //onSucceed();
-        
-		InstallDriverTask install = new InstallDriverTask(this, this);
-		install.execute();
+		//InstallDriverTask install = new InstallDriverTask(this, this);
+		//install.execute();
     }
 
     @Override

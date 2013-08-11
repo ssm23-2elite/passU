@@ -1,6 +1,7 @@
 package org.ssm232elite.passu.android.mouse;
 
 import org.ssm232elite.passu.android.R;
+import org.ssm232elite.passu.android.AR;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,7 +22,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class PassUMouse extends Activity {
 
@@ -30,12 +30,6 @@ public class PassUMouse extends Activity {
 	int m_nScreenW = 0, m_nScreenH = 0;
 	boolean m_bRunning = false;
 
-	@Override
-	public boolean onTouchEvent(MotionEvent ev) {
-		// TODO Auto-generated method stub
-		Toast.makeText(this, String.format("x: %d, y: %d", ev.getX(), ev.getY()), Toast.LENGTH_SHORT).show();
-		return super.onTouchEvent(ev);
-	}
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -158,13 +152,13 @@ public class PassUMouse extends Activity {
 	}
 
 	private void cmdShowCursor() {
-		if (Singleton.getInstance().m_CurService != null)
-			Singleton.getInstance().m_CurService.ShowCursor(true);
+		if (AR.getInstance().m_CurService != null)
+			AR.getInstance().m_CurService.ShowCursor(true);
 	}
 
 	private void cmdHideCursor() {
-		if (Singleton.getInstance().m_CurService != null)
-			Singleton.getInstance().m_CurService.ShowCursor(false);
+		if (AR.getInstance().m_CurService != null)
+			AR.getInstance().m_CurService.ShowCursor(false);
 	}
 
 }
