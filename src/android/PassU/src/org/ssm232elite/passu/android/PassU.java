@@ -79,7 +79,7 @@ public class PassU extends Activity implements UDPReceiver {
 			socket.send(packet);
 			Log.d("AndroidUDP", "Sent: " + packet);
 			printOutput("Packet sent, waiting for response \n");
-
+ 
 			//Now get response
 			byte[] buf = new byte[1024];
 			packet = new DatagramPacket(buf, buf.length);
