@@ -20,6 +20,7 @@
 	    android:layout_marginLeft="30dp"
 	    android:layout_marginRight="30dp"/>
 	<EditText
+	    android:id="@+id/edit_ipport"
 	    android:layout_marginTop="10dp"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"

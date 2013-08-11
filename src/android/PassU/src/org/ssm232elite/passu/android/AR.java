@@ -12,6 +12,7 @@ import android.view.WindowManager;
  * 
  * @author Jake Yoon
  */
+
 public class AR extends Application {
 
 	public static int width;
