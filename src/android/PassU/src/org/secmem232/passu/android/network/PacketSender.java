@@ -21,12 +21,9 @@ public class PacketSender {
 		this.sendStream = stream;
 	}
 	
-	public void send(Packet packet) throws IOException{
-		//get packet size for transmission
-		int packetSize = packet.getHeader().getPacketLength();
-				
+	public void send(Packet packet) throws IOException{		
 		synchronized(java.lang.Object.class){
-			sendStream.write(packet.asByteArray(), 0, packetSize);
+			sendStream.write(packet.asByteArray(), 0, Packet.LENGTH);
 		}
 	}
 }

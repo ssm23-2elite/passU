@@ -4,16 +4,21 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.List;
 
 import org.secmem232.passu.android.AR;
+import org.secmem232.passu.android.mouse.PassUService;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
 
-public class CommonUtil {
-
+public class Util {
+	private static final boolean D = true;
 	private final static String LOG = "CommonUtil";
 
 	public static String getLocalIpAddress()
@@ -112,6 +117,16 @@ public class CommonUtil {
 		return positionalNumber;
 	}
 	
+	public static int ByteToInt(byte [] data){
+		int result = 0;
+		for(int i=0; i<data.length; i++){
+			if(data[i] == ' ')
+				continue;
+			result = result * 10 + (data[i]-'0');
+		}
+		return result;
+	}
+	
 	public static int getPositionalNumber(int iSrc){
 		int positionnalNumber=1;
 		while(true){
@@ -122,4 +137,37 @@ public class CommonUtil {
 		return positionnalNumber;
 	}
 	
+	public static class Services{
+	
+		/**
+		 * Check PassUService is running or not.
+		 * @param context Application/Activity's context
+		 * @return <code>true</code> if PassUService is running, <code>false</code> otherwise.
+		 */
+		public static boolean isServiceAliveU(Context context){
+			String serviceCls = PassUService.class.getName();
+			ActivityManager manager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+			List<RunningServiceInfo> serviceList = manager.getRunningServices(Integer.MAX_VALUE);
+			for(RunningServiceInfo info : serviceList){
+				if(info.service.getClassName().equals(serviceCls)){
+					return true;
+				}
+			}
+			if(D) Log.d(LOG, "PassUService not available.");
+			return false;
+		}
+		
+		/**
+		 * Starts PassUService.
+		 * @param context Application/Activity's context
+		 * @see org.secmem232.passu.android.mouse.PassUService PassUService
+		 */
+		public static void startPassUService(Context context){
+			if(!isServiceAliveU(context)){
+				if(D) Log.d(LOG, "Starting PassUService..");
+				Intent intent = new Intent(context, PassUService.class);
+				context.startService(intent);
+			}
+		}
+}
 }

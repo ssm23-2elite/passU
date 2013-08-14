@@ -2,6 +2,7 @@ package org.secmem232.passu.android.mouse;
 
 import org.secmem232.passu.android.AR;
 import org.secmem232.passu.android.IPassU;
+import org.secmem232.passu.android.intent.PassUIntent;
 import org.secmem232.passu.android.natives.InputHandler;
 import org.secmem232.passu.android.network.AddOptionListener;
 import org.secmem232.passu.android.network.PassUSocket;
@@ -38,11 +39,10 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 	private Handler handler;
 
 	private IBinder mBinder = new IPassU.Stub() {
-
 		@Override
 		public boolean isConnected() throws RemoteException {
 			// TODO Auto-generated method stub
-			return (mSocket!=null && mSocket.isConnected()) ? true : false;
+			return (mSocket != null && mSocket.isConnected()) ? true : false;
 		}
 
 		@Override
@@ -55,7 +55,6 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 		public void disconnect() throws RemoteException {
 			// Do time-consuming (blocks UI thread, causes activity death) task on here
 			new AsyncTask<Void, Void, Void>(){
-
 				@Override
 				protected Void doInBackground(Void... params) {					
 					// Close input device
@@ -66,13 +65,11 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 					mState = ServiceState.IDLE;
 					return null;
 				}
-
 			}.execute();
 		}
 
 		@Override
 		public void connect(final String ipAddress) throws RemoteException {
-
 			new AsyncTask<Void, Void, Void>() {
 
 				@Override
@@ -106,17 +103,10 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 	public void onCreate() {
 		super.onCreate();
 		AR.getInstance().m_CurService = this;
-
+		
 		mSocket = new PassUSocket(this);
 		mSocket.setVirtualEventListener(this);
 		mSocket.setAddOptionListener(this);
-
-		mInputHandler = new InputHandler(this);
-
-		handler = new Handler();
-
-		onViewInit();
-		ShowCursor();
 	}
 
 	@Override
@@ -243,14 +233,19 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 	@Override
 	public void onServerConnected(String ipAddress) {
 		mState = ServiceState.CONNECTED;
-		sendBroadcast(new Intent("Connected"));
+		sendBroadcast(new Intent(PassUIntent.ACTION_CONNECTED));
+		
+		mInputHandler = new InputHandler(this);
+		handler = new Handler();
+		onViewInit();
+		ShowCursor();
 	}
 
 	@Override
 	public void onServerConnectionFailed() {
 		Log.i(LOG, "onServerConnectionFailed");
 		mState = ServiceState.IDLE;
-		sendBroadcast(new Intent("ConnectionFailed"));
+		sendBroadcast(new Intent(PassUIntent.ACTION_CONNECTION_FAILED));
 
 		new AsyncTask<Void, Void, Void>(){
 			@Override
