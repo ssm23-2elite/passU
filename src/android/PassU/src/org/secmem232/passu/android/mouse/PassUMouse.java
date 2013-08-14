@@ -1,7 +1,7 @@
-package org.ssm232elite.passu.android.mouse;
+package org.secmem232.passu.android.mouse;
 
-import org.ssm232elite.passu.android.R;
-import org.ssm232elite.passu.android.AR;
+import org.secmem232.passu.android.AR;
+import org.secmem232.passu.android.R;
 
 import android.app.Activity;
 import android.content.Context;
@@ -153,12 +153,12 @@ public class PassUMouse extends Activity {
 
 	private void cmdShowCursor() {
 		if (AR.getInstance().m_CurService != null)
-			AR.getInstance().m_CurService.ShowCursor(true);
+			AR.getInstance().m_CurService.ShowCursor();
 	}
 
 	private void cmdHideCursor() {
 		if (AR.getInstance().m_CurService != null)
-			AR.getInstance().m_CurService.ShowCursor(false);
+			AR.getInstance().m_CurService.HideCursor();
 	}
 
 }

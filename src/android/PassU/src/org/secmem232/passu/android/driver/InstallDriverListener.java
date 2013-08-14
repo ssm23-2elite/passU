@@ -1,4 +1,4 @@
-package org.ssm232elite.passu.android.driver;
+package org.secmem232.passu.android.driver;
 
 
 /***

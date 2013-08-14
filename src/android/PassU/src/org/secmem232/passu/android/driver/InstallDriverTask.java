@@ -1,8 +1,8 @@
-package org.ssm232elite.passu.android.driver;
+package org.secmem232.passu.android.driver;
 
 import java.io.IOException;
 
-import org.ssm232elite.passu.android.util.CommandLine;
+import org.secmem232.passu.android.util.CommandLine;
 
 import android.content.Context;
 import android.os.AsyncTask;

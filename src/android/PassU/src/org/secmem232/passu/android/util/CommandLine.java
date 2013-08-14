@@ -1,4 +1,4 @@
-package org.ssm232elite.passu.android.util;
+package org.secmem232.passu.android.util;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import org.ssm232elite.passu.android.R;
+import org.secmem232.passu.android.R;
 
 import android.content.Context;
 import android.os.Build;

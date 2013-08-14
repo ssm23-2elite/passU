@@ -1,4 +1,4 @@
-package org.ssm232elite.passu.android.network;
+package org.secmem232.passu.android.network;
 
 public interface KeyEventListener {
 	/**

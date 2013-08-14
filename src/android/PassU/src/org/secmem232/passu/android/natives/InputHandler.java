@@ -1,6 +1,6 @@
-package org.ssm232elite.passu.android.natives;
+package org.secmem232.passu.android.natives;
 
-import org.ssm232elite.passu.android.util.CommandLine;
+import org.secmem232.passu.android.util.CommandLine;
 
 import android.content.Context;
 import android.util.DisplayMetrics;

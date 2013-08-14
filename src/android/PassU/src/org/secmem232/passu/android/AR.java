@@ -1,6 +1,6 @@
-package org.ssm232elite.passu.android;
+package org.secmem232.passu.android;
 
-import org.ssm232elite.passu.android.mouse.PassUService;
+import org.secmem232.passu.android.mouse.PassUService;
 
 import android.app.Application;
 import android.content.Context;

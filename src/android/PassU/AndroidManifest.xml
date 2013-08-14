@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.ssm232elite.passu.android"
+    package="org.secmem232.passu.android"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -23,9 +23,9 @@
             </intent-filter>
         </activity>
 
-        <service android:name="org.ssm232elite.passu.android.mouse.PassUService" >
+        <service android:name=".mouse.PassUService" >
             <intent-filter>
-                <action android:name="org.ssm232elite.passu.android.mouse.PassUService" />
+                <action android:name=".mouse.PassUService" />
             </intent-filter>
         </service>
 
@@ -34,15 +34,11 @@
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
-            android:name="org.ssm232elite.passu.android.PassU_"
+            android:name=".PassU_"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar" />
         <activity
             android:name=".mouse.PassUMouse"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.NoTitleBar" />
-         <activity
-            android:name=".mouse.GUI"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar" />
         <activity

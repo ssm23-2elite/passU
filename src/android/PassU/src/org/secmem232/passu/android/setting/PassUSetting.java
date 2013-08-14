@@ -1,6 +1,6 @@
-package org.ssm232elite.passu.android.setting;
+package org.secmem232.passu.android.setting;
 
-import org.ssm232elite.passu.android.R;
+import org.secmem232.passu.android.R;
 
 import android.os.Bundle;
 import android.preference.ListPreference;

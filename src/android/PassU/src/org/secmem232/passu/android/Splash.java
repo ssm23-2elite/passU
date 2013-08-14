@@ -1,10 +1,9 @@
-package org.ssm232elite.passu.android;
+package org.secmem232.passu.android;
 
-import org.ssm232elite.passu.android.driver.InstallDriverListener;
-import org.ssm232elite.passu.android.driver.InstallDriverTask;
+import org.secmem232.passu.android.driver.InstallDriverListener;
+import org.secmem232.passu.android.driver.InstallDriverTask;
 
 import android.app.Activity;
-import android.os.Bundle;
 import android.widget.Toast;
 
 import com.googlecode.androidannotations.annotations.AfterViews;
@@ -21,10 +20,10 @@ public class Splash extends Activity implements InstallDriverListener {
 	
     @AfterViews
 	void onInitialize() {
-		onSucceed();
+		//onSucceed();
         
-		//InstallDriverTask install = new InstallDriverTask(this, this);
-		//install.execute();
+		InstallDriverTask install = new InstallDriverTask(this, this);
+		install.execute();
     }
 
     @Override
