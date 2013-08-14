@@ -18,10 +18,10 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="passUTestServer.h">
+    <ClInclude Include="USBIcon.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="passUTestServerDlg.h">
+    <ClInclude Include="USBIconDlg.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
@@ -33,51 +33,33 @@
     <ClInclude Include="Resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="packet.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="PassUListen.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="PassUSocket.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="PassUThread.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="passUTestServer.cpp">
+    <ClCompile Include="USBIcon.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="passUTestServerDlg.cpp">
+    <ClCompile Include="USBIconDlg.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="PassUListen.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="PassUSocket.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="PassUThread.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="passUTestServer.rc">
+    <ResourceCompile Include="USBIcon.rc">
       <Filter>리소스 파일</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\passUTestServer.rc2">
+    <None Include="res\USBIcon.rc2">
       <Filter>리소스 파일</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\passUTestServer.ico">
+    <Image Include="res\USBIcon.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\passu.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>
