@@ -1,5 +1,5 @@
-/cygdrive/d/Workspace/SSM/passU/PassU/obj/local/armeabi/objs/passu/suinput.o: \
- /cygdrive/d/Workspace/SSM/passU/PassU/jni/suinput.cpp \
+/cygdrive/d/Workspace/SSM/passU/src/android/PassU/obj/local/armeabi/objs/passu/suinput.o: \
+ /cygdrive/d/Workspace/SSM/passU/src/android/PassU/jni/suinput.cpp \
  /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/errno.h \
  /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/sys/cdefs.h \
  /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/sys/cdefs_elf.h \
@@ -47,7 +47,7 @@
  /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/linux/capability.h \
  /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/pathconf.h \
  /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/stdio.h \
- /cygdrive/d/Workspace/SSM/passU/PassU/jni/include/uinput.h \
+ /cygdrive/d/Workspace/SSM/passU/src/android/PassU/jni/include/uinput.h \
  /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/linux/input.h \
  /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/sys/ioctl.h \
  /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/linux/ioctl.h \
@@ -56,8 +56,8 @@
  /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/asm/ioctls.h \
  /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/asm/termbits.h \
  /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/sys/ioctl_compat.h \
- /cygdrive/d/Workspace/SSM/passU/PassU/jni/include/suinput.h \
- /cygdrive/d/Workspace/SSM/passU/PassU/jni/include/uinput.h
+ /cygdrive/d/Workspace/SSM/passU/src/android/PassU/jni/include/suinput.h \
+ /cygdrive/d/Workspace/SSM/passU/src/android/PassU/jni/include/uinput.h
 
 /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/errno.h:
 
@@ -153,7 +153,7 @@
 
 /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/stdio.h:
 
-/cygdrive/d/Workspace/SSM/passU/PassU/jni/include/uinput.h:
+/cygdrive/d/Workspace/SSM/passU/src/android/PassU/jni/include/uinput.h:
 
 /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/linux/input.h:
 
@@ -171,6 +171,6 @@
 
 /cygdrive/d/android-ndk-r9/platforms/android-14/arch-arm/usr/include/sys/ioctl_compat.h:
 
-/cygdrive/d/Workspace/SSM/passU/PassU/jni/include/suinput.h:
+/cygdrive/d/Workspace/SSM/passU/src/android/PassU/jni/include/suinput.h:
 
-/cygdrive/d/Workspace/SSM/passU/PassU/jni/include/uinput.h:
+/cygdrive/d/Workspace/SSM/passU/src/android/PassU/jni/include/uinput.h:
