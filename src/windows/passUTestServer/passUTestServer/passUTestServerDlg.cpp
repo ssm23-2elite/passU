@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "passUTestServer.h"
 #include "passUTestServerDlg.h"
+#include "PassUListen.h"
 #include "afxdialogex.h"
 
 #ifdef _DEBUG
@@ -101,7 +102,39 @@ BOOL CpassUTestServerDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-	thr = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ReceiveData, this, NULL, &id1);
+	CPassUListen listen;
+	CSocket client;
+	// 초기화
+	if(!AfxSocketInit()) {
+		AfxMessageBox(_T("Socket 초기화 실패"));
+	}
+	// 포트 열기 : 9000번
+	if(!listen.Create(9000)) {
+		AfxMessageBox(_T("Port 열기 실패"));
+	}
+	// Listen 
+	if(!listen.Listen())  {
+		AfxMessageBox(_T("Listen 실패"));
+	}
+	// Aceept
+	if(!listen.Accept(client)) {
+		AfxMessageBox(_T("Accept 실패"));
+	}
+	int bytes, i=0;
+	char buf[20];
+	ZeroMemory(buf, sizeof(buf));
+	strcpy_s(buf, "250 Conect OK. Start Message!");
+	// Send로 데이터 전송 
+	bytes = client.Send(buf, strlen(buf));
+	while( i != 10) {                          
+		ZeroMemory(buf, sizeof(buf));
+		// 데이터 받기 시작
+		bytes = client.Receive(buf, sizeof(buf));
+		// 데이터 출력
+		TRACE(buf);
+	}
+	client.Close();
+	listen.Close();
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -155,49 +188,38 @@ HCURSOR CpassUTestServerDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-UINT ReceiveData(LPVOID pParam)
+BOOL CpassUTestServerDlg::PreTranslateMessage(MSG* pMsg)
 {
-	CpassUTestServerDlg *dlg = (CpassUTestServerDlg*)pParam;
-	AfxSocketInit(NULL);
-	CSocket echoServer;  
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	if(pMsg->message == WM_KEYDOWN)    { // if message is key down
+		CString key;
 
-	// Create socket for sending/receiving datagrams
-	if (echoServer.Create(3737, SOCK_DGRAM, NULL)== 0) {
-		AfxMessageBox(_T("Create() failed"));
-	}
+		switch (pMsg->wParam){
+		case VK_UP:     // if Up arrow  
+			key = "1";
+			break;
+		case VK_DOWN:   // if down arrow 
+			key = "2";
+			break;
+		case VK_LEFT:   // if down arrow 
+			key = "3";
+			break;
+		case VK_RIGHT:   // if down arrow 
+			key = "4";
+			break;
+		} // end of switch
 
-	for(;;) { // Run forever
-		// Client address
-		SOCKADDR_IN echoClntAddr; 
+		CSocket passUClient;  
 
-		// Set the size of the in-out parameter
-		int clntAddrLen = sizeof(echoClntAddr);
-
-		// Buffer for echo string
-		char echoBuffer[ECHOMAX];
-
-		// Block until receive message from a client
-		int recvMsgSize = echoServer.ReceiveFrom(echoBuffer, 
-			ECHOMAX, (SOCKADDR*)&echoClntAddr, &clntAddrLen, 0);
-		if (recvMsgSize < 0) {
-			AfxMessageBox(_T("RecvFrom() failed"));
+		if (passUClient.Create(0,SOCK_DGRAM,NULL) == 0) {
+			AfxMessageBox(_T("Create() failed"));
 		}
 
-		int ret;
-		if ((ret = echoServer.SendTo(_T("NICE"), sizeof(_T("NICE")), (SOCKADDR*)&echoClntAddr,
-			clntAddrLen, 0)) != sizeof(_T("NICE"))) {
-			CString data;
-			data.Format(_T("%d %d %d Failue"), ret, recvMsgSize, GetLastError());
-			dlg->m_edit.ReplaceSel(data);
-			dlg->m_edit.ReplaceSel((LPCTSTR)_T("\r\n"));
-		} else { 
-			dlg->m_edit.ReplaceSel((LPCTSTR)_T("Success"));
-			dlg->m_edit.ReplaceSel((LPCTSTR)_T("\r\n"));
+		if (passUClient.SendTo((void *)&key, sizeof(key),3737,
+			(LPCTSTR)_T("223.62.180.126"), 0) != sizeof(key)) {
+				AfxMessageBox(_T("SendTo() sent a different number of bytes than expected"));
 		}
-
-		//echoBuffer[recvMsgSize] = '\0';
-
-		//dlg->m_edit.ReplaceSel((LPCTSTR)echoBuffer);
-		//dlg->m_edit.ReplaceSel((LPCTSTR)_T("\r\n"));
-	}
+		passUClient.Close();
+	} // end of if
+	return CDialogEx::PreTranslateMessage(pMsg);
 }
