@@ -9,8 +9,6 @@ import java.net.Socket;
 import android.util.Log;
 
 public class PassUSocket implements PacketListener {
-
-	private static final int PORT = 3737;
 	private final String LOG = "PassUSocket";
 	
 	private Socket socket;
@@ -52,12 +50,12 @@ public class PassUSocket implements PacketListener {
 	 * @param ipAddr ip address
 	 * @throws IOException
 	 */
-	public synchronized void connect(String ipAddr){
+	public synchronized void connect(String ipAddr, int port){
 		Log.w(LOG, "connect");
 		try{
 			socket = new Socket();
 
-			socket.connect(new InetSocketAddress(ipAddr, PORT), 5000); // Set timeout to 5 seconds
+			socket.connect(new InetSocketAddress(ipAddr, port), 5000); // Set timeout to 5 seconds
 
 			// Open outputStream
 			sendStream = socket.getOutputStream();
@@ -192,25 +190,20 @@ public class PassUSocket implements PacketListener {
 
 	@Override
 	public void onInterrupt() {
-
-		//If server was closed, throw an IOException	
-		//If file is open, Shoud be closed
-
+		Log.w(LOG, "onInterrupt");
+		mServerConnectionListener.onServerConnectionInterrupted();	
 		synchronized(this){
-			if(socket!=null){
+			if(socket != null){
 				try{					
 					recvStream.close();
 					sendStream.close();
 					packetReceiver = null;
 					socket.close();
-					socket=null;
-
+					socket = null;
 				}catch(IOException e){
 					e.printStackTrace();
-				}finally{
-					mServerConnectionListener.onServerConnectionInterrupted();				
 				}
-			}
+			} 
 		}
 	}
 }

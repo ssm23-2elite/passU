@@ -36,8 +36,7 @@ import com.googlecode.androidannotations.annotations.ViewById;
 @EActivity(R.layout.layout_main)
 public class PassU extends Activity implements ServerCheckListener {
 	private final String LOG = "PassU";
-	private static final int PORT = 3737;
-	
+
 	@ViewById(R.id.btn_connect)
 	Button btn_connect;
 
@@ -53,14 +52,19 @@ public class PassU extends Activity implements ServerCheckListener {
 			mPassUSvc = IPassU.Stub.asInterface(service);
 			try {
 				// Remote connected requested?
-				String ip = edit_ip.getText().toString();
+				String ipport = edit_ip.getText().toString();
+				String ip = ipport.split(":")[0];
+				int port = Integer.parseInt(ipport.split(":")[1]);
+				
 				// Connect to server when client is not connected to server
 				if(!mPassUSvc.isConnected()){
-					Log.i(LOG, "Remote-connect requested to " + ip);
-					onConnectRequested(ip);
+					Log.i(LOG, "Remote-connect requested to " + ip + ":" + port);
+					onConnectRequested(ip, port);
 				} else {
 					Log.e(LOG, "Client already connected to server!");
 				}
+			} catch (ArrayIndexOutOfBoundsException e) {
+				printOutput("Insert IP:PORT");
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
@@ -74,13 +78,16 @@ public class PassU extends Activity implements ServerCheckListener {
 
 	@AfterViews
 	protected void onInitialize() {
-		edit_ip.setText("211.189.20.139");
+		edit_ip.setText("211.189.20.139:3737");
 	}
 
 	@Click
 	void btn_connect() {
-		String ip = edit_ip.getText().toString();
-		tryConnect(ip);
+		String ipport = edit_ip.getText().toString();
+		String ip = ipport.split(":")[0];
+		int port = Integer.parseInt(ipport.split(":")[1]);
+		
+		tryConnect(ip, port);
 	}
 
 	@Click
@@ -116,26 +123,23 @@ public class PassU extends Activity implements ServerCheckListener {
 			String action = intent.getAction();
 
 			if(PassUIntent.ACTION_CONNECTED.equals(action)){
-				Toast.makeText(getApplicationContext(), "Welcome to PassU", Toast.LENGTH_SHORT).show();
+				printOutput("Welcome to PassU");
 				HideBackground();
 			} else if(PassUIntent.ACTION_DEVICE_OPEN_FAILED.equals(action)) {
-				Toast.makeText(getApplicationContext(), "Device open failed\nis Rooted device?", Toast.LENGTH_SHORT).show();
-				
+				printOutput("Device open failed\nis Rooted device?");
 			} else if(PassUIntent.ACTION_DISCONNECTED.equals(action)) {
-				Toast.makeText(getApplicationContext(), "Disconnected Server", Toast.LENGTH_SHORT).show();
-				
+				printOutput("Disconnected");
 			} else if(PassUIntent.ACTION_INTERRUPTED.equals(action)) {
-				Toast.makeText(getApplicationContext(), "Interrupted Server", Toast.LENGTH_SHORT).show();
-				
+				printOutput("Interrupted Server");
 			} else if(PassUIntent.ACTION_CONNECTION_FAILED.equals(action)){
-				Toast.makeText(getApplicationContext(), "Connection Failed", Toast.LENGTH_SHORT).show();
+				printOutput("Connection Failed");
 			}
 		}
 	};
 
-	public void onConnectRequested(String ipAddress) {
+	public void onConnectRequested(String ip, int port) {
 		try {
-			mPassUSvc.connect(ipAddress);
+			mPassUSvc.connect(ip, port);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -143,12 +147,12 @@ public class PassU extends Activity implements ServerCheckListener {
 
 	// tryConnect to Server
 	@Background
-	void tryConnect(final String ip) {
+	void tryConnect(final String ip, final int port) {
 		Socket socket = new Socket();
 		try {
 			InetAddress ia = InetAddress.getByName(ip);
-			InetSocketAddress remoteAddr = new InetSocketAddress(ia, PORT);
-			final int connectionTimeout = 2000;	// 2 seconds
+			InetSocketAddress remoteAddr = new InetSocketAddress(ia, port);
+			final int connectionTimeout = 1000;	// 2 seconds
 			socket.connect(remoteAddr, connectionTimeout);
 			if(socket.isConnected())
 			{

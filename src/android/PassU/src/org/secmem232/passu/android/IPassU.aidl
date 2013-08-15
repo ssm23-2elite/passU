@@ -4,6 +4,6 @@ import java.util.List;
 interface IPassU{
 	String getConnectionStatus();
 	boolean isConnected();
-	void connect(String ipAddress);
+	void connect(String ip, int port);
 	void disconnect();
 }
