@@ -2,6 +2,8 @@
 
 #include <afxsock.h>
 #include "afxwin.h"
+#include "ServerSock.h"
+#include "AcceptSock.h"
 
 // ServerConf 대화 상자입니다.
 
@@ -15,6 +17,10 @@ public:
 	bool m_bDragFlag; // 드래그 판별 플래그
 	bool m_applyFlag; // apply 눌렀나 판별하는 플래그
 	CPoint m_ptltemText; // 특정 아이템 텍스트의 좌표
+	CServerSock *m_pServer;
+	CAcceptSock *m_pAccept;
+
+
 	//CTrackWnd m_wndTrack;
 
 // 대화 상자 데이터입니다.
@@ -56,4 +62,8 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	CEdit m_portEditControl;
 	CString serverIPAddress;
+	void initServer(int nPort);
+	void cleanUp(void);
+	void accept(void);
+	void closeAcceptSock(void);
 };

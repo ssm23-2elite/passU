@@ -38,7 +38,11 @@ ServerConf::ServerConf(CWnd* pParent /*=NULL*/)
 
 	serverIPAddress.Append(strIpAddress);
 
-	
+	AfxSocketInit();
+
+	m_pServer = NULL;
+	m_pAccept = NULL;
+
 }
 
 ServerConf::~ServerConf()
@@ -101,11 +105,10 @@ void ServerConf::OnBnClickedOk()
 
 	nPort = _ttoi(m_serverPortEdit);
 
-	((CtestApp *) AfxGetApp )->initServer(nPort);
-
 	AfxMessageBox(_T("Start!!"));
 
-	CDialogEx::OnOK();
+	initServer(nPort);
+
 }
 
 
@@ -253,4 +256,55 @@ void ServerConf::OnMouseMove(UINT nFlags, CPoint point)
 		dc.TextOutW(point.x, point.y, str);
 	}
 	CDialogEx::OnMouseMove(nFlags, point);
+}
+
+void ServerConf::initServer(int nPort)
+{
+	m_pServer = new CServerSock();
+	m_pServer->Create(nPort);
+
+	
+	AfxMessageBox(_T("Create!!"));
+	CDialogEx::OnOK();
+
+	m_pServer->Listen();
+
+	
+	AfxMessageBox(_T("Listen Complete!!"));
+}
+
+
+void ServerConf::cleanUp(void)
+{
+	if(m_pServer)	delete m_pServer;
+	if(m_pAccept)	delete m_pAccept;
+}
+
+
+
+
+void ServerConf::accept(void)
+{
+	m_pAccept = new CAcceptSock();
+
+	BOOL check = m_pServer->Accept(*m_pAccept);
+
+	if(check == FALSE){
+		AfxMessageBox(_T("접속 허용 실패"));
+		return ;
+	}
+
+	AfxMessageBox(_T("Accept COmplete!!"));
+
+
+
+}
+
+
+void ServerConf::closeAcceptSock(void)
+{
+	m_pAccept->Close();
+	delete m_pAccept;
+
+
 }

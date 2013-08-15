@@ -17,7 +17,7 @@ ClientConf::ClientConf(CWnd* pParent /*=NULL*/)
 	: CDialogEx(ClientConf::IDD, pParent)
 	, m_PortNum(_T(""))
 {
-
+	m_pClient = NULL;
 }
 
 ClientConf::~ClientConf()
@@ -69,14 +69,45 @@ void ClientConf::OnBnClickedOk()
 	//AfxMessageBox(nPort);
 	AfxMessageBox(m_address);
 
+
+	//flag = 1;
+	
+
+
+	CDialogEx::OnOK();
+
+}
+
+
+
+void ClientConf::connect(void)
+{
+
+	
 	int nPort;
 
 	nPort = _ttoi(m_PortNum);
 
-	((CtestApp *) AfxGetApp )->clientConnect(nPort, m_address);
-	
-	//flag = 1;
-	
-	CDialogEx::OnOK();
+	m_pClient = new CClientSock();
+
+	m_pClient->Create();
+
+	m_pClient->Connect(m_address, nPort);
+
+	AfxMessageBox(_T("Connect Complete!"));
+
+
+}
+
+
+void ClientConf::cleanUp(void)
+{
+	if(m_pClient)	delete m_pClient;
+}
+
+void ClientConf::closeClientSock(void)
+{
+	m_pClient->Close();
+	delete m_pClient;
 
 }

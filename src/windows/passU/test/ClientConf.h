@@ -16,6 +16,12 @@ public:
 	CIPAddressCtrl m_ip;
 	CString m_PortNum;
 
+	CClientSock *m_pClient;
+	
+	void connect(void);
+	
+	void cleanUp(void);
+
 // 대화 상자 데이터입니다.
 	enum { IDD = IDD_DIALOG2 };
 
@@ -27,4 +33,5 @@ public:
 	afx_msg void OnIpnFieldchangedIpaddress(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedOk();
 
+	void closeClientSock(void);
 };
