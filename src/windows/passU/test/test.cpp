@@ -51,8 +51,8 @@ BOOL CtestApp::InitInstance()
 	// 이 항목을 설정하십시오.
 	InitCtrls.dwICC = ICC_WIN95_CLASSES;
 	InitCommonControlsEx(&InitCtrls);
-	
-	
+
+
 
 	CWinApp::InitInstance();
 
@@ -82,7 +82,7 @@ BOOL CtestApp::InitInstance()
 	{
 		// TODO: 여기에 [확인]을 클릭하여 대화 상자가 없어질 때 처리할
 		//  코드를 배치합니다.
-		
+
 	}
 	else if (nResponse == IDCANCEL)
 	{
@@ -148,9 +148,9 @@ void CtestApp::receiveData(void)
 	UINT nPort;
 
 	m_pChild->GetPeerName(strIP, nPort);
-	
+
 	strText.Format(_T("[ %s ] %s "), strIP, temp);
-	
+
 }
 
 
@@ -183,12 +183,10 @@ void CtestApp::clientConnect(void)
 
 	nPort = _ttoi(m_portNum);
 
-	if(dlg.DoModal() == IDOK)
-	{
-		m_pClient = new ClientSocket();
-		m_pClient->Create();
-		m_pClient->Connect(dlg.m_address, nPort);
-	}
+	m_pClient = new ClientSocket();
+	m_pClient->Create();
+	m_pClient->Connect(dlg.m_address, nPort);
+
 
 
 }

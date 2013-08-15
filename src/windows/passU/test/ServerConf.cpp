@@ -17,6 +17,8 @@ ServerConf::ServerConf(CWnd* pParent /*=NULL*/)
 	, m_serverPortEdit(_T(""))
 	, serverIPAddress(_T(""))
 {
+	
+	m_applyFlag = FALSE;
 	m_bDragFlag = FALSE;
 	WORD wVersionRequested;
     WSADATA wsaData;
@@ -90,11 +92,18 @@ END_MESSAGE_MAP()
 void ServerConf::OnBnClickedOk()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if(m_applyFlag == FALSE){
+		AfxMessageBox(_T("Plz Enter Port Number !!"));
+		return ;
+	}
+
 	int nPort;
 
 	nPort = _ttoi(m_serverPortEdit);
 
 	((CtestApp *) AfxGetApp )->initServer(nPort);
+
+	AfxMessageBox(_T("Start!!"));
 
 	CDialogEx::OnOK();
 }
@@ -168,7 +177,7 @@ void ServerConf::OnBnClickedPortApply()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	UpdateData();
-
+	m_applyFlag = TRUE;
 	m_portEditControl.EnableWindow(FALSE);
 	m_CButton_portApply.EnableWindow(FALSE);
 	//AfxMessageBox(m_serverPortEdit);

@@ -13,6 +13,7 @@ public:
 	ServerConf(CWnd* pParent = NULL);   // 표준 생성자입니다.
 	virtual ~ServerConf();
 	bool m_bDragFlag; // 드래그 판별 플래그
+	bool m_applyFlag; // apply 눌렀나 판별하는 플래그
 	CPoint m_ptltemText; // 특정 아이템 텍스트의 좌표
 	//CTrackWnd m_wndTrack;
 
