@@ -305,6 +305,4 @@ void ServerConf::closeAcceptSock(void)
 {
 	m_pAccept->Close();
 	delete m_pAccept;
-
-
 }
