@@ -113,6 +113,12 @@ public class PassU extends Activity implements ServerCheckListener {
 		super.onPause();
 		unregisterReceiver(serviceConnReceiver);
 	}
+	
+	@Override
+	protected void onStop() {
+		unbindService(conn);
+		super.onStop();
+	}
 
 	/***
 	 * 서비스로 부터 받은 브로드캐스트 정보를 받아서 처리하는 리시버
@@ -145,6 +151,12 @@ public class PassU extends Activity implements ServerCheckListener {
 		}
 	}
 
+	@Override
+	public void onBackPressed() {
+		android.os.Process.killProcess(android.os.Process.myPid());
+		super.onBackPressed();
+	}
+	
 	// tryConnect to Server
 	@Background
 	void tryConnect(final String ip, final int port) {
@@ -183,6 +195,7 @@ public class PassU extends Activity implements ServerCheckListener {
 		home.addCategory(Intent.CATEGORY_HOME);
 		home.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		startActivity(home);
+		finish();
 	}
 
 	@Override

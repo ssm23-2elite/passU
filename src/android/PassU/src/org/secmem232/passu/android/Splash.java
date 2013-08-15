@@ -27,6 +27,11 @@ public class Splash extends Activity implements InstallDriverListener {
     }
 
     @Override
+    public void onBackPressed() {
+    	android.os.Process.killProcess(android.os.Process.myPid());
+    	super.onBackPressed();
+    }
+    @Override
     public void onSucceed() {
     	PassU_.intent(this).start();
     	onDestroy();

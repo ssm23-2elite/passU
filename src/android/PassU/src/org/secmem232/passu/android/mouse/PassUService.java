@@ -268,7 +268,6 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 		sendBroadcast(new Intent(PassUIntent.ACTION_INTERRUPTED));
 		
 		Looper.prepare();
-		Toast.makeText(getApplicationContext(), "Server Connection Interrupted", Toast.LENGTH_SHORT).show();
 		new AsyncTask<Void, Void, Void>(){
 			@Override
 			protected Void doInBackground(Void... params) {				
@@ -276,6 +275,7 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 				return null;
 			}
 		}.execute();
+		Toast.makeText(getApplicationContext(), "Server Connection Interrupted", Toast.LENGTH_SHORT).show();
 		onDestroy();
 		Looper.loop();
 	}

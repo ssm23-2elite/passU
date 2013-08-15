@@ -3,7 +3,11 @@ package org.secmem232.passu.android.network;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class PacketReceiver extends Thread{		
+import android.util.Log;
+
+public class PacketReceiver extends Thread {
+	
+	private final String LOG = "PacketReceiver";
 	private byte[] buffer = new byte[Packet.LENGTH];
 	private int bufferOffset = 0;
 	private Packet packet;
@@ -25,6 +29,7 @@ public class PacketReceiver extends Thread{
 	}
 	
 	private int readPacketDataFromStream() throws IOException{
+		Log.w(LOG, "readPacketDataFromStream");
 		int readLen = recvStream.read(buffer, bufferOffset, Packet.LENGTH);			
 			
 		if(readLen>0)
@@ -34,6 +39,7 @@ public class PacketReceiver extends Thread{
 	}
 	
 	private boolean tryReadPacketData(){
+		Log.w(LOG, "tryReadPacketData");
 		if(bufferOffset < PacketHeader.LENGTH)
 			return false; // try fetching more data from stream
 		
@@ -49,7 +55,7 @@ public class PacketReceiver extends Thread{
 
 	@Override
 	public void run() {	
-		if(mListener==null)
+		if(mListener == null)
 			throw new IllegalStateException("Packet listener must be set first.");
 		
 		/**
