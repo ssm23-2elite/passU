@@ -18,10 +18,12 @@ import android.graphics.PixelFormat;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class PassUService extends Service 
 implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
@@ -34,7 +36,7 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 
 	private static final String LOG = "PassUService";
 
-	private PassUMouseT mView;
+	private PassUMouse mView;
 
 	private Handler handler;
 
@@ -69,18 +71,16 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 		}
 
 		@Override
-		public void connect(final String ipAddress) throws RemoteException {
+		public void connect(final String ip, final int port) throws RemoteException {
 			new AsyncTask<Void, Void, Void>() {
 
 				@Override
 				protected Void doInBackground(Void... params) {
-					// Open input device
-					mInputHandler.open();
-
 					// Start connection and receive events from server
-					mSocket.connect(ipAddress);
+					mSocket.connect(ip, port);
+					
 					//Send devices resolution to host for coordinate transformation;
-					if(mSocket!=null && mSocket.isConnected()){
+					if(mSocket != null && mSocket.isConnected()){
 						mState = ServiceState.CONNECTING;
 						//mSocket.sendDeviceInfo(getApplicationContext().getResources().getDisplayMetrics());
 					}
@@ -149,7 +149,7 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 	private void onViewInit() {
 		Log.w(LOG, "onViewInit");
 
-		mView = new PassUMouseT(this);
+		mView = new PassUMouse(this);
 		WindowManager.LayoutParams params = new WindowManager.LayoutParams(
 				WindowManager.LayoutParams.WRAP_CONTENT,
 				WindowManager.LayoutParams.WRAP_CONTENT,
@@ -232,13 +232,18 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 
 	@Override
 	public void onServerConnected(String ipAddress) {
+		Log.w(LOG, "onServerConnected");
 		mState = ServiceState.CONNECTED;
-		sendBroadcast(new Intent(PassUIntent.ACTION_CONNECTED));
 		
-		mInputHandler = new InputHandler(this);
+		Looper.prepare();
+		
 		handler = new Handler();
 		onViewInit();
 		ShowCursor();
+		sendBroadcast(new Intent(PassUIntent.ACTION_CONNECTED));
+		mInputHandler = new InputHandler(this);
+		
+		Looper.loop();
 	}
 
 	@Override
@@ -260,8 +265,10 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 	public void onServerConnectionInterrupted() {
 		Log.i(LOG, "onServerConnectionInterrupted");
 		mState = ServiceState.IDLE;
-		sendBroadcast(new Intent("ConnectionInterrupted"));
-
+		sendBroadcast(new Intent(PassUIntent.ACTION_INTERRUPTED));
+		
+		Looper.prepare();
+		Toast.makeText(getApplicationContext(), "Server Connection Interrupted", Toast.LENGTH_SHORT).show();
 		new AsyncTask<Void, Void, Void>(){
 			@Override
 			protected Void doInBackground(Void... params) {				
@@ -269,6 +276,8 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 				return null;
 			}
 		}.execute();
+		onDestroy();
+		Looper.loop();
 	}
 
 	@Override
@@ -276,7 +285,11 @@ implements ServerConnectionListener, VirtualEventListener, AddOptionListener {
 		Log.i(LOG, "onServerDisconnected");
 		mState = ServiceState.IDLE;		
 		// Sending broadcast for disconnection..
-		sendBroadcast(new Intent("Disconnected"));
+		sendBroadcast(new Intent(PassUIntent.ACTION_DISCONNECTED));
+		Looper.prepare();
+		Toast.makeText(getApplicationContext(), "Server Disconnected", Toast.LENGTH_SHORT).show();
+		onDestroy();
+		Looper.loop();
 	}
 
 	@Override

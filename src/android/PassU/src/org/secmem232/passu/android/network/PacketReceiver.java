@@ -25,7 +25,6 @@ public class PacketReceiver extends Thread{
 	}
 	
 	private int readPacketDataFromStream() throws IOException{
-		
 		int readLen = recvStream.read(buffer, bufferOffset, Packet.LENGTH);			
 			
 		if(readLen>0)
