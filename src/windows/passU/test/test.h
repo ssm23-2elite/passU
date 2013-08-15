@@ -25,11 +25,15 @@ public:
 	int flag;
 	CString m_ipAddress;
 	CString m_portNum;
+
+	CSocket *m_serverSock;
+	CSocket *m_serverRecvSock;
+
 	ServerSocket *m_pServer;
 	ServerChildSocket *m_pChild;
 	ClientSocket *m_pClient;
 	
-	void initServer(int nPort);
+	void initServer(UINT nPort);
 	void cleanUp(void);
 	void sendData(CString strData);
 	void receiveData(void);
