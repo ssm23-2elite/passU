@@ -97,7 +97,7 @@ void ServerConf::OnBnClickedOk()
 		return ;
 	}
 
-	UINT nPort;
+	int nPort;
 
 	nPort = _ttoi(m_serverPortEdit);
 

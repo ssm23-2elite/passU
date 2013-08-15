@@ -18,8 +18,6 @@ ClientConf::ClientConf(CWnd* pParent /*=NULL*/)
 	, m_PortNum(_T(""))
 {
 
-	
-
 }
 
 ClientConf::~ClientConf()
@@ -68,13 +66,14 @@ void ClientConf::OnBnClickedOk()
 
 	//nPort.Format(_T("%s"), m_PortNum);
 
-
 	//AfxMessageBox(nPort);
 	AfxMessageBox(m_address);
 
+	int nPort;
 
+	nPort = _ttoi(m_PortNum);
 
-	((CtestApp *) AfxGetApp )->clientConnect();
+	((CtestApp *) AfxGetApp )->clientConnect(nPort, m_address);
 	
 	//flag = 1;
 	

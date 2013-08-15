@@ -33,14 +33,14 @@ public:
 	ServerChildSocket *m_pChild;
 	ClientSocket *m_pClient;
 	
-	void initServer(UINT nPort);
+	void initServer(int nPort);
 	void cleanUp(void);
 	void sendData(CString strData);
 	void receiveData(void);
 	void accept(void);
 	void closeChild(void);
 	
-	void clientConnect(void);
+	void clientConnect(int, CString);
 	void clientCleanUp(void);
 	void clientSendData(CString strData);
 	void clientReceiveData(void);

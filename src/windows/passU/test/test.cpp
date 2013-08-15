@@ -25,9 +25,10 @@ CtestApp::CtestApp()
 {
 	// 다시 시작 관리자 지원
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
-	m_pServer = new ServerSocket;
-	m_pClient = new ClientSocket;
-	m_pChild = new ServerChildSocket;
+	m_pServer = NULL;
+	m_pClient = NULL;
+	m_pChild = NULL;
+	AfxSocketInit();
 	// TODO: 여기에 생성 코드를 추가합니다.
 	// InitInstance에 모든 중요한 초기화 작업을 배치합니다.
 }
@@ -108,11 +109,11 @@ BOOL CtestApp::InitInstance()
 
 
 
-void CtestApp::initServer(UINT nPort)
+void CtestApp::initServer(int nPort)
 {
 	AfxMessageBox(_T("hello"));
 	
-	//m_pServer = new ServerSocket;
+	m_pServer = new ServerSocket;
 	
 	
 	AfxMessageBox(_T("before create"));
@@ -175,7 +176,7 @@ void CtestApp::receiveData(void)
 
 void CtestApp::accept(void)
 {
-//	m_pChild = new ServerChildSocket;
+	m_pChild = new ServerChildSocket;
 
 	BOOL check = m_pServer->Accept(*m_pChild);
 
@@ -195,16 +196,14 @@ void CtestApp::closeChild(void)
 }
 
 
-void CtestApp::clientConnect(void)
+void CtestApp::clientConnect(int nPort, CString m_address)
 {
 	ClientConf dlg;
-	UINT nPort;
+	
 
-	nPort = _ttoi(m_portNum);
-
-//	m_pClient = new ClientSocket;
+	m_pClient = new ClientSocket;
 	m_pClient->Create(); 
-	m_pClient->Connect(dlg.m_address, nPort);
+	m_pClient->Connect(m_address, nPort);
 
 
 
