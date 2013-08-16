@@ -9,8 +9,6 @@
 #endif
 
 #include "resource.h"		// 주 기호입니다.
-#include "ServerSock.h"
-#include "ClientSock.h"
 
 // CtestApp:
 // 이 클래스의 구현에 대해서는 test.cpp을 참조하십시오.
@@ -24,8 +22,6 @@ public:
 	CString m_ipAddress;
 	CString m_portNum;
 
-	CTypedPtrList<CObList, CClientSock*> m_clientSocks;
-	
 
 	// 재정의입니다.
 public:

@@ -1,3 +1,6 @@
+#ifndef __PACKET_H__
+#define __PACKET_H__
+
 typedef struct keypacket{ // 키보드 키 값을 가지고 있는 패킷(UDP)
    int sendDev:32;
    int recvDev:32;
@@ -20,4 +23,6 @@ typedef struct mousepacket{ // 마우스 위치 정보를 가지고 있는 패킷(UDP)
    int xCoord:32;
    int yCoord:32;
    int pad:32;
-} MPACKET
+} MPACKET;
+
+#endif 

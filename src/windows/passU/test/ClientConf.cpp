@@ -17,7 +17,7 @@ ClientConf::ClientConf(CWnd* pParent /*=NULL*/)
 	: CDialogEx(ClientConf::IDD, pParent)
 	, m_PortNum(_T(""))
 {
-	m_pClient = NULL;
+	AfxSocketInit();
 }
 
 ClientConf::~ClientConf()
@@ -64,50 +64,21 @@ void ClientConf::OnBnClickedOk()
 	m_ip.GetAddress(ipFirst, ipSecond, ipThird, ipForth);
 	m_address.Format(_T("%d.%d.%d.%d"), ipFirst, ipSecond, ipThird, ipForth);
 
-	//nPort.Format(_T("%s"), m_PortNum);
+	int nPort;
+
+
+	nPort = _ttoi(m_PortNum);
 
 	//AfxMessageBox(nPort);
 	AfxMessageBox(m_address);
 
 
 	//flag = 1;
+	clientSock.Create();
 	
+	clientSock.Connect(m_address, nPort);
 
 
 	CDialogEx::OnOK();
-
-}
-
-
-
-void ClientConf::connect(void)
-{
-
-	
-	int nPort;
-
-	nPort = _ttoi(m_PortNum);
-
-	m_pClient = new CClientSock();
-
-	m_pClient->Create();
-
-	m_pClient->Connect(m_address, nPort);
-
-	AfxMessageBox(_T("Connect Complete!"));
-
-
-}
-
-
-void ClientConf::cleanUp(void)
-{
-	if(m_pClient)	delete m_pClient;
-}
-
-void ClientConf::closeClientSock(void)
-{
-	m_pClient->Close();
-	delete m_pClient;
 
 }

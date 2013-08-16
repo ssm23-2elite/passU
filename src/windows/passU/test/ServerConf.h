@@ -2,8 +2,6 @@
 
 #include <afxsock.h>
 #include "afxwin.h"
-#include "ServerSock.h"
-#include "AcceptSock.h"
 
 // ServerConf 대화 상자입니다.
 
@@ -17,9 +15,10 @@ public:
 	bool m_bDragFlag; // 드래그 판별 플래그
 	bool m_applyFlag; // apply 눌렀나 판별하는 플래그
 	CPoint m_ptltemText; // 특정 아이템 텍스트의 좌표
-	CServerSock *m_pServer;
-	CAcceptSock *m_pAccept;
+	CAsyncSocket serverSock;
+	CAsyncSocket realSock;
 
+	
 
 	//CTrackWnd m_wndTrack;
 
@@ -31,8 +30,8 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnBnClickedOk();
-	afx_msg void OnBnClickedCancel();
+	afx_msg void OnBnClickedStart();
+	afx_msg void OnBnClickedStop();
 	CButton m_CButton_one;
 	CButton m_CButton_two;
 	CButton m_CButton_three;
@@ -63,7 +62,4 @@ public:
 	CEdit m_portEditControl;
 	CString serverIPAddress;
 	void initServer(int nPort);
-	void cleanUp(void);
-	void accept(void);
-	void closeAcceptSock(void);
 };
