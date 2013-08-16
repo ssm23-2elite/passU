@@ -5,20 +5,19 @@ import org.secmem232.passu.android.mouse.PassUService;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-
-import com.googlecode.androidannotations.annotations.EApplication;
 
 /***
  * Role : Manage Service as Singleton
  * @author Jake Yoon
  */
-
-@EApplication
 public class AR extends Application {
+	private final String LOG = "AR";
+	
 	private static 		AR					m_Instance;
-	public				PassUService		m_CurService = null;
+	public				PassUService		m_Service = null;
 	
 	public static int width;
 	public static int height;
@@ -34,6 +33,7 @@ public class AR extends Application {
 	@Override
 	public void onCreate()
 	{
+		if(D.D) Log.w(LOG, "onCreate");
 		super.onCreate();		
 		Display dp = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 		width = dp.getWidth();

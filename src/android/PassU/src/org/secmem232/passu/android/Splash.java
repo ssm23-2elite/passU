@@ -4,28 +4,27 @@ import org.secmem232.passu.android.driver.InstallDriverListener;
 import org.secmem232.passu.android.driver.InstallDriverTask;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
 import android.widget.Toast;
-
-import com.googlecode.androidannotations.annotations.AfterViews;
-import com.googlecode.androidannotations.annotations.EActivity;
 
 /**
  * Intro Activity for initialization
  * Role : Checking Rooting => Install Busybox
  * @author Jake Yoon
  */
-
-@EActivity(R.layout.layout_splash)
 public class Splash extends Activity implements InstallDriverListener {
 	
-    @AfterViews
-	void onInitialize() {
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		
+		setContentView(R.layout.layout_splash);
 		//onSucceed();
-        
 		InstallDriverTask install = new InstallDriverTask(this, this);
 		install.execute();
-    }
-
+	}
+    
     @Override
     public void onBackPressed() {
     	android.os.Process.killProcess(android.os.Process.myPid());
@@ -33,7 +32,7 @@ public class Splash extends Activity implements InstallDriverListener {
     }
     @Override
     public void onSucceed() {
-    	PassU_.intent(this).start();
+    	startActivity(new Intent(Splash.this, PassU.class));
     	onDestroy();
 		finish();
     }
@@ -52,7 +51,6 @@ public class Splash extends Activity implements InstallDriverListener {
     		Toast.makeText(this, "UNKNOWN ERROR", Toast.LENGTH_LONG).show();
     		break;
     	}
-    	
     	onDestroy();
 		finish();
     }

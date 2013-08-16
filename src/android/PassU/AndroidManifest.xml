@@ -11,11 +11,11 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     
     <application
-        android:name=".AR_"
+        android:name=".AR"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
-            android:name=".Splash_"
+            android:name=".Splash"
             android:theme="@android:style/Theme.NoTitleBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,7 +34,7 @@
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
-            android:name=".PassU_"
+            android:name=".PassU"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.NoTitleBar" />
         <activity

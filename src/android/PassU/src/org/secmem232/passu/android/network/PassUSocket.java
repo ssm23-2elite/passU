@@ -6,11 +6,14 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import org.secmem232.passu.android.AR;
+import org.secmem232.passu.android.D;
+
 import android.util.Log;
 
 public class PassUSocket implements PacketListener {
 	private final String LOG = "PassUSocket";
-	
+
 	private Socket socket;
 	private OutputStream sendStream;
 	private InputStream recvStream;
@@ -25,6 +28,7 @@ public class PassUSocket implements PacketListener {
 	private PacketSender packetSender;
 
 	public PassUSocket(ServerConnectionListener listener){
+		if(D.D) Log.w(LOG, "PassUSocket");
 		mServerConnectionListener = listener;
 	}
 
@@ -33,14 +37,17 @@ public class PassUSocket implements PacketListener {
 	 * @return true if connected to server, false otherwise
 	 */
 	public boolean isConnected(){
+		if(D.D) Log.w(LOG, "isConnected");
 		return socket != null ? socket.isConnected() : false;		
 	}
 
 	public void setVirtualEventListener(VirtualEventListener listener){
+		if(D.D) Log.w(LOG, "setVirtualEventListener");
 		mVirtEventListener = listener;
 	}
 
 	public void setAddOptionListener(AddOptionListener listner) {
+		if(D.D) Log.w(LOG, "setAddOptionListener");
 		mAddOptionListener = listner;
 	}
 
@@ -50,26 +57,25 @@ public class PassUSocket implements PacketListener {
 	 * @param ipAddr ip address
 	 * @throws IOException
 	 */
-	public synchronized void connect(String ipAddr, int port){
-		Log.w(LOG, "connect");
+	public synchronized void connect(String ip, int port){
+		if(D.D) Log.w(LOG, "connect");
 		try{
 			socket = new Socket();
-
-			socket.connect(new InetSocketAddress(ipAddr, port), 5000); // Set timeout to 5 seconds
+			socket.connect(new InetSocketAddress(ip, port), 5000); // Set timeout to 5 seconds
 
 			// Open outputStream
 			sendStream = socket.getOutputStream();
-
+			packetSender = new PacketSender(sendStream);
+			
 			// Open inputStream
 			recvStream = socket.getInputStream();		
-			packetSender = new PacketSender(sendStream);
-
+						
 			// Create and start packet receiver
 			packetReceiver = new PacketReceiver(recvStream);
 			packetReceiver.setPacketListener(this);
 			packetReceiver.start();	
 
-			mServerConnectionListener.onServerConnected(ipAddr);
+			mServerConnectionListener.onServerConnected(ip, port);
 		} catch(IOException e) {
 			e.printStackTrace();
 			mServerConnectionListener.onServerConnectionFailed();
@@ -81,8 +87,9 @@ public class PassUSocket implements PacketListener {
 	 * @throws IOException
 	 */
 	public void disconnect(){
+		if(D.D) Log.w(LOG, "disconnect");
 		synchronized(this){
-			if(socket!=null){
+			if(socket != null){
 				try{				
 					recvStream.close();
 					sendStream.close();
@@ -99,8 +106,9 @@ public class PassUSocket implements PacketListener {
 	}
 
 	private void cleanup(){
+		if(D.D) Log.w(LOG, "cleanup");
 		synchronized(this){
-			if(socket!=null){
+			if(socket != null){
 				try{
 					recvStream.close();
 					sendStream.close();
@@ -117,8 +125,9 @@ public class PassUSocket implements PacketListener {
 
 	//Send screen state(On or Off)
 	public void sendScreenOnOffState(boolean state){
+		if(D.D) Log.w(LOG, "sendScreenOnOffState");
 		/*try{
-			
+
 			if(state){				
 				packetSender.send(new Packet(OpCode.SCREEN_ON_STATE_INFO, null, 0));
 			}else{
@@ -130,29 +139,47 @@ public class PassUSocket implements PacketListener {
 	}
 
 	public void setClipboardText(Packet packet){
+		if(D.D) Log.w(LOG, "setClipboardText");
 		//String str = new String(packet.getPayload(), 0, packet.getHeader().getPayloadLength()).trim();		
 		//mAddOptionListener.setClipBoard(str);
 	}
 
+	//Send notification to Host
+	public void sendEcho(Packet packet){
+		if(D.D) Log.w(LOG, "sendEcho");
+		try{
+			packetSender.send(packet);
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	public void onPacketReceived(Packet packet) {
-		if(packet.getDeviceType() == PacketHeader.Device_Type.KEYBOARD) {
+		if(D.D) Log.w(LOG, "onPacketReceived");
+		Log.w(LOG, packet.toString());
+		if( packet.getDeviceType() == PacketHeader.Device_Type.KEYBOARD ) {
 			if( packet.getUpdownFlag() == PacketHeader.Updown_Flag.UP ) {
 				mVirtEventListener.onKeyUp(packet.getKeyCode());
 			} else if( packet.getUpdownFlag() == PacketHeader.Updown_Flag.DOWN ) {
 				mVirtEventListener.onKeyDown(packet.getKeyCode());
 			}
-		} else if(packet.getDeviceType() == PacketHeader.Device_Type.MOUSE) {
+		} else if( packet.getDeviceType() == PacketHeader.Device_Type.MOUSE ) {
 			if( packet.getUpdownFlag() == PacketHeader.Updown_Flag.UP ) {
+				AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
 				mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
 				mVirtEventListener.onTouchUp();
 			} else if( packet.getUpdownFlag() == PacketHeader.Updown_Flag.DOWN ) {
+				AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
 				mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
 				mVirtEventListener.onTouchDown();
 			} else {
+				AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
 				mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
 			}
 		}
+		sendEcho(packet);
+
 		/*
 		switch(packet.get.GetEventCode()){
 		case EventPacket.SETCOORDINATES:
@@ -190,7 +217,7 @@ public class PassUSocket implements PacketListener {
 
 	@Override
 	public void onInterrupt() {
-		Log.w(LOG, "onInterrupt");
+		if(D.D) Log.w(LOG, "onInterrupt");
 		mServerConnectionListener.onServerConnectionInterrupted();	
 		synchronized(this){
 			if(socket != null){

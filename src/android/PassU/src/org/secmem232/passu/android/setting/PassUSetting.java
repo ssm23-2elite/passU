@@ -17,9 +17,5 @@ public class PassUSetting extends PreferenceActivity {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.menu_setting);
 		setContentView(R.layout.layout_setting);
-		
-		
-		
-		
 	}
 }

@@ -71,6 +71,15 @@ public class Packet {
 		return packet;
 	}
 	
+	public String toString() {	
+		if(getHeader().getDeviceType() == PacketHeader.Device_Type.KEYBOARD) {
+			return String.format("%s[%4d]", getHeader(), keyCode);
+		} else if (getHeader().getDeviceType() == PacketHeader.Device_Type.MOUSE) {
+			return String.format("%s[%1d][%4d][%4d]", getHeader(), wheelFlag, xCoordinate, yCoordinate);
+		} else {
+			return String.format("UNKNOWN");
+		}
+	}
 	/**
 	 * Get packet as byte array.
 	 * @return

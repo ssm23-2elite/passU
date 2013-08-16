@@ -83,7 +83,7 @@ public class PacketHeader{
 	
 	@Override
 	public String toString(){
-		return String.format("%4d%4d%1d%1d%1d", sendDevice, receiveDevice, deviceType, relativeField, updownFlag);
+		return String.format("[%4d][%4d][%1d][%1d][%1d]", sendDevice, receiveDevice, deviceType, relativeField, updownFlag);
 	}
 	
 	/**
@@ -98,7 +98,7 @@ public class PacketHeader{
 		Util.itoa(relativeField, headerBuffer, RELATIVE_FIELD_LENGTH, SEND_DEVICE_LENGTH + RECEIVE_DEVICE_LENGTH
 				+ DEVICE_TYPE_LENGTH);
 		Util.itoa(updownFlag, headerBuffer, UPDOWN_FLAG_LENGTH, SEND_DEVICE_LENGTH + RECEIVE_DEVICE_LENGTH 
-				+ DEVICE_TYPE_LENGTH + RECEIVE_DEVICE_LENGTH );
+				+ DEVICE_TYPE_LENGTH + RELATIVE_FIELD_LENGTH );
 		return headerBuffer;
 	}
 	
@@ -117,8 +117,7 @@ public class PacketHeader{
 		System.arraycopy(rawData, SEND_DEVICE_LENGTH + RECEIVE_DEVICE_LENGTH + DEVICE_TYPE_LENGTH, relativeFieldBuffer, 0,  RELATIVE_FIELD_LENGTH);				
 		header.setRelativeField(Util.ByteToInt(relativeFieldBuffer));
 
-		System.arraycopy(rawData, SEND_DEVICE_LENGTH + RECEIVE_DEVICE_LENGTH + DEVICE_TYPE_LENGTH + RELATIVE_FIELD_LENGTH, 
-				updownFlagBuffer, 0,  UPDOWN_FLAG_LENGTH);				
+		System.arraycopy(rawData, SEND_DEVICE_LENGTH + RECEIVE_DEVICE_LENGTH + DEVICE_TYPE_LENGTH + RELATIVE_FIELD_LENGTH, updownFlagBuffer, 0,  UPDOWN_FLAG_LENGTH);				
 		header.setUpdownFlag(Util.ByteToInt(updownFlagBuffer));
 		return header;
 	}

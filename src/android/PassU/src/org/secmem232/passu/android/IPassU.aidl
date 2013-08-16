@@ -5,5 +5,5 @@ interface IPassU{
 	String getConnectionStatus();
 	boolean isConnected();
 	void connect(String ip, int port);
-	void disconnect();
+	void disconnect();	
 }

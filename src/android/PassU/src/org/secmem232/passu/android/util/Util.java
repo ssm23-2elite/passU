@@ -19,7 +19,7 @@ import android.util.Log;
 
 public class Util {
 	private static final boolean D = true;
-	private final static String LOG = "CommonUtil";
+	private final static String LOG = "Util";
 
 	public static String getLocalIpAddress()
 	{
@@ -48,7 +48,7 @@ public class Util {
 			return 1;
 		}
 	}
-	
+
 	//get Version name from packageManager
 	public static String getVersionName(Context context) {
 		try {
@@ -58,65 +58,65 @@ public class Util {
 			return "1.0";
 		}
 	}
-	
+
 	public static int itoa(int iSrc, byte[] buffer){
 		int positionalNumber = getPositionalNumber(iSrc);
 		int length = positionalNumber;
-				
+
 		int i=0;
 		while(positionalNumber > 0){
 			int jesu = (int)Math.pow(10, positionalNumber-1);
 			int quotiont = iSrc / jesu;
-			
+
 			buffer[i] = (byte) (quotiont+'0');
-			
+
 			int remainder = iSrc % jesu;		
-			
+
 			positionalNumber--;
 			i++;
 			iSrc = remainder;
 		}
 		return length;
 	}
-	
+
 	public static int itoa(int iSrc, byte[] buffer, int offset){
 		int positionalNumber = getPositionalNumber(iSrc);
 		int length = positionalNumber;
-				
+
 		int i=offset;
 		while(positionalNumber > 0){
 			int jesu = (int)Math.pow(10, positionalNumber-1);
 			int quotiont = iSrc / jesu;
-			
+
 			buffer[i] = (byte) (quotiont+'0');
-			
+
 			int remainder = iSrc % jesu;		
-			
+
 			positionalNumber--;
 			i++;
 			iSrc = remainder;
 		}
 		return length;
 	}
-	
+
 	public static int itoa(int iSrc, byte[] buffer, int positionalNumber, int offset){
-						
+
 		int i=offset;
 		while(positionalNumber > 0){
 			int jesu = (int)Math.pow(10, positionalNumber-1);
 			int quotiont = iSrc / jesu;
-			
+
 			buffer[i] = (byte) (quotiont+'0');
-			
+
 			int remainder = iSrc % jesu;		
-			
+
 			positionalNumber--;
 			i++;
 			iSrc = remainder;
 		}
 		return positionalNumber;
 	}
-	
+
 	public static int ByteToInt(byte [] data){
 		int result = 0;
 		for(int i=0; i<data.length; i++){
@@ -126,7 +126,7 @@ public class Util {
 		}
 		return result;
 	}
-	
+
 	public static int getPositionalNumber(int iSrc){
 		int positionnalNumber=1;
 		while(true){
@@ -136,9 +136,8 @@ public class Util {
 		}
 		return positionnalNumber;
 	}
-	
+
 	public static class Services{
-	
 		/**
 		 * Check PassUService is running or not.
 		 * @param context Application/Activity's context
@@ -156,18 +155,20 @@ public class Util {
 			if(D) Log.d(LOG, "PassUService not available.");
 			return false;
 		}
-		
+
 		/**
 		 * Starts PassUService.
 		 * @param context Application/Activity's context
 		 * @see org.secmem232.passu.android.mouse.PassUService PassUService
 		 */
-		public static void startPassUService(Context context){
+		public static void startPassUService(Context context, String ip, int port){
 			if(!isServiceAliveU(context)){
 				if(D) Log.d(LOG, "Starting PassUService..");
 				Intent intent = new Intent(context, PassUService.class);
+				intent.putExtra("ip", ip);
+				intent.putExtra("port", port);
 				context.startService(intent);
 			}
 		}
-}
+	}
 }

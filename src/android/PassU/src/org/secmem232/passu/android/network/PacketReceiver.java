@@ -3,6 +3,8 @@ package org.secmem232.passu.android.network;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.secmem232.passu.android.D;
+
 import android.util.Log;
 
 public class PacketReceiver extends Thread {
@@ -16,38 +18,38 @@ public class PacketReceiver extends Thread {
 	private PacketListener mListener;
 	
 	public PacketReceiver(InputStream recvStream){
+		if(D.D) Log.w(LOG, "PacketReceiver");
 		this.recvStream = recvStream;
 	}
 	
 	public PacketReceiver(InputStream recvStream, PacketListener listener){
+		if(D.D) Log.w(LOG, "PacketReceiver");
 		this.recvStream = recvStream;
 		this.mListener = listener;		
 	}		
 	
 	public void setPacketListener(PacketListener listener){
+		if(D.D) Log.w(LOG, "setPacketListener");
 		this.mListener = listener;
 	}
 	
 	private int readPacketDataFromStream() throws IOException{
-		Log.w(LOG, "readPacketDataFromStream");
 		int readLen = recvStream.read(buffer, bufferOffset, Packet.LENGTH);			
-			
-		if(readLen>0)
-			bufferOffset+=readLen;
+		if(D.D) Log.w(LOG, "readPacketDataFromStream" + readLen);	
+		if(readLen > 0)
+			bufferOffset += readLen;
 		
 		return readLen;
 	}
 	
 	private boolean tryReadPacketData(){
-		Log.w(LOG, "tryReadPacketData");
+		if(D.D) Log.w(LOG, "tryReadPacketData");
 		if(bufferOffset < PacketHeader.LENGTH)
 			return false; // try fetching more data from stream
 		
 		packet = Packet.parse(buffer);
-		
 		// Decrease current offset by last packet's length
 		bufferOffset -= Packet.LENGTH;
-		
 		// Return packet object
 		return true;
 	}	
@@ -55,6 +57,7 @@ public class PacketReceiver extends Thread {
 
 	@Override
 	public void run() {	
+		if(D.D) Log.w(LOG, "run");
 		if(mListener == null)
 			throw new IllegalStateException("Packet listener must be set first.");
 		
@@ -68,11 +71,9 @@ public class PacketReceiver extends Thread {
 					//when host was closed
 					throw new IOException();
 				}
-				
 				while(tryReadPacketData()){
 					mListener.onPacketReceived(packet);
 				}				
-				
 			} catch(IOException e){
 				e.printStackTrace();					
 				mListener.onInterrupt();

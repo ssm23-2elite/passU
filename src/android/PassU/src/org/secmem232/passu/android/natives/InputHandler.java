@@ -4,8 +4,10 @@ import org.secmem232.passu.android.util.CommandLine;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 public class InputHandler {
+	private final String LOG = "InputHandler";
 	private boolean isDeviceOpened = false;
 	
 	private int displayWidth;

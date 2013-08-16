@@ -5,22 +5,14 @@ import java.io.OutputStream;
 
 import android.app.Notification;
 
-/**
- * Provides method for sending packet via stream
- * @author Hyomin Oh
- */
 public class PacketSender {
-	
 	private OutputStream sendStream;	
-	
 	public PacketSender(OutputStream stream){
 		this.sendStream = stream;		
 	}
-	
 	public void setOutputStream(OutputStream stream){
 		this.sendStream = stream;
 	}
-	
 	public void send(Packet packet) throws IOException{		
 		synchronized(java.lang.Object.class){
 			sendStream.write(packet.asByteArray(), 0, Packet.LENGTH);
