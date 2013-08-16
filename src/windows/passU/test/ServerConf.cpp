@@ -17,6 +17,8 @@ ServerConf::ServerConf(CWnd* pParent /*=NULL*/)
 	, m_serverPortEdit(_T(""))
 	, serverIPAddress(_T(""))
 {
+	
+	m_applyFlag = FALSE;
 	m_bDragFlag = FALSE;
 	WORD wVersionRequested;
     WSADATA wsaData;
@@ -36,7 +38,8 @@ ServerConf::ServerConf(CWnd* pParent /*=NULL*/)
 
 	serverIPAddress.Append(strIpAddress);
 
-	
+	AfxSocketInit();
+
 }
 
 ServerConf::~ServerConf()
@@ -64,8 +67,8 @@ void ServerConf::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(ServerConf, CDialogEx)
-	ON_BN_CLICKED(IDOK, &ServerConf::OnBnClickedOk)
-	ON_BN_CLICKED(IDCANCEL, &ServerConf::OnBnClickedCancel)
+	ON_BN_CLICKED(IDOK, &ServerConf::OnBnClickedStart)
+	ON_BN_CLICKED(IDCANCEL, &ServerConf::OnBnClickedStop)
 	ON_BN_CLICKED(IDC_BUTTON5, &ServerConf::OnBnClickedServerButton3)
 	ON_BN_CLICKED(IDC_BUTTON1, &ServerConf::OnBnClickedServerButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &ServerConf::OnBnClickedServerButton2)
@@ -87,22 +90,35 @@ END_MESSAGE_MAP()
 // ServerConf 메시지 처리기입니다.
 
 
-void ServerConf::OnBnClickedOk()
+void ServerConf::OnBnClickedStart()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if(m_applyFlag == FALSE){
+		AfxMessageBox(_T("Plz Enter Port Number !!"));
+		return ;
+	}
+
 	int nPort;
 
 	nPort = _ttoi(m_serverPortEdit);
 
-	((CtestApp *) AfxGetApp )->initServer(nPort);
+	AfxMessageBox(_T("Start!!"));
+	
+
+ 	initServer(nPort);
 
 	CDialogEx::OnOK();
+
 }
 
 
-void ServerConf::OnBnClickedCancel()
+void ServerConf::OnBnClickedStop()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	
+
+
 	CDialogEx::OnCancel();
 }
 
@@ -168,7 +184,7 @@ void ServerConf::OnBnClickedPortApply()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	UpdateData();
-
+	m_applyFlag = TRUE;
 	m_portEditControl.EnableWindow(FALSE);
 	m_CButton_portApply.EnableWindow(FALSE);
 	//AfxMessageBox(m_serverPortEdit);
@@ -237,11 +253,29 @@ void ServerConf::OnMouseMove(UINT nFlags, CPoint point)
 	 
 	str.Format(_T("위치 : %d %d"), point.x, point.y);
 //	AfxMessageBox(str);
-	if(m_bDragFlag == TRUE){
+	if(m_bDragFlag == true){
 
 		//RedrawWindow();
 		
 		dc.TextOutW(point.x, point.y, str);
 	}
 	CDialogEx::OnMouseMove(nFlags, point);
+}
+
+void ServerConf::initServer(int nPort)
+{
+
+	if(serverSock.Create(nPort) == FALSE){
+		AfxMessageBox(_T("Faild To Create"));
+		return ;
+	}
+
+	if(serverSock.Listen() == FALSE){
+		AfxMessageBox(_T("Faild To Listen"));
+		return;
+	}
+
+	serverSock.Accept(realSock);
+	AfxMessageBox(_T("Accept Complete"));
+
 }

@@ -17,9 +17,7 @@ ClientConf::ClientConf(CWnd* pParent /*=NULL*/)
 	: CDialogEx(ClientConf::IDD, pParent)
 	, m_PortNum(_T(""))
 {
-
-	
-
+	AfxSocketInit();
 }
 
 ClientConf::~ClientConf()
@@ -66,18 +64,21 @@ void ClientConf::OnBnClickedOk()
 	m_ip.GetAddress(ipFirst, ipSecond, ipThird, ipForth);
 	m_address.Format(_T("%d.%d.%d.%d"), ipFirst, ipSecond, ipThird, ipForth);
 
-	//nPort.Format(_T("%s"), m_PortNum);
+	int nPort;
 
+
+	nPort = _ttoi(m_PortNum);
 
 	//AfxMessageBox(nPort);
 	AfxMessageBox(m_address);
 
 
-
-	((CtestApp *) AfxGetApp )->clientConnect();
-	
 	//flag = 1;
+	clientSock.Create();
 	
+	clientSock.Connect(m_address, nPort);
+
+
 	CDialogEx::OnOK();
 
 }

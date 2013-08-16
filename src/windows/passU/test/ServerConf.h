@@ -13,7 +13,13 @@ public:
 	ServerConf(CWnd* pParent = NULL);   // 표준 생성자입니다.
 	virtual ~ServerConf();
 	bool m_bDragFlag; // 드래그 판별 플래그
+	bool m_applyFlag; // apply 눌렀나 판별하는 플래그
 	CPoint m_ptltemText; // 특정 아이템 텍스트의 좌표
+	CAsyncSocket serverSock;
+	CAsyncSocket realSock;
+
+	
+
 	//CTrackWnd m_wndTrack;
 
 // 대화 상자 데이터입니다.
@@ -24,8 +30,8 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnBnClickedOk();
-	afx_msg void OnBnClickedCancel();
+	afx_msg void OnBnClickedStart();
+	afx_msg void OnBnClickedStop();
 	CButton m_CButton_one;
 	CButton m_CButton_two;
 	CButton m_CButton_three;
@@ -55,4 +61,5 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	CEdit m_portEditControl;
 	CString serverIPAddress;
+	void initServer(int nPort);
 };

@@ -9,10 +9,6 @@
 #endif
 
 #include "resource.h"		// 주 기호입니다.
-#include "ServerSocket.h"
-#include "ClientSocket.h"
-#include "ServerChildSocket.h"
-
 
 // CtestApp:
 // 이 클래스의 구현에 대해서는 test.cpp을 참조하십시오.
@@ -25,22 +21,7 @@ public:
 	int flag;
 	CString m_ipAddress;
 	CString m_portNum;
-	ServerSocket *m_pServer;
-	ServerChildSocket *m_pChild;
-	ClientSocket *m_pClient;
-	
-	void initServer(int nPort);
-	void cleanUp(void);
-	void sendData(CString strData);
-	void receiveData(void);
-	void accept(void);
-	void closeChild(void);
-	
-	void clientConnect(void);
-	void clientCleanUp(void);
-	void clientSendData(CString strData);
-	void clientReceiveData(void);
-	void clientcloseChild(void);
+
 
 	// 재정의입니다.
 public:

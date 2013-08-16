@@ -23,11 +23,10 @@ END_MESSAGE_MAP()
 
 CtestApp::CtestApp()
 {
+	AfxSocketInit();
 	// 다시 시작 관리자 지원
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
-	m_pServer = NULL;
-	m_pClient = NULL;
-	m_pChild = NULL;
+	
 	// TODO: 여기에 생성 코드를 추가합니다.
 	// InitInstance에 모든 중요한 초기화 작업을 배치합니다.
 }
@@ -51,8 +50,8 @@ BOOL CtestApp::InitInstance()
 	// 이 항목을 설정하십시오.
 	InitCtrls.dwICC = ICC_WIN95_CLASSES;
 	InitCommonControlsEx(&InitCtrls);
-	
-	
+
+
 
 	CWinApp::InitInstance();
 
@@ -82,7 +81,7 @@ BOOL CtestApp::InitInstance()
 	{
 		// TODO: 여기에 [확인]을 클릭하여 대화 상자가 없어질 때 처리할
 		//  코드를 배치합니다.
-		
+
 	}
 	else if (nResponse == IDCANCEL)
 	{
@@ -104,112 +103,4 @@ BOOL CtestApp::InitInstance()
 	// 대화 상자가 닫혔으므로 응용 프로그램의 메시지 펌프를 시작하지 않고  응용 프로그램을 끝낼 수 있도록 FALSE를
 	// 반환합니다.
 	return FALSE;
-}
-
-
-
-void CtestApp::initServer(int nPort)
-{
-	m_pServer = new ServerSocket();
-	m_pServer->Create(nPort);
-	m_pServer->Listen();
-
-}
-
-
-void CtestApp::cleanUp(void)
-{
-	if(m_pServer)	delete m_pServer;
-	if(m_pChild)	delete m_pChild;
-}
-
-
-void CtestApp::sendData(CString strData)
-{
-	if(m_pChild){
-		strData.Insert(strData.GetLength(), _T("\0"));
-		m_pChild->Send(strData, 100);
-		CString strIP, strText;
-		UINT nPort;
-		m_pChild->GetSockName(strIP, nPort);
-		strText.Format(_T("[ %s ] %s "), strIP, strData);
-
-	}
-}
-
-
-void CtestApp::receiveData(void)
-{
-	char temp[1024];
-
-	m_pChild->Receive(temp, sizeof(temp));
-	CString strIP, strText;
-
-	UINT nPort;
-
-	m_pChild->GetPeerName(strIP, nPort);
-	
-	strText.Format(_T("[ %s ] %s "), strIP, temp);
-	
-}
-
-
-void CtestApp::accept(void)
-{
-	m_pChild = new ServerChildSocket();
-
-	BOOL check = m_pServer->Accept(*m_pChild);
-
-	if(check == FALSE){
-		AfxMessageBox(_T("접속 허용 실패"));
-		return ;
-	}
-
-}
-
-
-void CtestApp::closeChild(void)
-{
-	m_pChild->Close();
-	delete m_pChild;
-
-}
-
-
-void CtestApp::clientConnect(void)
-{
-	ClientConf dlg;
-	UINT nPort;
-
-	nPort = _ttoi(m_portNum);
-
-	if(dlg.DoModal() == IDOK)
-	{
-		m_pClient = new ClientSocket();
-		m_pClient->Create();
-		m_pClient->Connect(dlg.m_address, nPort);
-	}
-
-
-}
-
-
-void CtestApp::clientCleanUp(void)
-{
-	if(m_pClient)	delete m_pClient;
-}
-
-
-void CtestApp::clientSendData(CString strData)
-{
-}
-
-
-void CtestApp::clientReceiveData(void)
-{
-}
-
-
-void CtestApp::clientcloseChild(void)
-{
 }

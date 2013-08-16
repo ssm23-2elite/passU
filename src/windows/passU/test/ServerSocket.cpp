@@ -10,6 +10,8 @@
 
 ServerSocket::ServerSocket()
 {
+	int a = 1;
+
 }
 
 ServerSocket::~ServerSocket()
