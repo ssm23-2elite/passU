@@ -42,7 +42,7 @@ public class PassUMouse extends ViewGroup {
 	public PassUMouse(Context context) {
 		super(context);
 		if(D.D) Log.w(LOG, "PassUMouse");
-		cursor = BitmapFactory.decodeResource(context.getResources(), R.drawable.cursor);
+		cursor = BitmapFactory.decodeResource(context.getResources(), R.drawable.cursor_goldarrow);
 
 		mLoadPaint = new Paint();
 		mLoadPaint.setAntiAlias(true);
