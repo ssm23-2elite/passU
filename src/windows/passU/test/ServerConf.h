@@ -18,6 +18,9 @@ public:
 	bool m_applyFlag; // apply 눌렀나 판별하는 플래그
 	CPoint m_ptltemText; // 특정 아이템 텍스트의 좌표
 	CServerSock *m_pServer;
+
+	CTypedPtrList<CObList, CAcceptSock *> m_acceptSocks;
+
 	CAcceptSock *m_pAccept;
 
 
@@ -66,4 +69,5 @@ public:
 	void cleanUp(void);
 	void accept(void);
 	void closeAcceptSock(void);
+	void Send(char *buf);
 };

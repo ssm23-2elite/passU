@@ -285,16 +285,27 @@ void ServerConf::cleanUp(void)
 
 void ServerConf::accept(void)
 {
-	m_pAccept = new CAcceptSock();
 
-	BOOL check = m_pServer->Accept(*m_pAccept);
+	CAcceptSock *p = new CAcceptSock;
 
-	if(check == FALSE){
-		AfxMessageBox(_T("접속 허용 실패"));
-		return ;
-	}
+	BOOL check = m_pServer->Accept(*p);
+
+	p->Send("연결되었습니다.", 16);
+
+	m_acceptSocks.AddTail(p);
+
+
+	//m_pAccept = new CAcceptSock();
+
+	//BOOL check = m_pServer->Accept(*m_pAccept);
+
+	//if(check == FALSE){
+	//	AfxMessageBox(_T("접속 허용 실패"));
+	//	return ;
+	//}
 
 	AfxMessageBox(_T("Accept COmplete!!"));
+
 
 
 
@@ -305,4 +316,25 @@ void ServerConf::closeAcceptSock(void)
 {
 	m_pAccept->Close();
 	delete m_pAccept;
+}
+
+void ServerConf::Send(char *buf)
+{
+	POSITION pos = m_acceptSocks.GetHeadPosition();
+	while (pos != NULL)
+	{
+		CAcceptSock *p = m_acceptSocks.GetNext(pos);
+		p->Send(buf, strlen(buf)+1);
+	}
+}
+
+void ServerConf::OnReceive(CAcceptSock * pSock)
+{
+	char buf[200];
+	pSock->Receive(buf,200);
+	//m_listReceive.InsertString(0, buf);
+	
+
+	
+	Send(buf);
 }
