@@ -7,13 +7,16 @@ import java.util.Enumeration;
 import java.util.List;
 
 import org.secmem232.passu.android.AR;
+import org.secmem232.passu.android.R;
 import org.secmem232.passu.android.mouse.PassUService;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 
@@ -169,6 +172,32 @@ public class Util {
 				intent.putExtra("port", port);
 				context.startService(intent);
 			}
+		}
+	}
+	
+	public static String getSelectedCursorName(Context context) {
+		SharedPreferences defaultSharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+		return defaultSharedPref.getString("mouseicon", "null");
+	}
+	
+	public static int getSelectedCursorResource(Context context) {
+		SharedPreferences defaultSharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+		return getCursorResource(defaultSharedPref.getString("mouseicon", "null"));
+	}
+	
+	public static int getCursorResource(String name) {
+		if("Gold Arrow".equals(name)) {
+			return R.drawable.cursor_goldarrow;
+		} else if("Blue Arrow".equals(name)) {
+			return R.drawable.cursor_bluearrow;
+		} else if("Leaf".equals(name)) {
+			return R.drawable.cursor_leaf;
+		} else if("Sword".equals(name)) {
+			return R.drawable.cursor_sword;
+		} else if("Finger".equals(name)) {
+			return R.drawable.cursor_finger;
+		} else {
+			return R.drawable.cursor_goldarrow;
 		}
 	}
 }

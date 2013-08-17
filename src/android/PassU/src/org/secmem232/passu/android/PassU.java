@@ -118,8 +118,6 @@ public class PassU extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		if(mPassUSvc != null)
-			unbindService(conn);
 	}
 	@Override
 	protected void onResume() {

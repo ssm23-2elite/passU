@@ -11,6 +11,21 @@
         <item>3</item>
     </string-array>
     
+    <string-array name="cursors">
+        <item>Gold Arrow</item>
+        <item>Blue Arrow</item>
+        <item>Leaf</item>
+        <item>Sword</item>
+        <item>Finger</item>
+    </string-array>
+    <string-array name="cursor_values">
+        <item>Gold Arrow</item>
+        <item>Blue Arrow</item>
+        <item>Leaf</item>
+        <item>Sword</item>
+        <item>Finger</item>
+    </string-array>
+    
     <string-array name="mapping">
         <item>Back</item>
         <item>Menu</item>

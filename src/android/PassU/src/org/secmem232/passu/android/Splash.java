@@ -20,7 +20,7 @@ public class Splash extends Activity implements InstallDriverListener {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.layout_splash);
-		//onSucceed();
+	//	onSucceed();
 		InstallDriverTask install = new InstallDriverTask(this, this);
 		install.execute();
 	}

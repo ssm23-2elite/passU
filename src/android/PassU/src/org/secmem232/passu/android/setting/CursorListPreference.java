@@ -3,10 +3,9 @@ package org.secmem232.passu.android.setting;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.secmem232.passu.android.D;
+import org.secmem232.passu.android.R;
+import org.secmem232.passu.android.util.Util;
 
-import android.R;
-import android.R.string;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,61 +17,66 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-
 public class CursorListPreference extends ListPreference {
-	 
-	private final String LOG = "CursorListPreference";
+	private LayoutInflater inflater;
 	
-    public CursorListPreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
-    /* 
-    public void onPrepareDialogBuilder(AlertDialog.Builder builder){
-        super.onPrepareDialogBuilder(builder);
-        builder.setAdapter(
-        		new CursorListAdapter( getContext(), R.layout.layout_listpreference, getEntriesList()), new OnClickListener(){
+	public CursorListPreference(final Context context) {
+		this(context, null);
+		this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	}
+
+	public CursorListPreference(final Context context, final AttributeSet attrs) {
+		super(context, attrs);
+		this.inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	}
+
+	public void onPrepareDialogBuilder(AlertDialog.Builder builder){
+        builder.setAdapter(new CursorListAdapter(getContext(),R.layout.layout_cursorlistitem,
+        		getEntriesList()), new OnClickListener(){
             public void onClick(DialogInterface dialog, int which) {
-                setValue(getEntryValues()[which].toString());
-                dialog.dismiss();
             }
         });
+        super.onPrepareDialogBuilder(builder);
     }
-     
-
-    private ArrayList<Cursor> getEntriesList(){
-        ArrayList<Cursor> list = new ArrayList<Cursor>();
-        Cursor[] array = getEntries();
-         
-        for(Cursor cursor : array){
-            list.add(cursor);
-        }
-         
+	
+	private ArrayList<String> getEntriesList(){
+        ArrayList<String> list = new ArrayList<String>();
+        CharSequence[] array = getEntries();
+        for(CharSequence name : array){
+            list.add(name.toString());
+        } 
         return list;
     }
-     
-    private class CursorListAdapter extends ArrayAdapter<Cursor>{
-         
-        public CursorListAdapter(Context context, int resource, List<Cursor> objects) {
-            super(context, resource, objects);
-        }
-         
-        public View getView(int position, View view, ViewGroup parent){
-            LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            String name = (String) Cur.this.getEntries()[position];
-            String value = (String) ColorListPreference.this.getEntryValues()[position];
-             
-            view = vi.inflate(R.layout.color_list_preference_row, null);
-             
-            View colorView = view.findViewById(R.id.color);
-            TextView nameView = (TextView) view.findViewById(R.id.name);
-            Log.i("yViewer",value);
-            colorView.setBackgroundColor(rgb.toRGB(value));
-            nameView.setText(name);
-            nameView.setTextColor(rgb.toRGB(value));
-             
-            return view;
-        }
-    }*/
+
+	private class CursorListAdapter extends ArrayAdapter<String>{
+		public CursorListAdapter(Context context, int resource, List<String> objects) {
+			super(context, resource, objects);
+		}
+		public View getView(int position, View convertView, ViewGroup parent){
+			ViewHolder holder;
+			if( convertView == null ) {
+				convertView = inflater.inflate(R.layout.layout_cursorlistitem, parent, false);
+
+				holder = new ViewHolder();
+				holder.name = (TextView)convertView.findViewById(R.id.name);
+				holder.cursor = (ImageView)convertView.findViewById(R.id.cursor);
+				
+				convertView.setTag(holder);
+			} else {
+				holder = (ViewHolder) convertView.getTag();
+			}
+
+			holder.name.setText(getItem(position));
+			holder.cursor.setImageResource(Util.getCursorResource(getItem(position)));
+			return convertView;
+		}
+	}
+
+	private class ViewHolder {
+		public ImageView cursor;
+		public TextView name;
+	}
 }

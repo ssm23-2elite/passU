@@ -2,6 +2,7 @@ package org.secmem232.passu.android.mouse;
 
 import org.secmem232.passu.android.D;
 import org.secmem232.passu.android.R;
+import org.secmem232.passu.android.util.Util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -42,7 +43,7 @@ public class PassUMouse extends ViewGroup {
 	public PassUMouse(Context context) {
 		super(context);
 		if(D.D) Log.w(LOG, "PassUMouse");
-		cursor = BitmapFactory.decodeResource(context.getResources(), R.drawable.cursor_goldarrow);
+		cursor = BitmapFactory.decodeResource(context.getResources(), Util.getSelectedCursorResource(context));
 
 		mLoadPaint = new Paint();
 		mLoadPaint.setAntiAlias(true);

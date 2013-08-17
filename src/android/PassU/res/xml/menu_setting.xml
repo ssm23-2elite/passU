@@ -5,10 +5,12 @@
     <PreferenceCategory
         android:key="mouse"
         android:title="MOUSE" >
-        <Preference
-            android:key="mouse_icon"
-            android:selectable="true"
-            android:title="Cursor icon" />
+        <org.secmem232.passu.android.setting.CursorListPreference
+            android:dialogTitle="마우스커서 아이콘"
+            android:key="mouseicon"
+            android:entries="@array/cursors"
+            android:entryValues="@array/cursor_values"
+            android:title="마우스커서 아이콘" />
     </PreferenceCategory>
     <PreferenceCategory
         android:key="keyboard"
