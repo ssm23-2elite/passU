@@ -112,6 +112,7 @@ void CTestServerApp::initServer(int port)
 
 		sendMouseData(&packet);
 	bClientConnected = TRUE;
+	bMouseDown = FALSE;
 }
 
 void CTestServerApp::sendMouseMove(int x, int y)
@@ -122,7 +123,7 @@ void CTestServerApp::sendMouseMove(int x, int y)
 		packet.recvDev = 6;
 		packet.deviceType = 1;
 		packet.relativeField = 0;
-		packet.updownFlag = 1;
+		packet.updownFlag = (bMouseDown == TRUE)?0:1;
 		packet.wheelFlag = 0;
 		packet.xCoord = x;
 		packet.yCoord = y;
@@ -134,12 +135,13 @@ void CTestServerApp::sendMouseMove(int x, int y)
 void CTestServerApp::sendMouseDown(int x, int y)
 {
 	if(bClientConnected) {
+		bMouseDown = TRUE;
 		MPACKET packet;
 		packet.sendDev = 5;
 		packet.recvDev = 6;
 		packet.deviceType = 1;
 		packet.relativeField = 0;
-		packet.updownFlag = 0;
+		packet.updownFlag = (bMouseDown == TRUE)?0:1;
 		packet.wheelFlag = 0;
 		packet.xCoord = x;
 		packet.yCoord = y;
@@ -152,12 +154,13 @@ void CTestServerApp::sendMouseDown(int x, int y)
 void CTestServerApp::sendMouseUp(int x, int y)
 {
 	if(bClientConnected) {
+		bMouseDown = FALSE;
 		MPACKET packet;
 		packet.sendDev = 5;
 		packet.recvDev = 6;
 		packet.deviceType = 1;
 		packet.relativeField = 0;
-		packet.updownFlag = 1;
+		packet.updownFlag = (bMouseDown == TRUE)?0:1;
 		packet.wheelFlag = 0;
 		packet.xCoord = x;
 		packet.yCoord = y;

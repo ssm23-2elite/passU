@@ -23,6 +23,7 @@ public:
 	CSocket server;
 	CSocket client;
 	BOOL bClientConnected;
+	BOOL bMouseDown;
 
 	void initServer(int port);
 	void sendKeyboardData(KPACKET *packet);
