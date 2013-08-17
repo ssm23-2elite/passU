@@ -60,8 +60,8 @@ CtestDlg::CtestDlg(CWnd* pParent /*=NULL*/)
 void CtestDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_BUTTON4, CButton_clientconfiguration);
-	DDX_Control(pDX, IDC_BUTTON3, CButton_ServerConfig);
+	DDX_Control(pDX, IDC_BUTTON11, CButton_clientconfiguration);
+	DDX_Control(pDX, IDC_BUTTON10, CButton_ServerConfig);
 }
 
 BEGIN_MESSAGE_MAP(CtestDlg, CDialogEx)
@@ -69,8 +69,8 @@ BEGIN_MESSAGE_MAP(CtestDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON1, &CtestDlg::OnBnClickedStart)
-	ON_BN_CLICKED(IDC_BUTTON3, &CtestDlg::OnBnClickedServerConfiguration)
-	ON_BN_CLICKED(IDC_BUTTON4, &CtestDlg::OnBnClickedClientConfiguration)
+	ON_BN_CLICKED(IDC_BUTTON10, &CtestDlg::OnBnClickedServerConfiguration)
+	ON_BN_CLICKED(IDC_BUTTON11, &CtestDlg::OnBnClickedClientConfiguration)
 	ON_BN_CLICKED(IDC_RADIO2, &CtestDlg::OnBnClickedServerRadio)
 	ON_BN_CLICKED(IDC_RADIO1, &CtestDlg::OnBnClickedClientRadio)
 	ON_BN_CLICKED(IDC_BUTTON2, &CtestDlg::OnBnClickedExitButton)

@@ -12,11 +12,21 @@ class ServerConf : public CDialogEx
 public:
 	ServerConf(CWnd* pParent = NULL);   // 표준 생성자입니다.
 	virtual ~ServerConf();
+	
+	int m_deviceFlag; // 모니터인가, 스마트폰 그림인가를 판별하는 플래그 ( -1 : 초기값, 0 : 모니터, 1 : 스마트폰 )
+	int m_settingFlag[9]; // 버튼에 모니터 or 스마트폰 or 빈 칸인지 판별하는 플래그 ( -1 : 초기값, 0 : 모니터, 1 : 스마트폰 )
 	bool m_bDragFlag; // 드래그 판별 플래그
 	bool m_applyFlag; // apply 눌렀나 판별하는 플래그
+	
+	
 	CPoint m_ptltemText; // 특정 아이템 텍스트의 좌표
 	CAsyncSocket serverSock;
 	CAsyncSocket realSock;
+	
+	WINDOWPLACEMENT getCoord[11];
+
+	CWnd *btnControl[9];
+	CWnd *picControl[2];
 
 	
 
@@ -41,15 +51,6 @@ public:
 	CButton m_CButton_seven;
 	CButton m_CButton_eight;
 	CButton m_CButton_nine;
-	afx_msg void OnBnClickedServerButton1();
-	afx_msg void OnBnClickedServerButton2();
-	afx_msg void OnBnClickedServerButton3();
-	afx_msg void OnBnClickedServerButton4();
-	afx_msg void OnBnClickedServerButton5();
-	afx_msg void OnBnClickedServerButton6();
-	afx_msg void OnBnClickedServerButton7();
-	afx_msg void OnBnClickedServerButton8();
-	afx_msg void OnBnClickedServerButton9();
 	CString m_serverPortEdit;
 	afx_msg void OnBnClickedPortApply();
 	CButton m_CButton_portApply;
@@ -62,4 +63,13 @@ public:
 	CEdit m_portEditControl;
 	CString serverIPAddress;
 	void initServer(int nPort);
+	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedButton2();
+	afx_msg void OnBnClickedButton3();
+	afx_msg void OnBnClickedButton4();
+	//afx_msg void OnBnClickedButton5();
+	afx_msg void OnBnClickedButton6();
+	afx_msg void OnBnClickedButton7();
+	afx_msg void OnBnClickedButton8();
+	afx_msg void OnBnClickedButton9();
 };
