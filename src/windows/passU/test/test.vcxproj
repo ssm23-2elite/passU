@@ -107,6 +107,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientConf.h" />
+    <ClInclude Include="MyListen.h" />
+    <ClInclude Include="MySocket.h" />
+    <ClInclude Include="MyThread.h" />
     <ClInclude Include="packet.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ServerConf.h" />
@@ -117,6 +120,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClientConf.cpp" />
+    <ClCompile Include="MyListen.cpp" />
+    <ClCompile Include="MySocket.cpp" />
+    <ClCompile Include="MyThread.cpp" />
     <ClCompile Include="ServerConf.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

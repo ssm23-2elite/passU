@@ -28,4 +28,6 @@ public:
 	afx_msg void OnIpnFieldchangedIpaddress(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedOk();
 
+	void sendData(CString strData);
+	void receiveData(void);
 };

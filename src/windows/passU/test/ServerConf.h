@@ -2,7 +2,8 @@
 
 #include <afxsock.h>
 #include "afxwin.h"
-
+#include "MySocket.h"
+#include "MyListen.h"
 // ServerConf 대화 상자입니다.
 
 class ServerConf : public CDialogEx
@@ -17,12 +18,15 @@ public:
 	int m_settingFlag[9]; // 버튼에 모니터 or 스마트폰 or 빈 칸인지 판별하는 플래그 ( -1 : 초기값, 0 : 모니터, 1 : 스마트폰 )
 	bool m_bDragFlag; // 드래그 판별 플래그
 	bool m_applyFlag; // apply 눌렀나 판별하는 플래그
-	
+	bool m_startFlag; // 서버 구동중인가 아닌가를 판별하는 플래그
 	
 	CPoint m_ptltemText; // 특정 아이템 텍스트의 좌표
-	CAsyncSocket serverSock;
-	CAsyncSocket realSock;
+//	CAsyncSocket serverSock;
+	//CAsyncSocket realSock;
 	
+	CMySocket realSock;
+	CMyListen listen;
+
 	WINDOWPLACEMENT getCoord[11];
 
 	CWnd *btnControl[9];
@@ -72,4 +76,6 @@ public:
 	afx_msg void OnBnClickedButton7();
 	afx_msg void OnBnClickedButton8();
 	afx_msg void OnBnClickedButton9();
+	void closeClient(void);
+	void receiveData(void);
 };

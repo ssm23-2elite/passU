@@ -82,3 +82,14 @@ void ClientConf::OnBnClickedOk()
 	CDialogEx::OnOK();
 
 }
+
+void ClientConf::sendData(CString strData)
+{
+
+}
+
+
+void ClientConf::receiveData(void)
+{
+
+}

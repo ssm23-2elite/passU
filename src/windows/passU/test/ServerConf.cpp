@@ -39,6 +39,7 @@ IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 	}
 	serverIPAddress.Append(strIpAddress); // static control에 서버 IP 주소를 붙여넣음
 
+	m_startFlag = FALSE;
 	/* 버튼의 위치 좌표를 얻음 */
 	/*
 	CWnd *btnControl[9];
@@ -59,7 +60,6 @@ IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 		m_settingFlag[i] = -1; //  setting Flag 초기화
 
 	AfxSocketInit(); // 소켓 초기화
-
 }
 
 ServerConf::~ServerConf()
@@ -128,7 +128,7 @@ void ServerConf::OnBnClickedStart()
 
 	initServer(nPort);
 
-	CDialogEx::OnOK();
+	//CDialogEx::OnOK();
 
 }
 
@@ -136,8 +136,7 @@ void ServerConf::OnBnClickedStart()
 void ServerConf::OnBnClickedStop()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
-
+	closeClient();
 
 
 	CDialogEx::OnCancel();
@@ -505,8 +504,13 @@ void ServerConf::OnMouseMove(UINT nFlags, CPoint point)
 
 void ServerConf::initServer(int nPort)
 {
+	listen.Create(nPort);
+	listen.Listen();
 
-	if(serverSock.Create(nPort) == FALSE){
+	listen.OnAccept(realSock);
+
+
+	/*if(serverSock.Create(nPort) == FALSE){
 		AfxMessageBox(_T("Faild To Create"));
 		return ;
 	}
@@ -516,7 +520,13 @@ void ServerConf::initServer(int nPort)
 		return;
 	}
 
-	serverSock.Accept(realSock);
+	serverSock.Accept(realSock);*/
+
+	/* Nagle 알고리즘을 해제하는 코드, 우리 프로그램에서는 Nagle 알고리즘 필요없엉 */
+	const char opt_val = true;
+	setsockopt(realSock, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
+
+	m_startFlag = TRUE; // 서버 시작 플래그 True
 	AfxMessageBox(_T("Accept Complete"));
 }
 
@@ -661,4 +671,25 @@ void ServerConf::OnBnClickedButton9()
 			RedrawWindow();
 		}
 	}
+}
+
+void ServerConf::closeClient(void)
+{
+	if(m_startFlag == TRUE){
+		m_startFlag = FALSE;
+		realSock.Close();
+		AfxMessageBox(_T("Close Success!!"));
+	}
+}
+
+
+void ServerConf::receiveData(void)
+{
+	char temp[1024];
+
+	realSock.Receive(temp, sizeof(temp));
+
+	AfxMessageBox(_T("receive Success!!"));
+
+
 }
