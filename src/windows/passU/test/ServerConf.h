@@ -21,10 +21,14 @@ public:
 	bool m_startFlag; // 서버 구동중인가 아닌가를 판별하는 플래그
 	
 	CPoint m_ptltemText; // 특정 아이템 텍스트의 좌표
-//	CAsyncSocket serverSock;
-	//CAsyncSocket realSock;
+
+	/*typedef CTypedPtrArray<CObArray, CMySocket *> CSocketList;
 	
-	CMySocket realSock;
+	CSocketList m_clientSocks;*/
+
+	//CAsyncSocket serverSock;
+	//CAsyncSocket realSock;
+
 	CMyListen listen;
 
 	WINDOWPLACEMENT getCoord[11];
@@ -77,5 +81,8 @@ public:
 	afx_msg void OnBnClickedButton8();
 	afx_msg void OnBnClickedButton9();
 	void closeClient(void);
-	void receiveData(void);
+	void receiveData(CMySocket *s);
+	CButton m_CBtn_Start;
+	CButton m_CBtn_stop;
+	void initFlag(void);
 };

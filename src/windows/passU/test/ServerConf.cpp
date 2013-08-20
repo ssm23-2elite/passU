@@ -5,8 +5,7 @@
 #include "test.h"
 #include "ServerConf.h"
 #include "afxdialogex.h"
-
-
+#include "MyThread.h"
 
 // ServerConf 대화 상자입니다.
 
@@ -39,25 +38,7 @@ IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 	}
 	serverIPAddress.Append(strIpAddress); // static control에 서버 IP 주소를 붙여넣음
 
-	m_startFlag = FALSE;
-	/* 버튼의 위치 좌표를 얻음 */
-	/*
-	CWnd *btnControl[9];
-
-	*/
-
-	/*CWnd *btnControl;
-
-	btnControl = new CWnd;
-
-	btnControl = this->GetDlgItem(IDC_BUTTON1);*/
-
-
-
-	m_deviceFlag = -1; // device Flag 초기화
-
-	for(int i = 0 ; i < 9 ; i ++)
-		m_settingFlag[i] = -1; //  setting Flag 초기화
+	initFlag(); // 각종 Flag 초기화
 
 	AfxSocketInit(); // 소켓 초기화
 }
@@ -84,6 +65,8 @@ void ServerConf::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON13, m_CButton_portCancel);
 	DDX_Control(pDX, IDC_EDIT2, m_portEditControl);
 	DDX_Text(pDX, IDC_IPTEXT, serverIPAddress);
+	DDX_Control(pDX, IDOK, m_CBtn_Start);
+	DDX_Control(pDX, IDCANCEL, m_CBtn_stop);
 }
 
 
@@ -125,9 +108,11 @@ void ServerConf::OnBnClickedStart()
 
 	AfxMessageBox(_T("Start!!"));
 
+	m_startFlag = TRUE;
 
 	initServer(nPort);
-
+	
+	m_CBtn_Start.EnableWindow(FALSE);
 	//CDialogEx::OnOK();
 
 }
@@ -136,6 +121,7 @@ void ServerConf::OnBnClickedStart()
 void ServerConf::OnBnClickedStop()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	initFlag();
 	closeClient();
 
 
@@ -169,6 +155,7 @@ void ServerConf::OnBnClickedPortCancel()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_CButton_portApply.EnableWindow(TRUE);
 	m_portEditControl.EnableWindow(TRUE);
+	
 
 
 }
@@ -504,27 +491,13 @@ void ServerConf::OnMouseMove(UINT nFlags, CPoint point)
 
 void ServerConf::initServer(int nPort)
 {
+	
 	listen.Create(nPort);
 	listen.Listen();
 
-	listen.OnAccept(realSock);
-
-
-	/*if(serverSock.Create(nPort) == FALSE){
-		AfxMessageBox(_T("Faild To Create"));
-		return ;
-	}
-
-	if(serverSock.Listen() == FALSE){
-		AfxMessageBox(_T("Faild To Listen"));
-		return;
-	}
-
-	serverSock.Accept(realSock);*/
-
 	/* Nagle 알고리즘을 해제하는 코드, 우리 프로그램에서는 Nagle 알고리즘 필요없엉 */
 	const char opt_val = true;
-	setsockopt(realSock, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
+//	setsockopt(realSock, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
 
 	m_startFlag = TRUE; // 서버 시작 플래그 True
 	AfxMessageBox(_T("Accept Complete"));
@@ -677,19 +650,44 @@ void ServerConf::closeClient(void)
 {
 	if(m_startFlag == TRUE){
 		m_startFlag = FALSE;
-		realSock.Close();
+//		realSock.Close();
 		AfxMessageBox(_T("Close Success!!"));
+		
+		m_CBtn_Start.EnableWindow(TRUE);
 	}
+
+
 }
 
 
-void ServerConf::receiveData(void)
+void ServerConf::receiveData(CMySocket *s)
 {
 	char temp[1024];
+	//memset(temp, 0, sizeof(temp));
+	ZeroMemory(temp, sizeof(temp));
 
-	realSock.Receive(temp, sizeof(temp));
+	char saveStr[1024];
+
+	ZeroMemory( saveStr, sizeof(saveStr));
+
+	int t = 0;
+	t = s->Receive(temp, sizeof(temp));
+	
+	s->Send(temp, sizeof(temp));
 
 	AfxMessageBox(_T("receive Success!!"));
 
+	 
+}
+
+
+void ServerConf::initFlag(void)
+{
+	m_applyFlag = FALSE;
+	m_bDragFlag = FALSE;
+	m_deviceFlag = -1;
+	for(int i = 0 ; i < 9 ; i++ )
+		m_settingFlag[i] = -1;
+	m_startFlag = TRUE;
 
 }
