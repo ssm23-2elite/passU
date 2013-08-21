@@ -9,8 +9,7 @@ typedef struct keypacket{ // 키보드 키 값을 가지고 있는 패킷(UDP)
    int updownFlag:8;		// 업 1 다운 0
    int keyCode:32;			// 키 코드
    int pad1:32;
-   int pad2:32;
-   int pad3:6;
+   int pad2:8;
 } KPACKET;
  
 typedef struct mousepacket{ // 마우스 위치 정보를 가지고 있는 패킷(UDP)

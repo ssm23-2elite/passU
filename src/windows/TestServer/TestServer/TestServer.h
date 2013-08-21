@@ -24,6 +24,7 @@ public:
 	CSocket client;
 	BOOL bClientConnected;
 	BOOL bMouseDown;
+	BOOL bKeyDown;
 
 	void initServer(int port);
 	void sendKeyboardData(KPACKET *packet);
@@ -31,6 +32,11 @@ public:
 	void sendMouseMove(int x, int y);
 	void sendMouseUp(int x, int y);
 	void sendMouseDown(int x, int y);
+
+	void sendKeyUp(UINT keyCode);
+	void sendKeyDown(UINT keyCode);
+	void sendKeyData(KPACKET *packet);
+
 // 재정의입니다.
 public:
 	virtual BOOL InitInstance();
