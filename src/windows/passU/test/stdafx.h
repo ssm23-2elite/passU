@@ -25,8 +25,6 @@
 
 // user define
 
-#define DESIRED_WINSOCK_VERSION 0x0101
-#define MINIMUM_WINSOCK_VERSION 0x0001
 
 // user define
 
@@ -58,5 +56,4 @@
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif
 #endif
-
 

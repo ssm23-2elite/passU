@@ -185,7 +185,7 @@ void CTestServerApp::sendMouseData(MPACKET *pPacket)
 		str.Format(_T("real[%d] want[%d]"), bytes, sizeof(MPACKET));
 		
 		ZeroMemory(&buf, sizeof(MPACKET));
-		bytes = client.Receive((void*)&buf, sizeof(MPACKET));
+		bytes = client.Receive((void*)&buf, sizeof(MPACKET)); 
 	}
 }
 

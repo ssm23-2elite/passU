@@ -31,12 +31,15 @@ void ClientConf::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_IPADDRESS1, m_ip);
 	DDX_Text(pDX, IDC_EDIT1, m_PortNum);
 	DDV_MaxChars(pDX, m_PortNum, 5);
+	DDX_Control(pDX, IDOK, m_CBtn_ClientConnect);
+	DDX_Control(pDX, IDCANCEL, m_CBtn_ClientCancel);
 }
 
 
 BEGIN_MESSAGE_MAP(ClientConf, CDialogEx)
 	ON_NOTIFY(IPN_FIELDCHANGED, IDC_IPADDRESS1, &ClientConf::OnIpnFieldchangedIpaddress)
 	ON_BN_CLICKED(IDOK, &ClientConf::OnBnClickedOk)
+	ON_BN_CLICKED(IDCANCEL, &ClientConf::OnBnClickedCancel)
 END_MESSAGE_MAP()
 
 
@@ -65,7 +68,7 @@ void ClientConf::OnBnClickedOk()
 	m_address.Format(_T("%d.%d.%d.%d"), ipFirst, ipSecond, ipThird, ipForth);
 
 	int nPort;
-
+	 
 
 	nPort = _ttoi(m_PortNum);
 
@@ -78,18 +81,46 @@ void ClientConf::OnBnClickedOk()
 	
 	clientSock.Connect(m_address, nPort);
 
+	char *hellopack = "ConnectSuccess!";
 
-	CDialogEx::OnOK();
+	clientSock.Send(hellopack, strlen(hellopack));
+
+	receiveData();
+
+	m_connectFlag = true;
+	m_CBtn_ClientConnect.EnableWindow(FALSE);
+	//CDialogEx::OnOK();
 
 }
 
 void ClientConf::sendData(CString strData)
 {
-
+	if(clientSock){
+		strData.Insert(strData.GetLength(), _T("\0"));
+		clientSock.Send(strData, strData.GetLength());
+		AfxMessageBox(_T("sendData!!!"));
+	}
 }
 
 
 void ClientConf::receiveData(void)
 {
+	char temp[1024];
 
+	clientSock.Receive(temp, sizeof(temp));
+
+	AfxMessageBox(_T("receiveData!!!"));
+}
+
+
+void ClientConf::OnBnClickedCancel()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+
+	m_connectFlag = false;
+	m_CBtn_ClientConnect.EnableWindow(TRUE);
+	clientSock.Close();
+
+//	CDialogEx::OnCancel();
 }

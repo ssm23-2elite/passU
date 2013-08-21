@@ -16,7 +16,9 @@ public:
 	CIPAddressCtrl m_ip;
 	CString m_PortNum;
 	CSocket clientSock;
-
+	bool m_connectFlag; // 접속중인가를 판별하는 플래그
+	bool m_portFlag; // 포트번호를 입력받았나 판별하는 플래그
+	bool m_ipFlag; // ip 주소가 입력되었나 판별하는 플래그
 // 대화 상자 데이터입니다.
 	enum { IDD = IDD_DIALOG2 };
 
@@ -30,4 +32,7 @@ public:
 
 	void sendData(CString strData);
 	void receiveData(void);
+	CButton m_CBtn_ClientConnect;
+	CButton m_CBtn_ClientCancel;
+	afx_msg void OnBnClickedCancel();
 };
