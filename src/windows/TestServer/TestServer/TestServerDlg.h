@@ -4,6 +4,7 @@
 
 #pragma once
 #include "TestServer.h"
+#include "afxwin.h"
 
 // CTestServerDlg 대화 상자
 class CTestServerDlg : public CDialog
@@ -37,4 +38,5 @@ public:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	CButton m_tempBtn;
 };
