@@ -2,6 +2,7 @@ package org.secmem232.passu.android.driver;
 
 import java.io.IOException;
 
+import org.secmem232.passu.android.natives.KeyCodeMap;
 import org.secmem232.passu.android.util.CommandLine;
 
 import android.content.Context;
@@ -33,6 +34,7 @@ public class InstallDriverTask extends AsyncTask<Void, Void, Integer>{
 	@Override
 	protected Integer doInBackground(Void... params) {
 		try {
+			KeyCodeMap.init();
 			CommandLine.copyInputDrivers(context);
 		} catch (SecurityException e) {
 			e.printStackTrace();

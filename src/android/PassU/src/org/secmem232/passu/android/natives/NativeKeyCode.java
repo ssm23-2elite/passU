@@ -39,7 +39,7 @@ public class NativeKeyCode {
 	public static final int KEY_0 = 11;
 	public static final int KEY_MINUS = 12;
 	public static final int KEY_EQUAL = 13;
-	public static final int KEY_BACKSPACE = 14;
+	public static final int KEY_DEL = 14;
 	public static final int KEY_TAB = 15;
 	public static final int KEY_Q = 16;
 	public static final int KEY_W = 17;
@@ -54,7 +54,7 @@ public class NativeKeyCode {
 	public static final int KEY_LEFTBRACE = 26;
 	public static final int KEY_RIGHTBRACE = 27;
 	public static final int KEY_ENTER = 28;
-	public static final int KEY_LEFTCTRL = 29;
+	public static final int KEY_LCTRL = 29;
 	public static final int KEY_A = 30;
 	public static final int KEY_S = 31;
 	public static final int KEY_D = 32;
@@ -122,7 +122,7 @@ public class NativeKeyCode {
 	public static final int KEY_MUHENKAN = 94;
 	public static final int KEY_KPJPCOMMA = 95;
 	public static final int KEY_KPENTER = 96;
-	public static final int KEY_RIGHTCTRL = 97;
+	public static final int KEY_RCTRL = 97;
 	public static final int KEY_KPSLASH = 98;
 	public static final int KEY_SYSRQ = 99;
 	public static final int KEY_RIGHTALT = 100;
@@ -274,8 +274,6 @@ public class NativeKeyCode {
 	public static final int KEY_FORWARDMAIL = 233;
 	public static final int KEY_SAVE = 234;
 	public static final int KEY_DOCUMENTS = 235;
-
 	public static final int KEY_BATTERY = 236;
-
 	public static final int KEY_UNKNOWN = 240;
 }

@@ -8,6 +8,7 @@ import java.net.Socket;
 
 import org.secmem232.passu.android.AR;
 import org.secmem232.passu.android.D;
+import org.secmem232.passu.android.natives.KeyCodeMap;
 
 import android.util.Log;
 
@@ -160,9 +161,13 @@ public class PassUSocket implements PacketListener {
 		Log.w(LOG, packet.toString());
 		if( packet.getDeviceType() == PacketHeader.Device_Type.KEYBOARD ) {
 			if( packet.getUpdownFlag() == PacketHeader.Updown_Flag.UP ) {
-				mVirtEventListener.onKeyUp(packet.getKeyCode());
+				Integer keyCode = KeyCodeMap.M.get(packet.getKeyCode());
+				if(keyCode != null)
+					mVirtEventListener.onKeyUp(keyCode);
 			} else if( packet.getUpdownFlag() == PacketHeader.Updown_Flag.DOWN ) {
-				mVirtEventListener.onKeyDown(packet.getKeyCode());
+				Integer keyCode = KeyCodeMap.M.get(packet.getKeyCode());
+				if(keyCode != null)
+					mVirtEventListener.onKeyDown(keyCode);
 			}
 		} else if( packet.getDeviceType() == PacketHeader.Device_Type.MOUSE ) {
 			if( packet.getUpdownFlag() == PacketHeader.Updown_Flag.UP ) {

@@ -273,6 +273,7 @@ public class PassUService extends Service implements
 	public void onServerConnectionInterrupted() {
 		if(D.D) Log.w(LOG, "onServerConnectionInterrupted");
 		mState = ServiceState.IDLE;
+		HideCursor();
 		sendBroadcast(new Intent(PassUIntent.ACTION_INTERRUPTED));
 
 		Looper.prepare();
