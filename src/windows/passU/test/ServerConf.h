@@ -75,7 +75,6 @@ public:
 	CButton m_CButton_portApply;
 	afx_msg void OnBnClickedPortCancel();
 	CButton m_CButton_portCancel;
-	afx_msg void OnStnClickedPiccom();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);

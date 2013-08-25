@@ -33,7 +33,7 @@ extern "C" __declspec(dllexport)
 LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
 	//TCHAR s[256];
-
+									
 	KBDLLHOOKSTRUCT *pKey = (KBDLLHOOKSTRUCT *)lParam;
 
 		//MessageBox(g_hWnd, "keyboardHook", "vkCode : ", MB_OK);

@@ -105,7 +105,6 @@ BEGIN_MESSAGE_MAP(ServerConf, CDialogEx)
 	ON_BN_CLICKED(IDCANCEL, &ServerConf::OnBnClickedStop)
 	ON_BN_CLICKED(IDC_BUTTON12, &ServerConf::OnBnClickedPortApply)
 	ON_BN_CLICKED(IDC_BUTTON13, &ServerConf::OnBnClickedPortCancel)
-	ON_STN_CLICKED(IDC_PICCOM, &ServerConf::OnStnClickedPiccom)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
@@ -189,14 +188,6 @@ void ServerConf::OnBnClickedPortCancel()
 	m_CButton_portApply.EnableWindow(TRUE);
 	m_portEditControl.EnableWindow(TRUE);
 
-
-
-}
-
-
-void ServerConf::OnStnClickedPiccom()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
 
 
@@ -254,6 +245,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	CPoint m_tmpPoint;
 	CBitmap m_tmpBitmap;
+	CDC MemDC;HBITMAP hBmp;
 
 	btnControl[0] = this->GetDlgItem(IDC_BUTTON1);
 	btnControl[1] = this->GetDlgItem(IDC_BUTTON2);
@@ -288,6 +280,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 
 				if(m_deviceFlag == 0){ // 컴퓨터
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
+					
 
 					m_settingFlag[0] = 0;
 				} else if(m_deviceFlag == 1){ // 스마트폰
@@ -299,7 +292,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 					m_settingFlag[0] = -1;
 					return;
 				}
-				//	m_CButton_one.SetWindowTextW(NULL);
+				//	m_CButton_one.SetWindowText(NULL);
 
 				m_CButton_one.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
 
@@ -325,7 +318,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 					m_settingFlag[1] = -1;
 					return;
 				}
-				//	m_CButton_two.SetWindowTextW(NULL);
+				//	m_CButton_two.SetWindowText(NULL);
 
 				m_CButton_two.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩				
 
@@ -347,7 +340,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 					m_settingFlag[2] = -1;
 					return;
 				}
-				//	m_CButton_three.SetWindowTextW(NULL);
+				//	m_CButton_three.SetWindowText(NULL);
 
 				m_CButton_three.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
 
@@ -370,7 +363,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 					m_settingFlag[3] = -1;
 					return;
 				}
-				//	m_CButton_four.SetWindowTextW(NULL);
+				//	m_CButton_four.SetWindowText(NULL);
 
 				m_CButton_four.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
 
@@ -393,7 +386,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 		  //			m_settingFlag[4] = -1;
 		  //			return;
 		  //		}
-		  //		//	m_CButton_five.SetWindowTextW(NULL);
+		  //		//	m_CButton_five.SetWindowText(NULL);
 
 		  //		m_CButton_five.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
 
@@ -416,7 +409,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 				  m_settingFlag[5] = -1;
 				  return;
 			  }
-			  //	m_CButton_six.SetWindowTextW(NULL);
+			  //	m_CButton_six.SetWindowText(NULL);
 
 			  m_CButton_six.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
 
@@ -439,7 +432,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 					m_settingFlag[6] = -1;
 					return;
 				}
-				//	m_CButton_seven.SetWindowTextW(NULL);
+				//	m_CButton_seven.SetWindowText(NULL);
 
 				m_CButton_seven.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
 
@@ -463,7 +456,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 					return;
 
 				}
-				//m_CButton_eight.SetWindowTextW(NULL);
+				//m_CButton_eight.SetWindowText(NULL);
 
 				m_CButton_eight.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
 
@@ -489,7 +482,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 					return;
 				}
 
-				//m_CButton_nine.SetWindowTextW(_T(""));
+				//m_CButton_nine.SetWindowText(_T(""));
 
 				m_CButton_nine.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
 
@@ -540,7 +533,7 @@ void ServerConf::OnBnClickedButton1()
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
 		{
 			m_CButton_one.SetBitmap(NULL);
-			m_CButton_one.SetWindowTextW(_T("1"));
+			m_CButton_one.SetWindowText(_T("1"));
 			m_deviceFlag = -1;
 			m_settingFlag[0] = -1;
 			RedrawWindow();
@@ -556,7 +549,7 @@ void ServerConf::OnBnClickedButton2()
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
 		{
 			m_CButton_two.SetBitmap(NULL);
-			m_CButton_two.SetWindowTextW(_T("2"));
+			m_CButton_two.SetWindowText(_T("2"));
 			m_deviceFlag = -1;
 			m_settingFlag[1] = -1;
 			RedrawWindow();
@@ -572,7 +565,7 @@ void ServerConf::OnBnClickedButton3()
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
 		{
 			m_CButton_three.SetBitmap(NULL);
-			m_CButton_three.SetWindowTextW(_T("3"));
+			m_CButton_three.SetWindowText(_T("3"));
 			m_deviceFlag = -1;
 			m_settingFlag[2] = -1;
 			RedrawWindow();
@@ -588,7 +581,7 @@ void ServerConf::OnBnClickedButton4()
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
 		{
 			m_CButton_four.SetBitmap(NULL);
-			m_CButton_four.SetWindowTextW(_T("4"));
+			m_CButton_four.SetWindowText(_T("4"));
 			m_deviceFlag = -1;
 			m_settingFlag[3] = -1;
 			RedrawWindow();
@@ -604,7 +597,7 @@ void ServerConf::OnBnClickedButton4()
 //		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
 //		{
 //			m_CButton_five.SetBitmap(NULL);
-//			m_CButton_five.SetWindowTextW(_T("5"));
+//			m_CButton_five.SetWindowText(_T("5"));
 //			m_deviceFlag = -1;
 //			m_settingFlag[4] = -1;
 //			RedrawWindow();
@@ -620,7 +613,7 @@ void ServerConf::OnBnClickedButton6()
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
 		{
 			m_CButton_six.SetBitmap(NULL);
-			m_CButton_six.SetWindowTextW(_T("6"));
+			m_CButton_six.SetWindowText(_T("6"));
 			m_deviceFlag = -1;
 			m_settingFlag[5] = -1;
 			RedrawWindow();
@@ -636,7 +629,7 @@ void ServerConf::OnBnClickedButton7()
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
 		{
 			m_CButton_seven.SetBitmap(NULL);
-			m_CButton_seven.SetWindowTextW(_T("7"));
+			m_CButton_seven.SetWindowText(_T("7"));
 			m_deviceFlag = -1;
 			m_settingFlag[6] = -1;
 			RedrawWindow();
@@ -652,7 +645,7 @@ void ServerConf::OnBnClickedButton8()
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
 		{
 			m_CButton_eight.SetBitmap(NULL);
-			m_CButton_eight.SetWindowTextW(_T("8"));
+			m_CButton_eight.SetWindowText(_T("8"));
 			m_deviceFlag = -1;
 			m_settingFlag[7] = -1;
 			RedrawWindow();
@@ -668,7 +661,7 @@ void ServerConf::OnBnClickedButton9()
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
 		{
 			m_CButton_nine.SetBitmap(NULL);
-			m_CButton_nine.SetWindowTextW(_T("9"));
+			m_CButton_nine.SetWindowText(_T("9"));
 			m_deviceFlag = -1;
 			m_settingFlag[8] = -1;
 			RedrawWindow();
