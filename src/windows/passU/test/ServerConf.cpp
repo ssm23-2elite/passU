@@ -6,8 +6,15 @@
 #include "ServerConf.h"
 #include "afxdialogex.h"
 #include "MyThread.h"
+#include "packet.h"
 
 // ServerConf 대화 상자입니다.
+
+typedef HHOOK (*InstallKeyboardHook)();
+typedef HHOOK (*InstallMouseHook)();
+
+InstallKeyboardHook installKeyhook;
+InstallMouseHook installMousehook;
 
 IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 
@@ -16,9 +23,6 @@ IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 	, m_serverPortEdit(_T(""))
 	, serverIPAddress(_T(""))
 {
-
-	m_applyFlag = FALSE;
-	m_bDragFlag = FALSE;
 
 	/* 현재 서버가 될 컴퓨터의 IP를 알아내는 코드 */
 	WORD wVersionRequested;
@@ -37,14 +41,40 @@ IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 		WSACleanup();
 	}
 	serverIPAddress.Append(strIpAddress); // static control에 서버 IP 주소를 붙여넣음
-
+	nSocket = 0;
 	initFlag(); // 각종 Flag 초기화
+
+	hinstDLL = NULL;
+	hHook = NULL;
+
+
+	hinstDLL = LoadLibrary(_T("KeyHook.dll"));
+	if(!hinstDLL)
+		AfxMessageBox(_T("KeyHook.dll 로드 실패!"));
+
+	installKeyhook = (InstallKeyboardHook)GetProcAddress(hinstDLL, "InstallKeyboardHook");
+	installMousehook = (InstallMouseHook)GetProcAddress(hinstDLL, "InstallMouseHook");
 
 	AfxSocketInit(); // 소켓 초기화
 }
 
+//
+//
+//extern "C" __declspec(dllimport)   
+//	HHOOK InstallKeyboardHook();		// Install Keyboard Hook
+//
+//extern "C" __declspec(dllimport)
+//	void UnInstallKeyboardHook();		// Uninstall Keyboard Hook 
+//
+//extern "C" __declspec(dllimport)
+//	HHOOK InstallMouseHook();		// Install Mouse Hook
+//
+//extern "C" __declspec(dllimport)
+//	void UnInstallMouseHook();		// Uninstall Mouse Hook 
+
 ServerConf::~ServerConf()
 {
+	listen.Close();
 }
 
 void ServerConf::DoDataExchange(CDataExchange* pDX)
@@ -88,6 +118,7 @@ BEGIN_MESSAGE_MAP(ServerConf, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON7, &ServerConf::OnBnClickedButton7)
 	ON_BN_CLICKED(IDC_BUTTON8, &ServerConf::OnBnClickedButton8)
 	ON_BN_CLICKED(IDC_BUTTON9, &ServerConf::OnBnClickedButton9)
+	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 
@@ -97,10 +128,10 @@ END_MESSAGE_MAP()
 void ServerConf::OnBnClickedStart()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(m_applyFlag == FALSE){
-		AfxMessageBox(_T("Plz Enter Port Number !!"));
-		return ;
-	}
+	/*if(m_applyFlag == FALSE){
+	AfxMessageBox(_T("Plz Enter Port Number !!"));
+	return ;
+	}*/
 
 	int nPort;
 
@@ -109,10 +140,13 @@ void ServerConf::OnBnClickedStart()
 	AfxMessageBox(_T("Start!!"));
 
 	m_startFlag = TRUE;
+	//initServer(nPort);
+	initServer(7000);
 
-	initServer(nPort);
-	
 	m_CBtn_Start.EnableWindow(FALSE);
+
+	//PostMessage(WM_TEST_MESSAGE, 0, 0);
+
 	//CDialogEx::OnOK();
 
 }
@@ -122,7 +156,6 @@ void ServerConf::OnBnClickedStop()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	initFlag();
-	closeClient();
 
 
 	CDialogEx::OnCancel();
@@ -138,10 +171,10 @@ void ServerConf::OnBnClickedPortApply()
 
 	GetDlgItemText(IDC_EDIT2, str);
 
-	if(str.GetLength() == 0){
-		AfxMessageBox(_T("포트 번호를 입력하세요."));
-		return ;
-	}
+	/*if(str.GetLength() == 0){
+	AfxMessageBox(_T("포트 번호를 입력하세요."));
+	return ;
+	}*/
 
 	m_applyFlag = TRUE;
 	m_portEditControl.EnableWindow(FALSE);
@@ -155,7 +188,7 @@ void ServerConf::OnBnClickedPortCancel()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_CButton_portApply.EnableWindow(TRUE);
 	m_portEditControl.EnableWindow(TRUE);
-	
+
 
 
 }
@@ -280,6 +313,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 				if(m_deviceFlag == 0){ // 컴퓨터
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
 
+
 					m_settingFlag[1] = 0;
 
 				} else if(m_deviceFlag == 1){ // 스마트폰
@@ -343,50 +377,50 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 
 				UpdateData();Invalidate();RedrawWindow();
 		} /*else if(point.x >= getCoord[4].rcNormalPosition.left &&
-		//	point.x <= getCoord[4].rcNormalPosition.right &&
-		//	point.y <= getCoord[4].rcNormalPosition.bottom &&
-		//	point.y >= getCoord[4].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 5일 때
-		//		if(m_deviceFlag == 0){ // 컴퓨터
-		//			m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
+		  //	point.x <= getCoord[4].rcNormalPosition.right &&
+		  //	point.y <= getCoord[4].rcNormalPosition.bottom &&
+		  //	point.y >= getCoord[4].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 5일 때
+		  //		if(m_deviceFlag == 0){ // 컴퓨터
+		  //			m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
 
-		//			m_settingFlag[4] = 0;
-		//		} else if(m_deviceFlag == 1){ // 스마트폰
+		  //			m_settingFlag[4] = 0;
+		  //		} else if(m_deviceFlag == 1){ // 스마트폰
 
-		//			m_settingFlag[4] = 1;
-		//			m_tmpBitmap.LoadBitmapW(IDB_BITMAP2);
-		//		} else{ // 둘 다 아니면 그냥 리턴
+		  //			m_settingFlag[4] = 1;
+		  //			m_tmpBitmap.LoadBitmapW(IDB_BITMAP2);
+		  //		} else{ // 둘 다 아니면 그냥 리턴
 
-		//			m_settingFlag[4] = -1;
-		//			return;
-		//		}
-		//		//	m_CButton_five.SetWindowTextW(NULL);
+		  //			m_settingFlag[4] = -1;
+		  //			return;
+		  //		}
+		  //		//	m_CButton_five.SetWindowTextW(NULL);
 
-		//		m_CButton_five.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
+		  //		m_CButton_five.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
 
 
-		//		UpdateData();Invalidate();RedrawWindow();
-		}*/ else if(point.x >= getCoord[5].rcNormalPosition.left &&
-			point.x <= getCoord[5].rcNormalPosition.right &&
-			point.y <= getCoord[5].rcNormalPosition.bottom &&
-			point.y >= getCoord[5].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 6일 때
-				if(m_deviceFlag == 0){ // 컴퓨터
-					m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
+		  //		UpdateData();Invalidate();RedrawWindow();
+		  }*/ else if(point.x >= getCoord[5].rcNormalPosition.left &&
+		  point.x <= getCoord[5].rcNormalPosition.right &&
+		  point.y <= getCoord[5].rcNormalPosition.bottom &&
+		  point.y >= getCoord[5].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 6일 때
+			  if(m_deviceFlag == 0){ // 컴퓨터
+				  m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
 
-					m_settingFlag[5] = 0;
-				} else if(m_deviceFlag == 1){ // 스마트폰
-					m_tmpBitmap.LoadBitmapW(IDB_BITMAP2);
+				  m_settingFlag[5] = 0;
+			  } else if(m_deviceFlag == 1){ // 스마트폰
+				  m_tmpBitmap.LoadBitmapW(IDB_BITMAP2);
 
-					m_settingFlag[5] = 1;
-				} else{ // 둘 다 아니면 그냥 리턴
+				  m_settingFlag[5] = 1;
+			  } else{ // 둘 다 아니면 그냥 리턴
 
-					m_settingFlag[5] = -1;
-					return;
-				}
-				//	m_CButton_six.SetWindowTextW(NULL);
+				  m_settingFlag[5] = -1;
+				  return;
+			  }
+			  //	m_CButton_six.SetWindowTextW(NULL);
 
-				m_CButton_six.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
+			  m_CButton_six.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
 
-				UpdateData();Invalidate();RedrawWindow();
+			  UpdateData();Invalidate();RedrawWindow();
 		} else if(point.x >= getCoord[6].rcNormalPosition.left &&
 			point.x <= getCoord[6].rcNormalPosition.right &&
 			point.y <= getCoord[6].rcNormalPosition.bottom &&
@@ -463,7 +497,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 				UpdateData();
 				Invalidate();RedrawWindow();
 		} else { // 사각형(버튼) 아래가 아니면 그냥 리턴
-			
+
 			return ; 
 		}
 
@@ -491,13 +525,9 @@ void ServerConf::OnMouseMove(UINT nFlags, CPoint point)
 
 void ServerConf::initServer(int nPort)
 {
-	
+
 	listen.Create(nPort);
 	listen.Listen();
-
-	/* Nagle 알고리즘을 해제하는 코드, 우리 프로그램에서는 Nagle 알고리즘 필요없엉 */
-	const char opt_val = true;
-//	setsockopt(realSock, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
 
 	m_startFlag = TRUE; // 서버 시작 플래그 True
 	AfxMessageBox(_T("Accept Complete"));
@@ -646,43 +676,44 @@ void ServerConf::OnBnClickedButton9()
 	}
 }
 
-void ServerConf::closeClient(void)
+void ServerConf::closeClient(CMySocket *s)
 {
 	if(m_startFlag == TRUE){
 		m_startFlag = FALSE;
-//		realSock.Close();
+		s->Close();
+		delete s;
+		//		realSock.Close();
 		AfxMessageBox(_T("Close Success!!"));
-		
+
 		m_CBtn_Start.EnableWindow(TRUE);
 	}
-
-
 }
-
 
 void ServerConf::receiveData(CMySocket *s)
 {
-	char temp[1024];
-	//memset(temp, 0, sizeof(temp));
-	ZeroMemory(temp, sizeof(temp));
-
-	char saveStr[1024];
-
-	ZeroMemory( saveStr, sizeof(saveStr));
-
-	int t = 0;
-	t = s->Receive(temp, sizeof(temp));
+	KPACKET tmp;
 	
-	s->Send(temp, sizeof(temp));
+	s->Receive((LPCSTR *)&tmp, sizeof(KPACKET));
 
-	AfxMessageBox(_T("receive Success!!"));
+	tmp = unpackMessage(tmp);
 
-	 
-}
+	if(m_sendFlag == 1){ // 처음 플래그를 받았을 때 클라이언트한테 클라이언트 ID를 알려준다.
+		s->Send((LPCSTR *)&tmp ,sizeof(KPACKET)); 
+		installKeyhook();
+		installMousehook();
+	}
+
+	/* Nagle 알고리즘을 해제하는 코드, 우리 프로그램에서는 Nagle 알고리즘 필요없엉 */
+	const char opt_val = true;
+	setsockopt(*s, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
+
+	AfxMessageBox(_T("receive Success!!")); 
+ }
 
 
 void ServerConf::initFlag(void)
 {
+	nSocket = 0;
 	m_applyFlag = FALSE;
 	m_bDragFlag = FALSE;
 	m_deviceFlag = -1;
@@ -690,4 +721,215 @@ void ServerConf::initFlag(void)
 		m_settingFlag[i] = -1;
 	m_startFlag = TRUE;
 
+}
+
+
+
+
+BOOL ServerConf::PreTranslateMessage(MSG* pMsg) // PostMessage를 받아 Parsing하는 함수.......................................................
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+
+	// 일단은 KEY DOWN이라고는 하지만..
+	// ㅌ그냥 바로 실행해야할듯?
+	switch(pMsg->message){
+
+	case WM_TEST_MESSAGE:
+
+		//	AfxMessageBox(_T("receive PostMessage"));
+
+		 // 키보드 후킹 시작
+
+
+		//여기다가 바로 후킹 시작함 (키보드, 마우스) 
+
+		//그러다가 마우스를 넘어가게되면 PostMessage로 넘겨줘서 그 정보를 클라이언트한테 보내서 클라이언트에서s 작동하는 마우스와 키보드 핸들을 얻어와서 제어, 서버쪽 마우스와 키보드는 핸들을 내려놓음
+		return TRUE;
+	case WM_KEYBOARD_MESSAGE:
+		return TRUE;;
+
+	case WM_MOUSE_MESSAGE:
+		return TRUE;
+
+	case WM_CLIENT_MESSAGE:
+		return TRUE;
+
+	case WM_SERVER_MESSAGE:
+		return TRUE;
+	}
+	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+void ServerConf::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	CDialogEx::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+
+
+KPACKET ServerConf::packMessage(int msgType, int sendDev, int recvDev, int devType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3){
+	KPACKET k;
+	k.msgType = 0;
+	k.sendDev = 0;
+	k.recvDev = 0;
+	k.deviceType = 0;
+	k.relativeField = 0;
+	k.updownFlag = 0;;
+	k.pad1 = 0;
+	k.keyCode = 0;
+	k.pad2 = 0;
+	k.pad3 = 0;
+	switch(msgType){
+	case 1: // Keyboard
+		k.msgType = msgType;
+		k.sendDev = sendDev;
+		k.recvDev = recvDev;
+		k.deviceType = devType;
+		k.relativeField = relativeField;
+		k.updownFlag = updownFlag;;
+		k.pad1 = pad1;
+		k.keyCode = keyCode;
+		k.pad2 = pad2;
+		k.pad3 = pad3;
+
+	case 2: // Mouse
+		MPACKET m;
+		m.msgType = msgType;
+		m.sendDev = sendDev;
+		m.recvDev = recvDev;
+		m.deviceType = devType;
+		m.relativeField = relativeField;
+		m.updownFlag = updownFlag;
+		m.wheelFlag = pad1;
+		m.xCoord = keyCode;
+		m.yCoord = pad2;
+		m.pad = pad3;
+
+		memcpy(&k, &m, sizeof(KPACKET));
+
+
+	case 3: // Client
+		CPACKET c;
+		c.msgType = msgType;
+		c.c_id = sendDev;
+		c.first = recvDev;
+		c.pad2 = devType;
+		c.pad3 = relativeField;
+		c.pad4 = updownFlag;
+		c.pad5 = pad1;
+		c.pad6 = keyCode;
+		c.pad7 = pad2;
+		c.pad8 = pad3;
+
+
+		memcpy(&k, &c, sizeof(KPACKET));
+
+		break;
+
+	case 4: // Server
+		DPACKET d;
+		d.msgType = msgType;
+		d.len = sendDev;
+
+
+		memcpy(&k, &d, sizeof(KPACKET));
+
+		break;
+
+	default: // packing 실패
+		AfxMessageBox(_T("Msg Packing Failed"));
+		break;
+	}
+
+	return k;
+
+
+}
+
+KPACKET ServerConf::unpackMessage(KPACKET p){
+	KPACKET k;
+
+	k.msgType = 0;
+	k.sendDev = 0;
+	k.recvDev = 0;
+	k.deviceType = 0;
+	k.relativeField = 0;
+	k.updownFlag = 0;;
+	k.pad1 = 0;
+	k.keyCode = 0;
+	k.pad2 = 0;
+	k.pad3 = 0;
+
+	switch(p.msgType){
+	case 1: // Keyboard
+
+		k.deviceType = p.deviceType;
+		k.keyCode = p.keyCode;
+		k.msgType = p.msgType;
+		k.sendDev = p.sendDev;
+		k.recvDev = p.recvDev;
+		k.updownFlag = p.updownFlag;
+		k.relativeField = p.relativeField;
+
+		//	PostMessage(WM_KEYBOARD_MESSAGE, 0, 0);
+
+		break;
+
+	case 2: // Mouse
+		MPACKET m;
+
+		m.deviceType = p.deviceType;
+		m.msgType = p.msgType;
+		m.sendDev = p.sendDev;
+		m.recvDev = p.recvDev;
+		m.relativeField = p.relativeField;
+		m.updownFlag = p.updownFlag;
+		m.wheelFlag = p.pad1;
+		m.xCoord = p.keyCode;
+		m.yCoord = p.pad2;
+
+		//		PostMessage(WM_MOUSE_MESSAGE, 0, 0);
+
+		memcpy(&k, &m, sizeof(KPACKET));
+
+		break;
+
+	case 3: // Client
+		CPACKET c;
+
+		c.c_id = p.sendDev;
+		c.msgType = p.msgType;
+		c.first = p.recvDev;
+
+		if(c.first == 1){
+			c.first = 0;
+			keyP = packMessage(3, nSocket, 0, 0, 0, 0, 0, 0, 0, 200);
+			nSocket += 1;
+			m_sendFlag = true;
+			return keyP;
+		}
+
+		//	PostMessage(WM_CLIENT_MESSAGE, 0, 0);
+
+		memcpy(&k, &c, sizeof(KPACKET));
+		break;
+
+	case 4: // Server
+		DPACKET d;
+
+		d.msgType = p.msgType;
+		d.len = p.sendDev;
+		//		PostMessage(WM_SERVER_MESSAGE, 0, 0);
+		memcpy(&k, &d, sizeof(KPACKET));
+
+		break;
+
+	default: // unpacking 실패
+		AfxMessageBox(_T("Unpacking Failed!"));
+	}
+
+	return k;
 }

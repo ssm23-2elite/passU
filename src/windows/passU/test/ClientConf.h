@@ -1,7 +1,8 @@
 #pragma once
 #include "afxcmn.h"
 #include "afxwin.h"
-
+#include "packet.h"
+#include "ClientSocket.h"
 
 // ClientConf 대화 상자입니다.
 
@@ -15,10 +16,23 @@ public:
 	CString m_address;
 	CIPAddressCtrl m_ip;
 	CString m_PortNum;
-	CSocket clientSock;
+	
+	CClientSocket clientSock;
+	
 	bool m_connectFlag; // 접속중인가를 판별하는 플래그
 	bool m_portFlag; // 포트번호를 입력받았나 판별하는 플래그
 	bool m_ipFlag; // ip 주소가 입력되었나 판별하는 플래그
+	bool m_exitFlag;
+
+	KPACKET keyboard;
+	MPACKET mouse;
+	CPACKET client;
+	DPACKET data;
+
+	int clientID;
+
+
+
 // 대화 상자 데이터입니다.
 	enum { IDD = IDD_DIALOG2 };
 
@@ -30,9 +44,16 @@ public:
 	afx_msg void OnIpnFieldchangedIpaddress(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedOk();
 
-	void sendData(CString strData);
-	void receiveData(void);
+	void receiveData(CClientSocket *s);
+	KPACKET packMessage(int msgType, int sendDev, int recvDev, int devType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3);
+	KPACKET unpackMessage(KPACKET p);
+
 	CButton m_CBtn_ClientConnect;
 	CButton m_CBtn_ClientCancel;
 	afx_msg void OnBnClickedCancel();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	void connect(int nPort);
+	void cleanUp(void);
+	void closeSock(void);
+	void sendData(void);
 };

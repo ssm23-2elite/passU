@@ -4,6 +4,7 @@
 #include "afxwin.h"
 #include "MySocket.h"
 #include "MyListen.h"
+#include "packet.h"
 // ServerConf 대화 상자입니다.
 
 class ServerConf : public CDialogEx
@@ -21,13 +22,16 @@ public:
 	bool m_startFlag; // 서버 구동중인가 아닌가를 판별하는 플래그
 	
 	CPoint m_ptltemText; // 특정 아이템 텍스트의 좌표
-
-	/*typedef CTypedPtrArray<CObArray, CMySocket *> CSocketList;
 	
-	CSocketList m_clientSocks;*/
+	int nSocket; // 클라이언트 소켓 하나하나에 번호 부여. 시작 : 0부터
 
-	//CAsyncSocket serverSock;
-	//CAsyncSocket realSock;
+	//typedef CTypedPtrArray<CObArray, CMySocket *> CSocketList;
+	
+	HINSTANCE hinstDLL;
+	HHOOK hHook;
+
+	BOOL m_keyBoardHook;
+	BOOL m_mouseHook;
 
 	CMyListen listen;
 
@@ -36,15 +40,22 @@ public:
 	CWnd *btnControl[9];
 	CWnd *picControl[2];
 
+	KPACKET keyP;
+	MPACKET mouseP;
+	CPACKET clientP;
+	DPACKET dataP;
+
+	bool m_sendFlag;
+
+	CMyThread *currentThread;
 	
-
-	//CTrackWnd m_wndTrack;
-
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 // 대화 상자 데이터입니다.
 	enum { IDD = IDD_DIALOG1 };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
+	
 
 	DECLARE_MESSAGE_MAP()
 public:
@@ -80,9 +91,14 @@ public:
 	afx_msg void OnBnClickedButton7();
 	afx_msg void OnBnClickedButton8();
 	afx_msg void OnBnClickedButton9();
-	void closeClient(void);
+	void closeClient(CMySocket *s);
 	void receiveData(CMySocket *s);
 	CButton m_CBtn_Start;
 	CButton m_CBtn_stop;
 	void initFlag(void);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	void sendData(CMySocket * s);
+	KPACKET packMessage(int msgType, int sendDev, int recvDev, int devType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3);
+	KPACKET unpackMessage(KPACKET p);
+
 };

@@ -58,11 +58,11 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <IgnoreAllDefaultLibraries>
-      </IgnoreAllDefaultLibraries>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
-      <AdditionalDependencies>wsock32.lib</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -107,6 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClientConf.h" />
+    <ClInclude Include="ClientSocket.h" />
     <ClInclude Include="MyListen.h" />
     <ClInclude Include="MySocket.h" />
     <ClInclude Include="MyThread.h" />
@@ -120,6 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClientConf.cpp" />
+    <ClCompile Include="ClientSocket.cpp" />
     <ClCompile Include="MyListen.cpp" />
     <ClCompile Include="MySocket.cpp" />
     <ClCompile Include="MyThread.cpp" />

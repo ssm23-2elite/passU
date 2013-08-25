@@ -6,6 +6,7 @@
 #include "MyListen.h"
 #include "MyThread.h"
 
+#include "afxdialogex.h"
 
 // CMyListen
 
@@ -32,9 +33,13 @@ void CMyListen::OnAccept(int nErrorCode)
 
 		if(pThread){
 			pThread->m_hSocket = tmp.Detach();
-			pThread->ResumeThread();
+			m_sockList.AddTail(pThread);
+			pThread->ResumeThread(); 
 		}
+
+		AfxMessageBox(_T("쓰레드 생성, 연결 완료!"));
 	}
 
 	CAsyncSocket::OnAccept(nErrorCode);
 }
+

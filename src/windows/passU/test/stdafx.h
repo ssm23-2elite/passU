@@ -57,3 +57,24 @@
 #endif
 #endif
 
+
+#define WM_TEST_MESSAGE	WM_USER + 1000
+
+#define WM_KEYBOARD_MESSAGE	WM_USER + 1001
+#define WM_MOUSE_MESSAGE	WM_USER + 1002
+#define WM_CLIENT_MESSAGE	WM_USER + 1003
+#define WM_SERVER_MESSAGE	WM_USER + 1004
+
+//#pragma comment(lib, "KeyHook.dll")
+//
+//extern "C" __declspec(dllimport)
+//	HHOOK InstallKeyboardHook();		// Install Keyboard Hook
+//
+//extern "C" __declspec(dllimport)
+//	void UnInstallKeyboardHook();		// Uninstall Keyboard Hook 
+//
+//extern "C" __declspec(dllimport)
+//	HHOOK InstallMouseHook();		// Install Mouse Hook
+//
+//extern "C" __declspec(dllimport)
+//	void UnInstallMouseHook();		// Uninstall Mouse Hook 
