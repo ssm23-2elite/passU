@@ -217,7 +217,6 @@ typedef enum _TREEICON
 typedef VOID
 (*LPFNTREECALLBACK)(
     HWND        hTreeWnd,
-    HTREEITEM   hTreeItem,
     PVOID       pContext
 );
 
@@ -412,17 +411,9 @@ PUCHAR                          g_descEnd;
 
 VOID
 EnumerateHostControllers (
-    HTREEITEM  hTreeParent,
     ULONG     *DevicesConnected
     );
 
-
-VOID
-CleanupItem (
-    HWND      hTreeWnd,
-    HTREEITEM hTreeItem,
-    PVOID pContext
-    );
 
 DEVICE_POWER_STATE
 AcquireDevicePowerState(

@@ -43,7 +43,6 @@ ULONG TotalDevicesConnected;
 BOOL gDoAnnotation;
 
 HWND            ghTreeWnd        = NULL;
-HTREEITEM       ghTreeRoot       = NULL;
 
 int             giComputer       = 0;
 int             giHub            = 0;
@@ -66,7 +65,6 @@ EnumerateAllDevicesWithGuid(
 
 VOID
 EnumerateHostController (
-    HTREEITEM                hTreeParent,
     HANDLE                   hHCDev,    _Inout_ PCHAR            leafName,
     _In_    HANDLE           deviceInfo,
     _In_    PSP_DEVINFO_DATA deviceInfoData
@@ -105,7 +103,6 @@ PCHAR GetRootHubName (
 
 VOID
 EnumerateHub (
-    HTREEITEM                                       hTreeParent,
     _In_reads_(cbHubName) PCHAR                     HubName,
     _In_ size_t                                     cbHubName,
     _In_opt_ PUSB_NODE_CONNECTION_INFORMATION_EX    ConnectionInfo,
@@ -134,7 +131,6 @@ VOID FreeDeviceProperties(_In_ PUSB_DEVICE_PNP_STRINGS *ppDevProps);
 
 VOID
 EnumerateHubPorts (
-    HTREEITEM   hTreeParent,
     HANDLE      hHubDevice,
     ULONG       NumPorts
 );
@@ -200,38 +196,6 @@ GetStringDescriptors (
     _In_ PSTRING_DESCRIPTOR_NODE        StringDescNodeHead
 );
 
-HTREEITEM
-AddLeaf (
-         HTREEITEM hTreeParent,
-         LPARAM    lParam,
-         _In_ LPTSTR    lpszText,
-         TREEICON  TreeIcon
-         );
-
-VOID
-ExpandItem (
-            HWND      hTreeWnd,
-            HTREEITEM hTreeItem,
-            PVOID     pContext
-            );
-
-VOID
-WalkTree (
-          _In_ HTREEITEM        hTreeItem,
-          _In_ LPFNTREECALLBACK lpfnTreeCallback,
-          _In_opt_ PVOID            pContext
-          );
-
-VOID DestroyTree (VOID);
-
-VOID
-CleanupItem (
-    HWND      hTreeWnd,
-    HTREEITEM hTreeItem,
-    PVOID pContext
-);
-
-
 // 출력관련 함수들
 
 VOID
@@ -292,7 +256,7 @@ GetLangIDString (
     USHORT     idLang
     );
 
-/*
+
 VOID
 DisplayEndpointDescriptor (
     _In_     PUSB_ENDPOINT_DESCRIPTOR
@@ -308,7 +272,7 @@ DisplayEndointCompanionDescriptor (
     PUSB_SUPERSPEED_ENDPOINT_COMPANION_DESCRIPTOR EpCompDesc,
     UCHAR                                         DescType
     );
-	*/
+	
 
 int main()
 {
@@ -319,46 +283,26 @@ int main()
     InitializeListHead(&gHubList.ListHead);
     gDeviceList.DeviceInfo = INVALID_HANDLE_VALUE;
     InitializeListHead(&gDeviceList.ListHead);
-	/*
-	// Destroy the current contents of the TreeView
+
+	// 모든 USB 디바이스 열거
     //
-    DestroyTree();
+	EnumerateHostControllers(&devicesConnected);
 
-	// Create the root tree node
+	// 상태 업데이트 및 출력
     //
-    ghTreeRoot = AddLeaf(TVI_ROOT, 0, "My Computer", ComputerIcon);
-	
-	if (ghTreeRoot != NULL)
-    {*/
-		// Enumerate all USB buses and populate the tree
-        //
-		EnumerateHostControllers(ghTreeRoot, &devicesConnected);
-
-		//
-        // Expand all tree nodes
-        //
-        WalkTree(ghTreeRoot, ExpandItem, NULL);
-
-		// Update Status Line with number of devices connected
-        //
-        memset(statusText, 0, sizeof(statusText));
-        StringCchPrintf(statusText, sizeof(statusText),
+    memset(statusText, 0, sizeof(statusText));
+    StringCchPrintf(statusText, sizeof(statusText),
 #ifdef H264_SUPPORT
-        "UVC Spec Version: %d.%d Version: %d.%d Devices Connected: %d   Hubs Connected: %d",
-        UVC_SPEC_MAJOR_VERSION, UVC_SPEC_MINOR_VERSION, USBVIEW_MAJOR_VERSION, USBVIEW_MINOR_VERSION,
-        devicesConnected, TotalHubs);
+    "UVC Spec Version: %d.%d Version: %d.%d Devices Connected: %d   Hubs Connected: %d",
+    UVC_SPEC_MAJOR_VERSION, UVC_SPEC_MINOR_VERSION, USBVIEW_MAJOR_VERSION, USBVIEW_MINOR_VERSION,
+    devicesConnected, TotalHubs);
 #else
-        "Devices Connected: %d   Hubs Connected: %d",
-        devicesConnected, TotalHubs);
+    "Devices Connected: %d   Hubs Connected: %d",
+    devicesConnected, TotalHubs);
 #endif
 
-		printf("%s", statusText);/*
-    }
-    else
-    {
-        OOPS();
-    }
-	*/
+	printf("%s", statusText);
+
 	return 0;
 }
 
@@ -373,7 +317,6 @@ int main()
 
 VOID
 EnumerateHostControllers (
-    HTREEITEM  hTreeParent,
     ULONG     *DevicesConnected
 )
 {
@@ -389,10 +332,13 @@ EnumerateHostControllers (
     TotalDevicesConnected = 0;
     TotalHubs = 0;
 
+	// USB 허브 디바이스를 포함한 모든 USB 관련 Device 열거
+	//
     EnumerateAllDevices();
 
-    // Iterate over host controllers using the new GUID based interface
-    //
+    // GUID 기반 인터페이스를 사용하여 호스트 컨트롤러를 반복
+    // Handle 반환
+	//
     deviceInfo = SetupDiGetClassDevs((LPGUID)&GUID_CLASS_USB_HOST_CONTROLLER,
                                      NULL,
                                      NULL,
@@ -403,16 +349,16 @@ EnumerateHostControllers (
     for (index=0;
          SetupDiEnumDeviceInfo(deviceInfo,
                                index,
-                               &deviceInfoData);
+                               &deviceInfoData); // 디바이스 정보 요소를 명시하는 구조체 반환
          index++)
     {
-        deviceInterfaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA); // USB 갯수?
+        deviceInterfaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
 
         success = SetupDiEnumDeviceInterfaces(deviceInfo,
                                               0,
                                               (LPGUID)&GUID_CLASS_USB_HOST_CONTROLLER,
                                               index,
-                                              &deviceInterfaceData);
+                                              &deviceInterfaceData); // 디바이스 interfaces 를 열거
         if (!success)
         {
             OOPS();
@@ -424,7 +370,7 @@ EnumerateHostControllers (
                                                   NULL,
                                                   0,
                                                   &requiredLength,
-                                                  NULL);
+                                                  NULL); // 디바이스 interface의 정보를 읽어온다. 크기와 함께
 
         if (!success && GetLastError() != ERROR_INSUFFICIENT_BUFFER)
         {
@@ -446,7 +392,7 @@ EnumerateHostControllers (
                                                   deviceDetailData,
                                                   requiredLength,
                                                   &requiredLength,
-                                                  NULL);
+                                                  NULL); // 디바이스의 경로를 가져온다.
 
         if (!success)
         {
@@ -455,22 +401,19 @@ EnumerateHostControllers (
         }
 
         hHCDev = CreateFile(deviceDetailData->DevicePath,
-                            GENERIC_WRITE,
-                            FILE_SHARE_WRITE,
+                            GENERIC_WRITE, // 읽기? 쓰기?
+                            FILE_SHARE_WRITE, // 동시에 쓰기가능
                             NULL,
-                            OPEN_EXISTING,
+                            OPEN_EXISTING, // 있으면 열어
                             0,
-                            NULL);
+                            NULL); // 해당 Path에 있는 디바이스의 Handle을 얻는다.
 
-        // If the handle is valid, then we've successfully opened a Host
-        // Controller.  Display some info about the Host Controller itself,
-        // then enumerate the Root Hub attached to the Host Controller.
-        //
+        // Handle 얻기를 성공한 경우 그 디바이스의 RootHub의 내용을 가져온다.
+		//
         if (hHCDev != INVALID_HANDLE_VALUE)
         {
 			
-            EnumerateHostController(hTreeParent,
-                                    hHCDev,
+            EnumerateHostController(hHCDev,
                                     deviceDetailData->DevicePath,
                                     deviceInfo,
                                     &deviceInfoData);
@@ -482,7 +425,7 @@ EnumerateHostControllers (
         FREE(deviceDetailData);
     }
 
-    SetupDiDestroyDeviceInfoList(deviceInfo);
+    SetupDiDestroyDeviceInfoList(deviceInfo); // deviceInfo 메모리 free
 
     *DevicesConnected = TotalDevicesConnected;
 
@@ -492,11 +435,15 @@ EnumerateHostControllers (
 void
 EnumerateAllDevices()
 {
+	// GUID(모든 하드웨어에 뷰여된 ID) 를 바탕으로 디바이스 모두 열거
+	// 1. 디바이스
+	// 2. 허브 
+	//
     EnumerateAllDevicesWithGuid(&gDeviceList, 
-                                (LPGUID)&GUID_DEVINTERFACE_USB_DEVICE);
+                                (LPGUID)&GUID_DEVINTERFACE_USB_DEVICE); // 1
 
     EnumerateAllDevicesWithGuid(&gHubList, 
-                                (LPGUID)&GUID_DEVINTERFACE_USB_HUB);
+                                (LPGUID)&GUID_DEVINTERFACE_USB_HUB); // 2
 }
 
 void
@@ -505,17 +452,23 @@ EnumerateAllDevicesWithGuid(
     LPGUID Guid
     )
 {
+	// 디바이스 List가 이용가능하지 않다면 List Clear
+	//
     if (DeviceList->DeviceInfo != INVALID_HANDLE_VALUE)
     {
         ClearDeviceList(DeviceList);
     }
 
+	// Device 정보 들을 다루기 위한 Handle을 return 
+	// DIGCF_PRESENT: 실제 시스템에 보여지는 것
+	// DIGCF_DEVICEINTERFACE : Device를 돕기위한 Device
+	//
     DeviceList->DeviceInfo = SetupDiGetClassDevs(Guid,
                                      NULL,
                                      NULL,
                                      (DIGCF_PRESENT | DIGCF_DEVICEINTERFACE));
 
-    if (DeviceList->DeviceInfo != INVALID_HANDLE_VALUE)
+    if (DeviceList->DeviceInfo != INVALID_HANDLE_VALUE) // Device 이용가능한 경우
     {
         ULONG                    index;
         DWORD error;
@@ -538,11 +491,15 @@ EnumerateAllDevicesWithGuid(
             pNode->DeviceInterfaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
             pNode->DeviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
 
+			// 디바이스의 정보 요소들로 구성된 구조체를 pNode->DeviceInfoData 에 넣어준다.
+			// 반환 : True, False
+			//
             success = SetupDiEnumDeviceInfo(DeviceList->DeviceInfo,
                                             index,
                                             &pNode->DeviceInfoData);
 
             index++;
+
 
             if (success == FALSE)
             {
@@ -555,11 +512,13 @@ EnumerateAllDevicesWithGuid(
 
                 FreeDeviceInfoNode(&pNode);
             }
-            else
+            else // 정상 루틴
             {
                 BOOL   bResult;
                 ULONG  requiredLength;
 
+				// Device Descriptor를 pNode->DeviceDescNmae 로 읽어온다.
+				//
                 bResult = GetDeviceProperty(DeviceList->DeviceInfo,
                                             &pNode->DeviceInfoData,
                                             SPDRP_DEVICEDESC,
@@ -571,6 +530,8 @@ EnumerateAllDevicesWithGuid(
                     break;
                 }
 
+				// Device Descriptor를 pNode->DeviceDriverNmae 로 읽어온다.
+				//
                 bResult = GetDeviceProperty(DeviceList->DeviceInfo,
                                             &pNode->DeviceInfoData,
                                             SPDRP_DRIVER,
@@ -589,7 +550,7 @@ EnumerateAllDevicesWithGuid(
                                                       0,
                                                       Guid,
                                                       index-1,
-                                                      &pNode->DeviceInterfaceData);
+                                                      &pNode->DeviceInterfaceData); // 디바이스 interface 열거 함수
                 if (!success)
                 {
                     FreeDeviceInfoNode(&pNode);
@@ -602,7 +563,7 @@ EnumerateAllDevicesWithGuid(
                                                           NULL,
                                                           0,
                                                           &requiredLength,
-                                                          NULL);
+                                                          NULL); // 디바이스 interface에 대해 data 길이 반환
         
                 error = GetLastError();
                 
@@ -629,7 +590,7 @@ EnumerateAllDevicesWithGuid(
                                                           pNode->DeviceDetailData,
                                                           requiredLength,
                                                           &requiredLength,
-                                                          NULL);
+                                                          NULL); // 디바이스 Path 읽어온다.
                 if (!success)
                 {
                     FreeDeviceInfoNode(&pNode);
@@ -643,25 +604,14 @@ EnumerateAllDevicesWithGuid(
     }
 }
 
-//*****************************************************************************
-//
-// EnumerateHostController()
-//
-// hTreeParent - Handle of the TreeView item under which host controllers
-// should be added.
-//
-//*****************************************************************************
-
 VOID
 EnumerateHostController (
-    HTREEITEM                hTreeParent,
     HANDLE                   hHCDev,    _Inout_ PCHAR            leafName,
     _In_    HANDLE           deviceInfo,
     _In_    PSP_DEVINFO_DATA deviceInfoData
 )
 {
     PCHAR                   driverKeyName = NULL;
-    HTREEITEM               hHCItem = NULL;
     PCHAR                   rootHubName = NULL;
     PLIST_ENTRY             listEntry = NULL;
     PUSBHOSTCONTROLLERINFO  hcInfo = NULL;
@@ -672,30 +622,29 @@ EnumerateHostController (
     PUSB_DEVICE_PNP_STRINGS DevProps = NULL;
 
 
-    // Allocate a structure to hold information about this host controller.
+    // 메모리 할당
     //
     hcInfo = (PUSBHOSTCONTROLLERINFO)ALLOC(sizeof(USBHOSTCONTROLLERINFO));
 
-    // just return if could not alloc memory
+    // 메모리 할당 실패
+	//
     if (NULL == hcInfo)
         return;
 
-    hcInfo->DeviceInfoType = HostControllerInfo;
+    hcInfo->DeviceInfoType = HostControllerInfo; // enum -> 0
 
-    // Obtain the driver key name for this host controller.
+    // host controller로 부터 해당 드라이버 key 이름을 가져온다.
     //
     driverKeyName = GetHCDDriverKeyName(hHCDev);
 
     if (NULL == driverKeyName)
     {
-        // Failure obtaining driver key name.
         OOPS();
         FREE(hcInfo);
         return;
     }
 
-    // Don't enumerate this host controller again if it already
-    // on the list of enumerated host controllers.
+    // 이미 존재할 경우 다시 열거 하지 않는다.
     //
     listEntry = EnumeratedHCListHead.Flink;
 
@@ -707,7 +656,7 @@ EnumerateHostController (
 
         if (strcmp(driverKeyName, hcInfoInList->DriverKey) == 0)
         {
-            // Already on the list, exit
+            // 이미 리스트에 존재 즉, 열거 안함
             //
             FREE(driverKeyName);
             FREE(hcInfo);
@@ -717,7 +666,7 @@ EnumerateHostController (
         listEntry = listEntry->Flink;
     }
 
-    // Obtain host controller device properties
+    // host controller device 속성들을 얻음
     {
         size_t cbDriverName = 0;
         HRESULT hr = S_OK;
@@ -729,6 +678,8 @@ EnumerateHostController (
         }
     }
 
+	// 드라이버 키를 얻음 
+	//
     hcInfo->DriverKey = driverKeyName;
 
     if (DevProps)
@@ -736,13 +687,17 @@ EnumerateHostController (
         ULONG   ven, dev, subsys, rev;
         ven = dev = subsys = rev = 0;
 
+		// DeviceId를 얻음
+		//
         if (sscanf_s(DevProps->DeviceId,
                    "PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x",
                    &ven, &dev, &subsys, &rev) != 4)
         {
             OOPS();
         }
-
+		
+		// 기타 정보들
+		//
         hcInfo->VendorID = ven;
         hcInfo->DeviceID = dev;
         hcInfo->SubSysID = subsys;
@@ -763,7 +718,8 @@ EnumerateHostController (
         OOPS();
     }
 
-    // Get the USB Host Controller power map
+    // USB Host Controller의 power map을 얻는다.
+	//
     dwSuccess = GetHostControllerPowerMap(hHCDev, hcInfo);
 
     if (ERROR_SUCCESS != dwSuccess)
@@ -772,10 +728,12 @@ EnumerateHostController (
     }
 
 
-    // Get bus, device, and function
+    // 버스, 디바이스 그리고 함수를 얻는다.
     //
     hcInfo->BusDeviceFunctionValid = FALSE;
 
+	// 버스 얻는 부분
+	//
     success = SetupDiGetDeviceRegistryProperty(deviceInfo,
                                                deviceInfoData,
                                                SPDRP_BUSNUMBER,
@@ -786,6 +744,8 @@ EnumerateHostController (
 
     if (success)
     {
+		// 디바이스의 주소를 얻는 부분
+		//
         success = SetupDiGetDeviceRegistryProperty(deviceInfo,
                                                    deviceInfoData,
                                                    SPDRP_ADDRESS,
@@ -797,45 +757,27 @@ EnumerateHostController (
 
     if (success)
     {
+		// 함수를 얻는 부분
         hcInfo->BusDevice = deviceAndFunction >> 16;
         hcInfo->BusFunction = deviceAndFunction & 0xffff;
         hcInfo->BusDeviceFunctionValid = TRUE;
     }
 
-    // Get the USB Host Controller info
+    // USB Host Controller info를 얻는 부분
     dwSuccess = GetHostControllerInfo(hHCDev, hcInfo);
 
     if (ERROR_SUCCESS != dwSuccess)
     {
         OOPS();
     }
-	/*
-    // Add this host controller to the USB device tree view.
-    //
-    hHCItem = AddLeaf(hTreeParent,
-                      (LPARAM)hcInfo,
-                      leafName,
-                      hcInfo->Revision == UsbSuperSpeed ? GoodSsDeviceIcon : GoodDeviceIcon);
 	
-    if (NULL == hHCItem)
-    {
-        // Failure adding host controller to USB device tree
-        // view.
-
-        OOPS();
-        FREE(driverKeyName);
-        FREE(hcInfo);
-        return;
-    }
-	*/
-    // Add this host controller to the list of enumerated
-    // host controllers.
+    // 열거된 host controller들을 host controller 리스트에 추가
     //
     InsertTailList(&EnumeratedHCListHead,
                    &hcInfo->ListEntry);
 
-    // Get the name of the root hub for this host
-    // controller and then enumerate the root hub.
+    // Root Hub의 이름을 얻는 부분
+    // host controller와 root hub를 열거하기 위함
     //
     rootHubName = GetRootHubName(hHCDev);
 
@@ -847,8 +789,7 @@ EnumerateHostController (
         hr = StringCbLength(rootHubName, MAX_DRIVER_KEY_NAME, &cbHubName);
         if (SUCCEEDED(hr))
         {
-            EnumerateHub(hHCItem,
-                         rootHubName,
+            EnumerateHub(rootHubName,
                          cbHubName,
                          NULL,       // ConnectionInfo
                          NULL,       // ConnectionInfoV2
@@ -955,7 +896,7 @@ GetDeviceProperty(
                                                NULL,
                                                NULL,
                                                0,
-                                               &requiredLength);
+                                               &requiredLength); // Plug and Play 디바이스 속성을 검색하여 requiredLength를 읽어온다.
     lastError = GetLastError();
 
     if ((requiredLength == 0) || (bResult != FALSE && lastError != ERROR_INSUFFICIENT_BUFFER))
@@ -976,7 +917,7 @@ GetDeviceProperty(
                                                 NULL,
                                                 (PBYTE) *ppBuffer,
                                                 requiredLength,
-                                                &requiredLength);
+                                                &requiredLength); // 다시 한번 호출해서 해당 디바이스의 속성의 실제 내용을 읽어온다.
     if(bResult == FALSE)
     {
         FREE(*ppBuffer);
@@ -986,12 +927,6 @@ GetDeviceProperty(
 
     return TRUE;
 }
-
-//*****************************************************************************
-//
-// GetHCDDriverKeyName()
-//
-//*****************************************************************************
 
 PCHAR GetHCDDriverKeyName (
     HANDLE  HCD
@@ -1008,13 +943,13 @@ PCHAR GetHCDDriverKeyName (
     // Get the length of the name of the driver key of the HCD
     //
     success = DeviceIoControl(HCD,
-                              IOCTL_GET_HCD_DRIVERKEY_NAME,
-                              &driverKeyName,
-                              sizeof(driverKeyName),
-                              &driverKeyName,
-                              sizeof(driverKeyName),
+                              IOCTL_GET_HCD_DRIVERKEY_NAME, // 해당 함수 이름
+                              &driverKeyName, // inputbuffer의 주소
+                              sizeof(driverKeyName), // inputbuffer 크기
+                              &driverKeyName, // outputbuffer의 주소
+                              sizeof(driverKeyName), // outputbuffer 크기
                               &nBytes,
-                              NULL);
+                              NULL); // 제어 코드를 직접적으로 해당 디바이스에 전송
 
     if (!success)
     {
@@ -1022,8 +957,6 @@ PCHAR GetHCDDriverKeyName (
         goto GetHCDDriverKeyNameError;
     }
 
-    // Allocate space to hold the driver key name
-    //
     nBytes = driverKeyName.ActualLength;
     if (nBytes <= sizeof(driverKeyName))
     {
@@ -1031,17 +964,13 @@ PCHAR GetHCDDriverKeyName (
         goto GetHCDDriverKeyNameError;
     }
 
-    // Allocate size of name plus 1 for terminal zero
+    // 메모리 할당
     driverKeyNameW = (PUSB_HCD_DRIVERKEY_NAME)ALLOC(nBytes + 1);
     if (driverKeyNameW == NULL)
     {
         OOPS();
         goto GetHCDDriverKeyNameError;
     }
-
-    // Get the name of the driver key of the device attached to
-    // the specified port.
-    //
 
     success = DeviceIoControl(HCD,
                               IOCTL_GET_HCD_DRIVERKEY_NAME,
@@ -1103,7 +1032,7 @@ DriverNameToDeviceProperties(
     PUSB_DEVICE_PNP_STRINGS DevProps = NULL;
     DWORD           lastError;
 
-    // Allocate device propeties structure
+    // 메모리 할당
     DevProps = (PUSB_DEVICE_PNP_STRINGS) ALLOC(sizeof(USB_DEVICE_PNP_STRINGS));
 
     if(NULL == DevProps)
@@ -1112,7 +1041,7 @@ DriverNameToDeviceProperties(
         goto Done;
     }
 
-    // Get device instance
+    // device의 instance를 얻음
     status = DriverNameToDeviceInst(DriverName, cbDriverName, &deviceInfo, &deviceInfoData);
     if (status == FALSE)
     {
@@ -1443,7 +1372,6 @@ GetRootHubNameError:
 
 VOID
 EnumerateHub (
-    HTREEITEM                                       hTreeParent,
     _In_reads_(cbHubName) PCHAR                     HubName,
     _In_ size_t                                     cbHubName,
     _In_opt_ PUSB_NODE_CONNECTION_INFORMATION_EX    ConnectionInfo,
@@ -1462,7 +1390,6 @@ EnumerateHub (
     PUSB_HUB_INFORMATION_EX  hubInfoEx = NULL;
     PUSB_HUB_CAPABILITIES_EX hubCapabilityEx = NULL;
     HANDLE                  hHubDevice = INVALID_HANDLE_VALUE;
-    HTREEITEM               hItem = NULL;
     PVOID                   info = NULL;
     PCHAR                   deviceName = NULL;
     ULONG                   nBytes = 0;
@@ -1709,10 +1636,6 @@ EnumerateHub (
     // as the LPARAM reference value containing everything we know about the
     // hub.
     //
-    hItem = AddLeaf(hTreeParent,
-                    (LPARAM)info,
-                    leafName,
-                    HubIcon);
 
     if (hItem == NULL)
     {
@@ -1723,7 +1646,6 @@ EnumerateHub (
     // Now recursively enumerate the ports of this hub.
     //
     EnumerateHubPorts(
-        hItem,
         hHubDevice,
         hubInfo->u.HubInformation.HubDescriptor.bNumberOfPorts
         );
@@ -1799,8 +1721,6 @@ EnumerateHubError:
 //*****************************************************************************
 
 PCHAR WideStrToMultiStr ( 
-
-
                          _In_reads_bytes_(cbWideStr) PWCHAR WideStr, 
                          _In_ size_t                   cbWideStr
                          )
@@ -2081,7 +2001,6 @@ VOID FreeDeviceProperties(_In_ PUSB_DEVICE_PNP_STRINGS *ppDevProps)
 
 VOID
 EnumerateHubPorts (
-    HTREEITEM   hTreeParent,
     HANDLE      hHubDevice,
     ULONG       NumPorts
 )
@@ -2414,7 +2333,7 @@ EnumerateHubPorts (
                 hr = StringCbLength(extHubName, MAX_DRIVER_KEY_NAME, &cbHubName);
                 if (SUCCEEDED(hr))
                 {
-                    EnumerateHub(hTreeParent, //hPortItem,
+                    EnumerateHub(//hPortItem,
                             extHubName,
                             cbHubName,
                             connectionInfoEx,
@@ -2479,6 +2398,7 @@ EnumerateHubPorts (
 
             // Add error description if ConnectionStatus is other than NoDeviceConnected / DeviceConnected
             StringCchCat(leafName, 
+
                 sizeof(leafName), 
                 ConnectionStatuses[connectionInfoEx->ConnectionStatus]);
 
@@ -2529,11 +2449,6 @@ EnumerateHubPorts (
             {
                 icon = BadDeviceIcon;
             }
-
-            AddLeaf(hTreeParent, //hPortItem,
-                            (LPARAM)info,
-                            leafName,
-                            (TREEICON)icon);
         }
     } // for
 }
@@ -2612,12 +2527,11 @@ PCHAR GetDriverKeyName (
         goto GetDriverKeyNameError;
     }
 
-    // Convert the driver key name
+    // Driver Key name 의 type을 변환 ( WCHAR -> PCHAR )
     //
     driverKeyNameA = WideStrToMultiStr(driverKeyNameW->DriverKeyName, nBytes);
 
-    // All done, free the uncoverted driver key name and return the
-    // converted driver key name
+    // 메모리 해제
     //
     FREE(driverKeyNameW);
 
@@ -3595,353 +3509,7 @@ GetStringDescriptors (
     }
 }
 
-// Tree 관련 ***************************************************************************************************************************
-
-/*****************************************************************************
-
-AddLeaf()
-
-*****************************************************************************/
-
-HTREEITEM
-AddLeaf (
-         HTREEITEM hTreeParent,
-         LPARAM    lParam,
-         _In_ LPTSTR    lpszText,
-         TREEICON  TreeIcon
-         )
-{
-    TV_INSERTSTRUCT tvins;
-    HTREEITEM       hti;
-
-    memset(&tvins, 0, sizeof(tvins));
-
-    // Set the parent item
-    //
-    tvins.hParent = hTreeParent;
-
-    tvins.hInsertAfter = TVI_LAST;
-
-    // pszText and lParam members are valid
-    //
-    tvins.item.mask = TVIF_TEXT | TVIF_PARAM;
-
-    // Set the text of the item.
-    //
-    tvins.item.pszText = lpszText;
-
-    // Set the user context item
-    //
-    tvins.item.lParam = lParam;
-
-    // Add the item to the tree-view control.
-    //
-    hti = TreeView_InsertItem(ghTreeWnd, &tvins);
-
-    // added
-    tvins.item.mask = TVIF_IMAGE | TVIF_SELECTEDIMAGE;
-    tvins.item.hItem = hti;
-
-    // Determine which icon to display for the device
-    //
-    switch (TreeIcon)
-    {
-        case ComputerIcon:
-            tvins.item.iImage = giComputer;
-            tvins.item.iSelectedImage = giComputer;
-            break;
-
-        case HubIcon:
-            tvins.item.iImage = giHub;
-            tvins.item.iSelectedImage = giHub;
-            break;
-
-        case NoDeviceIcon:
-            tvins.item.iImage = giNoDevice;
-            tvins.item.iSelectedImage = giNoDevice;
-            break;
-
-        case GoodDeviceIcon:
-            tvins.item.iImage = giGoodDevice;
-            tvins.item.iSelectedImage = giGoodDevice;
-            break;
-
-        case GoodSsDeviceIcon:
-            tvins.item.iImage = giGoodSsDevice;
-            tvins.item.iSelectedImage = giGoodSsDevice;
-            break;
-            
-        case NoSsDeviceIcon:
-            tvins.item.iImage = giNoSsDevice;
-            tvins.item.iSelectedImage = giNoSsDevice;
-            break;
-
-        case BadDeviceIcon:
-        default:
-            tvins.item.iImage = giBadDevice;
-            tvins.item.iSelectedImage = giBadDevice;
-            break;
-    }
-    TreeView_SetItem(ghTreeWnd, &tvins.item);
-
-    return hti;
-}
-
-/*****************************************************************************
-
-ExpandItem()
-
-*****************************************************************************/
-
-VOID
-ExpandItem (
-            HWND      hTreeWnd,
-            HTREEITEM hTreeItem,
-            PVOID     pContext
-            )
-{
-    //
-    // Make this node visible.
-    //
-    UNREFERENCED_PARAMETER(pContext);
-
-    TreeView_Expand(hTreeWnd, hTreeItem, TVE_EXPAND);
-}
-
-/*****************************************************************************
-
-WalkTree()
-
-*****************************************************************************/
-
-VOID
-WalkTree (
-          _In_ HTREEITEM        hTreeItem,
-          _In_ LPFNTREECALLBACK lpfnTreeCallback,
-          _In_opt_ PVOID            pContext
-          )
-{
-    if (hTreeItem)
-    {
-        // Recursively call WalkTree on the node's first child.
-        //
-        WalkTree(TreeView_GetChild(ghTreeWnd, hTreeItem),
-            lpfnTreeCallback,
-            pContext);
-
-        //
-        // Call the lpfnCallBack on the node itself.
-        //
-        (*lpfnTreeCallback)(ghTreeWnd, hTreeItem, pContext);
-
-        //
-        //
-        // Recursively call WalkTree on the node's first sibling.
-        //
-        WalkTree(TreeView_GetNextSibling(ghTreeWnd, hTreeItem),
-            lpfnTreeCallback,
-            pContext);
-    }
-}
-
-/*****************************************************************************
-
-DestroyTree()
-
-*****************************************************************************/
-
-VOID DestroyTree (VOID)
-{
-    // Clear the selection of the TreeView, so that when the tree is
-    // destroyed, the control won't try to constantly "shift" the
-    // selection to another item.
-    //
-    TreeView_SelectItem(ghTreeWnd, NULL);
-
-    // Destroy the current contents of the TreeView
-    //
-    if (ghTreeRoot)
-    {
-        WalkTree(ghTreeRoot, CleanupItem, NULL);
-
-        TreeView_DeleteAllItems(ghTreeWnd);
-
-        ghTreeRoot = NULL;
-    }
-
-    ClearDeviceList(&gDeviceList);
-    ClearDeviceList(&gHubList);
-}
-
-//*****************************************************************************
-//
-// CleanupItem()
-//
-//*****************************************************************************
-
-VOID
-CleanupItem (
-    HWND      hTreeWnd,
-    HTREEITEM hTreeItem,
-    PVOID pContext
-)
-{
-    TV_ITEM tvi;
-    PVOID   info = NULL;
-
-    UNREFERENCED_PARAMETER(pContext);
-
-    tvi.mask = TVIF_HANDLE | TVIF_PARAM;
-    tvi.hItem = hTreeItem;
-
-    TreeView_GetItem(hTreeWnd,
-                     &tvi);
-
-    info = (PVOID)tvi.lParam;
-
-    if (info)
-    {
-        PCHAR                                  DriverKey = NULL;
-        PUSB_NODE_INFORMATION                  HubInfo = NULL;
-        PCHAR                                  HubName = NULL;
-        PUSB_NODE_CONNECTION_INFORMATION_EX    ConnectionInfoEx = NULL;
-        PUSB_DESCRIPTOR_REQUEST                ConfigDesc = NULL;
-        PUSB_DESCRIPTOR_REQUEST                BosDesc = NULL;
-        PSTRING_DESCRIPTOR_NODE                StringDescs = NULL;
-        PUSB_HUB_INFORMATION_EX                HubInfoEx = NULL;
-        PUSB_PORT_CONNECTOR_PROPERTIES         PortConnectorProps = NULL;
-        PUSB_NODE_CONNECTION_INFORMATION_EX_V2 ConnectionInfoV2 = NULL;
-        PUSB_HUB_CAPABILITIES_EX               HubCapabilityEx = NULL;
-        PUSB_DEVICE_PNP_STRINGS                UsbDeviceProperties = NULL;
-        PUSB_CONTROLLER_INFO_0                 ControllerInfo = NULL;
-
-        //
-        // All structures except DEVICE_INFO_NODE are free'd up here. DEVICE_INFO_NODE structures are free'd while
-        // destroying device info lists (ClearDeviceList())
-        // 
-        switch (*(PUSBDEVICEINFOTYPE)info)
-        {
-            case HostControllerInfo:
-                //
-                // Remove this host controller from the list of enumerated
-                // host controllers.
-                //
-                RemoveEntryList(&((PUSBHOSTCONTROLLERINFO)info)->ListEntry);
-                DriverKey = ((PUSBHOSTCONTROLLERINFO)info)->DriverKey;
-                ControllerInfo = ((PUSBHOSTCONTROLLERINFO)info)->ControllerInfo;
-                UsbDeviceProperties = ((PUSBHOSTCONTROLLERINFO)info)->UsbDeviceProperties;
-                break;
-
-            case RootHubInfo:
-                HubInfo = ((PUSBROOTHUBINFO)info)->HubInfo;
-                HubInfoEx = ((PUSBROOTHUBINFO)info)->HubInfoEx;
-                HubName = ((PUSBROOTHUBINFO)info)->HubName;
-                PortConnectorProps = ((PUSBROOTHUBINFO)info)->PortConnectorProps;
-                UsbDeviceProperties = ((PUSBROOTHUBINFO)info)->UsbDeviceProperties;
-                HubCapabilityEx = ((PUSBROOTHUBINFO)info)->HubCapabilityEx;
-                break;
-
-            case ExternalHubInfo:
-                HubInfo = ((PUSBEXTERNALHUBINFO)info)->HubInfo;
-                HubInfoEx = ((PUSBEXTERNALHUBINFO)info)->HubInfoEx;
-                HubName = ((PUSBEXTERNALHUBINFO)info)->HubName;
-                ConnectionInfoEx = ((PUSBEXTERNALHUBINFO)info)->ConnectionInfo;
-                PortConnectorProps = ((PUSBEXTERNALHUBINFO)info)->PortConnectorProps;
-                ConfigDesc = ((PUSBEXTERNALHUBINFO)info)->ConfigDesc;
-                BosDesc = ((PUSBEXTERNALHUBINFO)info)->BosDesc;
-                StringDescs = ((PUSBEXTERNALHUBINFO)info)->StringDescs;
-                ConnectionInfoV2 = ((PUSBEXTERNALHUBINFO)info)->ConnectionInfoV2;
-                UsbDeviceProperties = ((PUSBEXTERNALHUBINFO)info)->UsbDeviceProperties;
-                HubCapabilityEx = ((PUSBEXTERNALHUBINFO)info)->HubCapabilityEx;
-                break;
-
-            case DeviceInfo:
-                ConnectionInfoEx = ((PUSBDEVICEINFO)info)->ConnectionInfo;
-                PortConnectorProps = ((PUSBDEVICEINFO)info)->PortConnectorProps;
-                ConfigDesc = ((PUSBDEVICEINFO)info)->ConfigDesc;
-                BosDesc = ((PUSBDEVICEINFO)info)->BosDesc;
-                StringDescs = ((PUSBDEVICEINFO)info)->StringDescs;
-                ConnectionInfoV2 = ((PUSBDEVICEINFO)info)->ConnectionInfoV2;
-                UsbDeviceProperties = ((PUSBDEVICEINFO)info)->UsbDeviceProperties;
-                break;
-        }
-
-        if(UsbDeviceProperties)
-        {
-            FreeDeviceProperties(&UsbDeviceProperties);
-        }
-
-        if(ControllerInfo)
-        {
-            FREE(ControllerInfo);
-        }
-
-        if(HubCapabilityEx)
-        {
-            FREE(HubCapabilityEx);
-        }
-
-        if (DriverKey)
-        {
-            FREE(DriverKey);
-        }
-
-        if (HubInfo)
-        {
-            FREE(HubInfo);
-        }
-
-        if (HubName)
-        {
-            FREE(HubName);
-        }
-
-        if (ConfigDesc)
-        {
-            FREE(ConfigDesc);
-        }
-
-        if (BosDesc)
-        {
-            FREE(BosDesc);
-        }
-
-        if (StringDescs)
-        {
-            PSTRING_DESCRIPTOR_NODE Next;
-
-            do {
-
-                Next = StringDescs->Next;
-                FREE(StringDescs);
-                StringDescs = Next;
-
-            } while (StringDescs);
-        }
-
-        if (ConnectionInfoEx)
-        {
-            FREE(ConnectionInfoEx);
-        }
-
-        if (HubInfoEx) 
-        {
-            FREE(HubInfoEx);        
-        }
-
-        if (PortConnectorProps)
-        {
-            FREE(PortConnectorProps);
-        }
-
-        if (ConnectionInfoV2)
-        {
-            FREE(ConnectionInfoV2);
-        }
-
-        FREE(info);
-    }
-}
+// 출력함수 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 VOID
 DisplayConnectionInfo (
@@ -4263,6 +3831,7 @@ DisplayConnectionInfo (
         } else 
         {
             printf("\r\n");
+
         }
     }
 
@@ -4779,7 +4348,7 @@ DisplayPipeInfo (
 
     for (i = 0; i < NumPipes; i++)
     {
-        //DisplayEndpointDescriptor(&PipeInfo[i].EndpointDescriptor, NULL, 0, FALSE);
+        DisplayEndpointDescriptor(&PipeInfo[i].EndpointDescriptor, NULL, 0, FALSE);
     }
 
 }
@@ -4807,7 +4376,7 @@ GetLangIDString (
 
     return NULL;
 }
-/*
+
 VOID
 DisplayEndpointDescriptor (
     _In_     PUSB_ENDPOINT_DESCRIPTOR    
@@ -5093,7 +4662,7 @@ DisplayEndpointDescriptor (
                 break;
             }
             break;
-            
+           /* 
         case UsbHighSpeed:
             hsMaxPacket = (PUSB_HIGH_SPEED_MAXPACKET)&EndpointDesc->wMaxPacketSize;
 
@@ -5130,13 +4699,14 @@ DisplayEndpointDescriptor (
 
                 printf(" = %d transactions per microframe, 0x%02X max bytes\r\n", hsMaxPacket->HSmux + 1, hsMaxPacket->MaxPacket);
                 break;
-            
+       
             case USB_ENDPOINT_TYPE_BULK:
             case USB_ENDPOINT_TYPE_CONTROL:
                 printf(" = 0x%02X max bytes\r\n", hsMaxPacket->MaxPacket);
                 break;
             }
             break;
+			*/
         
         case UsbFullSpeed:
             // full speed
@@ -5273,4 +4843,3 @@ DisplayEndointCompanionDescriptor (
         EpCompDesc->wBytesPerInterval);
 
 }
-*/

@@ -2,10 +2,13 @@ package org.secmem232.passu.android.natives;
 
 import java.util.HashMap;
 
+import android.util.Log;
+
 public class KeyCodeMap {
 	public static HashMap<Integer, Integer> M = new HashMap<Integer, Integer>();
 	
 	public static void init() {
+		Log.w("KeyCodeMap", "Init");
 		M.put(WindowsKeyCode.KEY_0, NativeKeyCode.KEY_0);
 		M.put(WindowsKeyCode.KEY_1, NativeKeyCode.KEY_1);
 		M.put(WindowsKeyCode.KEY_2, NativeKeyCode.KEY_2);
