@@ -89,17 +89,10 @@ void ClientConf::OnBnClickedOk()
 
 }
 
-void ClientConf::sendData(){
-
-
-
-}
 
 void ClientConf::receiveData(CClientSocket *s)
 {
 	KPACKET tmp; // 구조체 임시 저장
-
-
 
 	s->Receive((LPCSTR *)&tmp, sizeof(KPACKET));
 
@@ -112,7 +105,6 @@ void ClientConf::receiveData(CClientSocket *s)
 void ClientConf::OnBnClickedCancel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	CPACKET p;
 
 	//	p.id = 
 
@@ -217,8 +209,6 @@ KPACKET ClientConf::unpackMessage(KPACKET p){
 		keyboard.updownFlag = p.updownFlag;
 		keyboard.relativeField = p.relativeField;
 
-	//	PostMessage(WM_KEYBOARD_MESSAGE, 0, 0);
-
 
 	case 2: // Mouse
 
@@ -233,7 +223,6 @@ KPACKET ClientConf::unpackMessage(KPACKET p){
 		mouse.yCoord = p.pad2;
 
 		memcpy(&keyboard, &mouse, sizeof(KPACKET));
-		//PostMessage(WM_MOUSE_MESSAGE, 0, 0);
 
 	case 3: // Client
 		client.msgType = p.msgType;
@@ -242,15 +231,12 @@ KPACKET ClientConf::unpackMessage(KPACKET p){
 
 
 		memcpy(&keyboard, &mouse, sizeof(KPACKET));
-	//	PostMessage(WM_CLIENT_MESSAGE, 0, 0);
 
 	case 4: // Data
 		data.msgType = p.msgType;
 		data.len = p.sendDev;
 
 		memcpy(&keyboard, &mouse, sizeof(KPACKET));
-
-	//	PostMessage(WM_SERVER_MESSAGE, 0, 0);
 
 	}
 

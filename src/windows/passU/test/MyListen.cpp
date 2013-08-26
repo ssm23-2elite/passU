@@ -43,3 +43,9 @@ void CMyListen::OnAccept(int nErrorCode)
 	CAsyncSocket::OnAccept(nErrorCode);
 }
 
+
+
+CObList CMyListen::getSockList(void)
+{
+	return m_sockList;
+}

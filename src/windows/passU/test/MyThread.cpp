@@ -27,7 +27,7 @@ BOOL CMyThread::InitInstance()
 	TRY{
 		m_mySocket -> Attach(m_hSocket); 
 		m_mySocket -> AsyncSelect(FD_READ | FD_CLOSE);
-//		m_mySocket -> send(
+
 
 	} CATCH_ALL(e){
 		DWORD dwErrorCode = GetLastError();

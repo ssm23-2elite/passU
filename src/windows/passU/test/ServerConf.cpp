@@ -117,7 +117,8 @@ BEGIN_MESSAGE_MAP(ServerConf, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON7, &ServerConf::OnBnClickedButton7)
 	ON_BN_CLICKED(IDC_BUTTON8, &ServerConf::OnBnClickedButton8)
 	ON_BN_CLICKED(IDC_BUTTON9, &ServerConf::OnBnClickedButton9)
-	ON_WM_KEYDOWN()
+//	ON_WM_KEYDOWN()
+ON_WM_COPYDATA()
 END_MESSAGE_MAP()
 
 
@@ -140,7 +141,7 @@ void ServerConf::OnBnClickedStart()
 
 	m_startFlag = TRUE;
 	//initServer(nPort);
-	initServer(7000);
+	initServer(nPort);
 
 	m_CBtn_Start.EnableWindow(FALSE);
 
@@ -245,7 +246,6 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	CPoint m_tmpPoint;
 	CBitmap m_tmpBitmap;
-	CDC MemDC;HBITMAP hBmp;
 
 	btnControl[0] = this->GetDlgItem(IDC_BUTTON1);
 	btnControl[1] = this->GetDlgItem(IDC_BUTTON2);
@@ -754,12 +754,12 @@ BOOL ServerConf::PreTranslateMessage(MSG* pMsg) // PostMessage를 받아 Parsing하�
 }
 
 
-void ServerConf::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
-{
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
-	CDialogEx::OnKeyDown(nChar, nRepCnt, nFlags);
-}
+//void ServerConf::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+//{
+//	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+//
+//	CDialogEx::OnKeyDown(nChar, nRepCnt, nFlags);
+//}
 
 
 
@@ -925,4 +925,48 @@ KPACKET ServerConf::unpackMessage(KPACKET p){
 	}
 
 	return k;
+}
+
+BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	HEVENT *hEVENT;
+
+	BYTE keyData[256];
+	
+	switch(pCopyDataStruct -> dwData){
+
+	case 0:
+
+		GetKeyboardState(keyData); // 키보드 상태 받아옴
+
+		hEVENT = (tagHEVENT *) pCopyDataStruct->lpData; // hEvent 구조체 연결(후킹된 자료)
+
+		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
+
+			
+			keyP.deviceType = 1;
+			keyP.msgType = 1;
+			keyP.keyCode = hEVENT->data;
+			
+			// 아........개짜증 여기서 안되면 ㅠㅠ
+			CObList tmp = ((CMyListen *)AfxGetApp())->getSockList();
+			
+			CMyThread *p = ((CMyThread *)tmp.GetAt(0));
+			
+			p->m_mySocket->Send(&keyP, sizeof(KPACKET));
+
+			
+			// 소켓.send(&keyp, sizeof(KPACKET));
+
+
+		}
+
+
+
+		break;
+
+	}
+
+	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
 }

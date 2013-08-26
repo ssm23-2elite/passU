@@ -1,7 +1,6 @@
 #pragma once
 
 #include <afxsock.h>
-#include "afxwin.h"
 #include "MySocket.h"
 #include "MyListen.h"
 #include "packet.h"
@@ -39,6 +38,14 @@ public:
 
 	CWnd *btnControl[9];
 	CWnd *picControl[2];
+
+	typedef struct tagHEVENT{
+		int type;
+		WPARAM data;
+		LPARAM lParam;
+	}HEVENT;
+
+	CObList sockList;
 
 	KPACKET keyP;
 	MPACKET mouseP;
@@ -95,9 +102,10 @@ public:
 	CButton m_CBtn_Start;
 	CButton m_CBtn_stop;
 	void initFlag(void);
-	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+//	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	void sendData(CMySocket * s);
 	KPACKET packMessage(int msgType, int sendDev, int recvDev, int devType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3);
 	KPACKET unpackMessage(KPACKET p);
-
+	//afx_msg BOOL OnCopyData(CWnd *pWnd, COPYDATASTRUCT *pCopyDataStruct);
+	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 };

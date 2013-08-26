@@ -1,5 +1,6 @@
-#include <Windows.h>
 
+#include <afxwin.h>
+#include <Windows.h>
 HINSTANCE g_hInstance;		// Instance Handle
 
 HHOOK	g_hKeyboardHook;	// KeyBoard Hook Handle
@@ -11,6 +12,12 @@ HWND g_hWnd = NULL;		// Main hwnd. We will get this from the App
 #pragma data_seg()
 
 char *szMessageString(int ID);
+
+typedef struct tagHEVENT{
+	int type;
+	WPARAM data;
+	LPARAM lParam;
+}HEVENT;
 
 /* _______________________________________________________________________________ 
 
@@ -37,21 +44,27 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 	KBDLLHOOKSTRUCT *pKey = (KBDLLHOOKSTRUCT *)lParam;
 
 		//MessageBox(g_hWnd, "keyboardHook", "vkCode : ", MB_OK);
-	
-
 
 	if(nCode<0)
 		return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 
-	
-	if(wParam == WM_KEYDOWN){
+	if(nCode >= 0){
+		COPYDATASTRUCT CDS;
+		HEVENT Event;
+
+		CDS.dwData = 0;
+		CDS.cbData = sizeof(Event);
+		CDS.lpData = &Event;
 		
-	//	MessageBox(g_hWnd, "hellokey",0,0);
-		
-		//SendMessage(g_hWnd, (WM_USER + 1001) , wParam, lParam); // keyboard message
+		Event.type = 1; // WM_KEY
+		Event.data = wParam;
+		Event.lParam = lParam;
+
+		SendMessage(g_hWnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		TRACE("Event.data : %d", Event.data);
+		TRACE("SENDMESSAGE...과연 copyData에서 받을까?");
 
 	}
-
 	// MessageBox(NULL, "Keyboard", "Hook", MB_OK);  <-- 짜증졸라 남..
 
 //	return 1;		// 다음 훅체인에 메시지 전달 안함--> 자기 스스로도 키보드 메세지를 못 받는다?
@@ -64,22 +77,26 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
 
 	if(wParam == WM_LBUTTONDOWN){ // 왼쪽 버튼 DOWN
-	//	MessageBox(g_hWnd, "LBUTTONDOWN", "WM_LBUTTONDOWN", MB_OK);
+	TRACE("LBUTTONDOWN\n");
 	
 	} else if (wParam == WM_LBUTTONUP){ // 왼쪽 버튼 UP
+	TRACE("LBUTTONUP\n");
 	
 	//	MessageBox(g_hWnd, "LBUTTONUP", "WM_LBUTTONUP", MB_OK);
 	
 	} else if (wParam == WM_RBUTTONDOWN){ // 오른쪽 버튼 DOWN
-		
+		TRACE("RBUTTONDOWN\n");
+	
 	//	MessageBox(g_hWnd, "RBUTTONDOWN", "WM_RBUTTONDOWN", MB_OK);
 	
 	} else if(wParam == WM_RBUTTONUP){ // 오른쪽 버튼 UP
+	TRACE("RBUTTONUP\n");
 		
 	//	MessageBox(g_hWnd, "RBUTTONUP", "WM_RBUTTONUP", MB_OK);
 	
 	} else if(wParam == WM_MOUSEWHEEL){ // 휠 움직일 때
-		
+		TRACE("MOUSEWHEEL\n");
+	
 	//	MessageBox(g_hWnd, "MOUSEWHEEL", "WM_MOUSEWHEEL", MB_OK);
 	
 	//} else if(wParam == WM_MOUSEMOVE){ // 마우스 움직일 때
@@ -88,12 +105,10 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 	//
 	} else if(wParam == WM_MBUTTONDOWN){ // 휠 버튼 DOWN
 			
-		MessageBox(g_hWnd, "MBUTTONDOWN", "WM_MBUTTONDOWN", MB_OK);
+		TRACE("WHEELBUTTONDOWN\n");
 	
 	} else if(wParam == WM_MBUTTONUP){ // 휠 버튼 UP
-			
-		MessageBox(g_hWnd, "MBUTTONUP", "WM_MBUTTONUP", MB_OK);
-	
+			TRACE("WHEELBUTTONUP\n");
 	}
 
 	return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
