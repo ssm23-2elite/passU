@@ -18,6 +18,7 @@ public:
 	virtual ~CMyListen();
 	virtual void OnAccept(int nErrorCode);
 
+	CObList getSockList(void);
 };
 
 
