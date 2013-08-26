@@ -118,6 +118,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="testDlg.h" />
+    <ClInclude Include="USBIconDlg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClientConf.cpp" />
@@ -132,6 +133,7 @@
     </ClCompile>
     <ClCompile Include="test.cpp" />
     <ClCompile Include="testDlg.cpp" />
+    <ClCompile Include="USBIconDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="test.rc" />
@@ -142,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\monitor.bmp" />
+    <Image Include="res\passu.bmp" />
     <Image Include="res\phone.bmp" />
     <Image Include="res\test.ico" />
   </ItemGroup>

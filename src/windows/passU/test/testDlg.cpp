@@ -8,6 +8,7 @@
 #include "afxdialogex.h"
 #include "ServerConf.h"
 #include "ClientConf.h"
+#include <Dbt.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -114,7 +115,7 @@ BOOL CtestDlg::OnInitDialog()
 	CButton_ServerConfig.EnableWindow(FALSE);
 	CButton_clientconfiguration.EnableWindow(FALSE);
 
-
+	usbIcon = NULL;
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -212,4 +213,34 @@ void CtestDlg::OnBnClickedExitButton()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	OnOK();
+}
+
+
+LRESULT CtestDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	if(message == WM_DEVICECHANGE){
+		UINT event = (UINT)wParam;
+		switch(event){
+
+		case DBT_DEVICEARRIVAL :
+			// USB에 새로운 장치가 연결되어 사용가능한 상태가 된 경우...
+			if(usbIcon == NULL)
+			{ 
+				usbIcon = new CUSBIconDlg;
+				usbIcon->Create(IDD_USBICON_DIALOG);
+				usbIcon->ShowWindow(SW_SHOW);
+			}
+			break;
+		case DBT_DEVICEREMOVECOMPLETE :
+			// USB에서 어떤 장치가 제거된 경우...
+			if(usbIcon != NULL)
+			{
+				usbIcon->DestroyWindow();
+				usbIcon = NULL;
+			}
+			break;
+		}
+	}
+	return CDialogEx::DefWindowProc(message, wParam, lParam);
 }
