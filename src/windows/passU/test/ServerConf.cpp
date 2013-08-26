@@ -950,11 +950,11 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			keyP.keyCode = hEVENT->data;
 			
 			// 아........개짜증 여기서 안되면 ㅠㅠ
-			CObList tmp = ((CMyListen *)AfxGetApp())->getSockList();
+			//CObList tmp = ((CMyListen *)AfxGetApp())->getSockList();
 			
-			CMyThread *p = ((CMyThread *)tmp.GetAt(0));
+			//CMyThread *p = ((CMyThread *)tmp.GetAt(0));
 			
-			p->m_mySocket->Send(&keyP, sizeof(KPACKET));
+		//	p->m_mySocket->Send(&keyP, sizeof(KPACKET));
 
 			
 			// 소켓.send(&keyp, sizeof(KPACKET));

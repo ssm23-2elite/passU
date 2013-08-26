@@ -1,13 +1,17 @@
 #pragma once
+
+#include <list>
 #include "MySocket.h"
 #include "MyThread.h"
+
 // CMyListen 명령 대상입니다.
+using namespace std;
 
 class CMyListen : public CAsyncSocket
 {
 public:
-	CObList m_sockList;
-
+	//CObList m_sockList;
+//	std::list<CMyThread>  
 /*
 	typedef CTypedPtrArray<CObArray, CMyThread *> CSocketList;
 

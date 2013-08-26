@@ -33,7 +33,7 @@ void CMyListen::OnAccept(int nErrorCode)
 
 		if(pThread){
 			pThread->m_hSocket = tmp.Detach();
-			m_sockList.AddTail(pThread);
+		//	m_sockList.AddTail(pThread);
 			pThread->ResumeThread(); 
 		}
 
@@ -45,7 +45,7 @@ void CMyListen::OnAccept(int nErrorCode)
 
 
 
-CObList CMyListen::getSockList(void)
-{
-	return m_sockList;
-}
+//CObList CMyListen::getSockList(void)
+//{
+//	return m_sockList;
+//}
