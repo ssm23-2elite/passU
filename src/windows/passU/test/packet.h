@@ -20,11 +20,11 @@ typedef struct mousepacket{ // 마우스 위치 정보를 가지고 있는 패킷(TCP)
 	int recvDev:32;
 	int deviceType:8;
 	int relativeField:8;
-	int updownFlag:8;
-	int wheelFlag:8;
+	int updownFlag:8; // 0 : up, 1 : down
+	int leftRight:8; // 0 : left , 1 : right
+	int wheelFlag:32; // 0 : wheel off, 1 : wheel on 2 : wheel move
 	int xCoord:32;
 	int yCoord:32;
-	int pad:32;
 } MPACKET;
 
 typedef struct c_packet{ // 클라이언트에서 쓸 패킷

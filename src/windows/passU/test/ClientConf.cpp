@@ -151,10 +151,11 @@ KPACKET ClientConf::packMessage(int msgType, int sendDev, int recvDev, int devTy
 		mouse.deviceType = devType;
 		mouse.relativeField = relativeField;
 		mouse.updownFlag = updownFlag;
-		mouse.wheelFlag = pad1;
-		mouse.xCoord = keyCode;
-		mouse.yCoord = pad2;
-		mouse.pad = pad3;
+		mouse.leftRight = pad1;
+		mouse.wheelFlag = keyCode;
+		mouse.xCoord = pad2;
+		mouse.yCoord = pad3;
+
 
 		memcpy(&keyboard, &mouse, sizeof(KPACKET));
 
@@ -201,26 +202,27 @@ KPACKET ClientConf::unpackMessage(KPACKET p){
 	keyboard.pad3 = 0;
 	switch(p.msgType){
 	case 1: // Keyboard
-		keyboard.deviceType = p.deviceType;
-		keyboard.keyCode = p.keyCode;
 		keyboard.msgType = p.msgType;
 		keyboard.sendDev = p.sendDev;
 		keyboard.recvDev = p.recvDev;
-		keyboard.updownFlag = p.updownFlag;
+		keyboard.deviceType = p.deviceType;
 		keyboard.relativeField = p.relativeField;
+		keyboard.updownFlag = p.updownFlag;
+		keyboard.keyCode = p.keyCode;
 
 
 	case 2: // Mouse
-
-		mouse.deviceType = p.deviceType;
+		
 		mouse.msgType = p.msgType;
 		mouse.sendDev = p.sendDev;
 		mouse.recvDev = p.recvDev;
+		mouse.deviceType = p.deviceType;
 		mouse.relativeField = p.relativeField;
 		mouse.updownFlag = p.updownFlag;
-		mouse.wheelFlag = p.pad1;
-		mouse.xCoord = p.keyCode;
-		mouse.yCoord = p.pad2;
+		mouse.leftRight = p.pad1;
+		mouse.wheelFlag = p.keyCode;
+		mouse.xCoord = p.pad2;
+		mouse.yCoord = p.pad3;
 
 		memcpy(&keyboard, &mouse, sizeof(KPACKET));
 

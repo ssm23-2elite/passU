@@ -796,10 +796,10 @@ KPACKET ServerConf::packMessage(int msgType, int sendDev, int recvDev, int devTy
 		m.deviceType = devType;
 		m.relativeField = relativeField;
 		m.updownFlag = updownFlag;
-		m.wheelFlag = pad1;
-		m.xCoord = keyCode;
-		m.yCoord = pad2;
-		m.pad = pad3;
+		m.leftRight = pad1;
+		m.wheelFlag = keyCode;
+		m.xCoord = pad2;
+		m.yCoord = pad3;
 
 		memcpy(&k, &m, sizeof(KPACKET));
 
@@ -817,7 +817,6 @@ KPACKET ServerConf::packMessage(int msgType, int sendDev, int recvDev, int devTy
 		c.pad7 = pad2;
 		c.pad8 = pad3;
 
-
 		memcpy(&k, &c, sizeof(KPACKET));
 
 		break;
@@ -827,9 +826,7 @@ KPACKET ServerConf::packMessage(int msgType, int sendDev, int recvDev, int devTy
 		d.msgType = msgType;
 		d.len = sendDev;
 
-
 		memcpy(&k, &d, sizeof(KPACKET));
-
 		break;
 
 	default: // packing 실패
@@ -931,7 +928,7 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	HEVENT *hEVENT;
-
+	MPACKET *mEVENT;
 	BYTE keyData[256];
 	
 	switch(pCopyDataStruct -> dwData){
@@ -961,11 +958,13 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 
 		}
-
-
-
 		break;
+	case 1:
 
+		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
+		
+		// 소켓.send(mEVENT, sizeof(MPACKET));
+		break;
 	}
 
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
