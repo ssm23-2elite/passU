@@ -1,6 +1,7 @@
 // ServerConf.cpp : 구현 파일입니다.
 //
 
+#include <afxwin.h>
 #include "stdafx.h"
 #include "test.h"
 #include "ServerConf.h"
@@ -12,10 +13,18 @@
 
 typedef HHOOK (*InstallKeyboardHook)();
 typedef HHOOK (*InstallMouseHook)();
+typedef void (*SetWindowHandleToDll)(HWND hWnd);
 
+typedef void (*UnInstallKeyboardHook)();
+typedef void  (*UnInstallMouseHook)();
+
+
+SetWindowHandleToDll setwindowHandleToDll;
 InstallKeyboardHook installKeyhook;
 InstallMouseHook installMousehook;
 
+UnInstallKeyboardHook uninstallKeyhook;
+UnInstallMouseHook uninstallMousehook;
 IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 
 	ServerConf::ServerConf(CWnd* pParent /*=NULL*/)
@@ -51,26 +60,25 @@ IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 	hinstDLL = LoadLibrary(_T("KeyHook.dll"));
 	if(!hinstDLL)
 		AfxMessageBox(_T("KeyHook.dll 로드 실패!"));
-
+		
+	
+	
+	
+	setwindowHandleToDll = (SetWindowHandleToDll)GetProcAddress(hinstDLL, "SetWindowHandleToDll");
+	
 	installKeyhook = (InstallKeyboardHook)GetProcAddress(hinstDLL, "InstallKeyboardHook");
 	installMousehook = (InstallMouseHook)GetProcAddress(hinstDLL, "InstallMouseHook");
-
+	
+	uninstallKeyhook = (UnInstallKeyboardHook)GetProcAddress(hinstDLL, "UnInstallKeyboardHook");
+	uninstallMousehook = (UnInstallMouseHook)GetProcAddress(hinstDLL, "UnInstallMouseHook");
+	
+			
+	pWnd = AfxGetMainWnd();
+	hWnd = pWnd->m_hWnd;
+	setwindowHandleToDll(hWnd);
+	
 	AfxSocketInit(); // 소켓 초기화
 }
-
-//
-//
-//extern "C" __declspec(dllimport)   
-//	HHOOK InstallKeyboardHook();		// Install Keyboard Hook
-//
-//extern "C" __declspec(dllimport)
-//	void UnInstallKeyboardHook();		// Uninstall Keyboard Hook 
-//
-//extern "C" __declspec(dllimport)
-//	HHOOK InstallMouseHook();		// Install Mouse Hook
-//
-//extern "C" __declspec(dllimport)
-//	void UnInstallMouseHook();		// Uninstall Mouse Hook 
 
 ServerConf::~ServerConf()
 {
@@ -139,6 +147,9 @@ void ServerConf::OnBnClickedStart()
 
 	AfxMessageBox(_T("Start!!"));
 
+	installKeyhook();
+	installMousehook();
+	
 	m_startFlag = TRUE;
 	//initServer(nPort);
 	initServer(nPort);
@@ -156,7 +167,9 @@ void ServerConf::OnBnClickedStop()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	initFlag();
-
+	
+	uninstallKeyhook();
+	uninstallMousehook();
 
 	CDialogEx::OnCancel();
 }
@@ -692,8 +705,7 @@ void ServerConf::receiveData(CMySocket *s)
 
 	if(m_sendFlag == 1){ // 처음 플래그를 받았을 때 클라이언트한테 클라이언트 ID를 알려준다.
 		s->Send((LPCSTR *)&tmp ,sizeof(KPACKET)); 
-		installKeyhook();
-		installMousehook();
+
 	}
 
 	/* Nagle 알고리즘을 해제하는 코드, 우리 프로그램에서는 Nagle 알고리즘 필요없엉 */
@@ -929,14 +941,11 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	HEVENT *hEVENT;
 	MPACKET *mEVENT;
-	BYTE keyData[256];
+	//BYTE keyData[256];
 	
 	switch(pCopyDataStruct -> dwData){
 
 	case 0:
-
-		GetKeyboardState(keyData); // 키보드 상태 받아옴
-
 		hEVENT = (tagHEVENT *) pCopyDataStruct->lpData; // hEvent 구조체 연결(후킹된 자료)
 
 		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
@@ -944,8 +953,11 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			
 			keyP.deviceType = 1;
 			keyP.msgType = 1;
-			keyP.keyCode = hEVENT->data;
+			keyP.keyCode = hEVENT->keyCode;
 			
+			TRACE("msgtype : keyboard, keyCode : %d\n", keyP.keyCode);
+
+
 			// 아........개짜증 여기서 안되면 ㅠㅠ
 			//CObList tmp = ((CMyListen *)AfxGetApp())->getSockList();
 			
@@ -960,8 +972,8 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		}
 		break;
 	case 1:
-
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
+		TRACE("msgtype : MOUSe, x : %d, y : %d\n", mEVENT->xCoord, mEVENT->yCoord);
 		
 		// 소켓.send(mEVENT, sizeof(MPACKET));
 		break;

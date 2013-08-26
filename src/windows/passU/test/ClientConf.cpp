@@ -156,7 +156,6 @@ KPACKET ClientConf::packMessage(int msgType, int sendDev, int recvDev, int devTy
 		mouse.xCoord = pad2;
 		mouse.yCoord = pad3;
 
-
 		memcpy(&keyboard, &mouse, sizeof(KPACKET));
 
 		break;
@@ -172,6 +171,7 @@ KPACKET ClientConf::packMessage(int msgType, int sendDev, int recvDev, int devTy
 		client.pad6 = keyCode;
 		client.pad7 = pad2;
 		client.pad8 = pad3;
+
 		memcpy(&keyboard, &client, sizeof(KPACKET));
 		break;
 

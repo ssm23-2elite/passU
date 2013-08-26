@@ -41,6 +41,7 @@ public:
 
 	typedef struct tagHEVENT{
 		int type;
+		int keyCode;
 		WPARAM data;
 		LPARAM lParam;
 	}HEVENT;
@@ -51,7 +52,8 @@ public:
 	MPACKET mouseP;
 	CPACKET clientP;
 	DPACKET dataP;
-
+	CWnd *pWnd ;
+	HWND hWnd;
 	bool m_sendFlag;
 
 	CMyThread *currentThread;

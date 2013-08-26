@@ -15,6 +15,7 @@ char *szMessageString(int ID);
 
 typedef struct tagHEVENT{
 	int type;
+	int keyCode;
 	WPARAM data;
 	LPARAM lParam;
 }HEVENT;
@@ -52,15 +53,18 @@ extern "C" __declspec(dllexport)
 LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
 	//TCHAR s[256];
-									
+						
+
+	HWND hwnd = FindWindow(NULL, TEXT("PassU - Server"));
 	KBDLLHOOKSTRUCT *pKey = (KBDLLHOOKSTRUCT *)lParam;
 
 		//MessageBox(g_hWnd, "keyboardHook", "vkCode : ", MB_OK);
 
+	
 	if(nCode<0)
 		return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 
-	if(nCode >= 0){
+	if(wParam == WM_KEYDOWN){
 		COPYDATASTRUCT CDS;
 		HEVENT Event;
 
@@ -69,12 +73,15 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 		CDS.lpData = &Event;
 		
 		Event.type = 1; // WM_KEY
+		Event.keyCode = pKey->vkCode;
 		Event.data = wParam;
 		Event.lParam = lParam;
+		
 
-		SendMessage(g_hWnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-		TRACE("Event.data : %d\n", Event.data);
-		TRACE("SENDMESSAGE...과연 copyData에서 받을까?\n");
+		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
+		TRACE("Event.data : %d\n", pKey->vkCode);
+	//	TRACE("SENDMESSAGE...과연 copyData에서 받을까?\n");
 
 	}
 	// MessageBox(NULL, "Keyboard", "Hook", MB_OK);  <-- 짜증졸라 남..
@@ -87,6 +94,11 @@ extern "C" __declspec(dllexport)
 LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 	MPACKET tmp;
 	COPYDATASTRUCT CDS;
+	POINT pt = {0};
+	GetCursorPos(&pt);
+	
+
+	HWND hwnd = FindWindow(NULL, TEXT("PassU - Server"));
 
 	if(nCode < 0 )
 		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
@@ -102,12 +114,14 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 		tmp.updownFlag = 1; // down
 		tmp.leftRight = 0; // left
 		tmp.wheelFlag = 0;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
-		tmp.xCoord = LOWORD(lParam);
-		tmp.yCoord = HIWORD(lParam);
+		tmp.xCoord = pt.x;
+		tmp.yCoord = pt.y;
 
-		SendMessage(g_hWnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		TRACE("x : %d, y : %d\n", pt.x, pt.y);
 
-	TRACE("LBUTTONDOWN\n");
+		int a = ::SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
+	//TRACE("LBUTTONDOWN\n");
 
 	
 	} else if (wParam == WM_LBUTTONUP){ // 왼쪽 버튼 UP
@@ -119,11 +133,12 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 		tmp.updownFlag = 0; // up
 		tmp.leftRight = 0; // left
 		tmp.wheelFlag = 0; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
-		tmp.xCoord = LOWORD(lParam);
-		tmp.yCoord = HIWORD(lParam);
-
-		SendMessage(g_hWnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-	TRACE("LBUTTONUP\n");
+		tmp.xCoord = pt.x;
+		tmp.yCoord = pt.y;
+		
+		TRACE("x : %d, y : %d\n", pt.x, pt.y);
+		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	//TRACE("LBUTTONUP\n");
 	
 	//	MessageBox(g_hWnd, "LBUTTONUP", "WM_LBUTTONUP", MB_OK);
 	
@@ -136,11 +151,12 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 		tmp.updownFlag = 1; // down
 		tmp.leftRight = 1; // right
 		tmp.wheelFlag = 0;
-		tmp.xCoord = LOWORD(lParam);
-		tmp.yCoord = HIWORD(lParam);
-
-		SendMessage(g_hWnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-		TRACE("RBUTTONDOWN\n");
+		tmp.xCoord = pt.x;
+		tmp.yCoord = pt.y;
+		
+		TRACE("x : %d, y : %d\n", pt.x, pt.y);
+		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	//	TRACE("RBUTTONDOWN\n");
 	
 	//	MessageBox(g_hWnd, "RBUTTONDOWN", "WM_RBUTTONDOWN", MB_OK);
 	
@@ -153,11 +169,12 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 		tmp.updownFlag = 0; // up
 		tmp.leftRight = 1; // right
 		tmp.wheelFlag = 0;
-		tmp.xCoord = LOWORD(lParam);
-		tmp.yCoord = HIWORD(lParam);
-		TRACE("RBUTTONUP\n");
+		tmp.xCoord = pt.x;
+		tmp.yCoord = pt.y;
+	//	TRACE("RBUTTONUP\n");
 		
-		SendMessage(g_hWnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		TRACE("x : %d, y : %d\n", pt.x, pt.y);
+		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 	
 	//	MessageBox(g_hWnd, "RBUTTONUP", "WM_RBUTTONUP", MB_OK);
 	
@@ -166,16 +183,17 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 		CDS.cbData = sizeof(tmp);
 		CDS.lpData = &tmp;
 
-		//tmp.msgType = 2; // mouse
+		tmp.msgType = 2; // mouse
 		//tmp.updownFlag = 0; // up
 		//tmp.leftRight = 1; // right
 		tmp.wheelFlag = 3;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
-		tmp.xCoord = LOWORD(lParam);
-		tmp.yCoord = HIWORD(lParam);
+		tmp.xCoord = pt.x;
+		tmp.yCoord = pt.y;
 
-		TRACE("MOUSEWHEEL\n");
+	//	TRACE("MOUSEWHEEL\n");
 	
-		SendMessage(g_hWnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		TRACE("x : %d, y : %d\n", pt.x, pt.y);
+		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 	//	MessageBox(g_hWnd, "MOUSEWHEEL", "WM_MOUSEWHEEL", MB_OK);
 	
 	//} else if(wParam == WM_MOUSEMOVE){ // 마우스 움직일 때
@@ -187,29 +205,46 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 		CDS.cbData = sizeof(tmp);
 		CDS.lpData = &tmp;
 
-		//tmp.msgType = 2; // mouse
+		tmp.msgType = 2; // mouse
 		//tmp.updownFlag = 0; // up
 		//tmp.leftRight = 1; // right
 		tmp.wheelFlag = 1; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
-		tmp.xCoord = LOWORD(lParam);
-		tmp.yCoord = HIWORD(lParam);
-		SendMessage(g_hWnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		tmp.xCoord = pt.x;
+		tmp.yCoord = pt.y;
+
+		
+		TRACE("x : %d, y : %d\n", pt.x, pt.y);
+		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 	
-		TRACE("WHEELBUTTONDOWN\n");
+	//	TRACE("WHEELBUTTONDOWN\n");
 	
 	} else if(wParam == WM_MBUTTONUP){ // 휠 버튼 UP
 		CDS.dwData = 1;
 		CDS.cbData = sizeof(tmp);
 		CDS.lpData = &tmp;
 
-		//tmp.msgType = 2; // mouse
+		tmp.msgType = 2; // mouse
 		//tmp.updownFlag = 0; // up
 		//tmp.leftRight = 1; // right
 		tmp.wheelFlag = 2;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
-		tmp.xCoord = LOWORD(lParam);
-		tmp.yCoord = HIWORD(lParam);
-		SendMessage(g_hWnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-		TRACE("WHEELBUTTONUP\n");
+		tmp.xCoord = pt.x;
+		tmp.yCoord = pt.y;
+		
+		TRACE("x : %d, y : %d\n", pt.x, pt.y);
+		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	//	TRACE("WHEELBUTTONUP\n");
+	} else if(wParam == WM_MOUSEMOVE){ // 마우스 이동
+		CDS.dwData = 1;
+		CDS.cbData = sizeof(tmp);
+		CDS.lpData = &tmp;
+
+		tmp.msgType = 2; 
+		tmp.xCoord = pt.x;
+		tmp.yCoord = pt.y;
+		
+		TRACE("x : %d, y : %d\n", pt.x, pt.y);
+		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+			
 	}
 
 	return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
