@@ -27,6 +27,11 @@ BOOL CMyThread::InitInstance()
 	TRY{
 		m_mySocket -> Attach(m_hSocket); 
 		m_mySocket -> AsyncSelect(FD_READ | FD_CLOSE);
+		
+		/* Nagle 알고리즘을 해제하는 코드, 우리 프로그램에서는 Nagle 알고리즘 필요없엉 */
+	
+		const char opt_val = true;
+		setsockopt(*m_mySocket, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
 
 
 	} CATCH_ALL(e){

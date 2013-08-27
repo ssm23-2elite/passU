@@ -46,7 +46,7 @@ public:
 
 	void receiveData(CClientSocket *s);
 	KPACKET packMessage(int msgType, int sendDev, int recvDev, int devType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3);
-	KPACKET unpackMessage(KPACKET p);
+	void unpackMessage(KPACKET p);
 
 	CButton m_CBtn_ClientConnect;
 	CButton m_CBtn_ClientCancel;

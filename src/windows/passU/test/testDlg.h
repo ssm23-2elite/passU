@@ -5,6 +5,8 @@
 #pragma once
 #include "afxwin.h"
 #include "USBIconDlg.h"
+#include "ServerConf.h"
+#include "ClientConf.h"
 
 // CtestDlg 대화 상자
 class CtestDlg : public CDialogEx
@@ -41,6 +43,8 @@ public:
 	CButton CButton_ServerConfig;
 	bool CRadioButton_Server;
 	bool CRadioButton_Client;
+	ServerConf server;
+	ClientConf client;
 	CUSBIconDlg *usbIcon;
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 };

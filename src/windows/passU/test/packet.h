@@ -29,9 +29,9 @@ typedef struct mousepacket{ // 마우스 위치 정보를 가지고 있는 패킷(TCP)
 
 typedef struct c_packet{ // 클라이언트에서 쓸 패킷
 	int msgType:32; // msgType : 3
-	int c_id:32;
-	int first:32;
-	int pad2:8;
+	int c_id:32; // 클라이언트 ID
+	int hello:32; // Hello 패킷
+	int bye:8; // bye 패킷
 	int pad3:8;
 	int pad4:8;
 	int pad5:8;

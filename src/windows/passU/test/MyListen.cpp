@@ -5,7 +5,7 @@
 #include "test.h"
 #include "MyListen.h"
 #include "MyThread.h"
-
+#include "packet.h"
 #include "afxdialogex.h"
 
 // CMyListen
@@ -16,6 +16,9 @@ CMyListen::CMyListen()
 
 CMyListen::~CMyListen()
 {
+	if(pThread != NULL){
+		pThread->Delete();
+	}
 }
 
 
@@ -29,7 +32,7 @@ void CMyListen::OnAccept(int nErrorCode)
 	CSocket tmp;
 
 	if(Accept(tmp)){
-		CMyThread *pThread = (CMyThread *)AfxBeginThread(RUNTIME_CLASS(CMyThread), 0, 0, CREATE_SUSPENDED);
+		pThread = (CMyThread *)AfxBeginThread(RUNTIME_CLASS(CMyThread), 0, 0, CREATE_SUSPENDED);
 
 		if(pThread){
 			pThread->m_hSocket = tmp.Detach();
@@ -46,9 +49,7 @@ void CMyListen::OnAccept(int nErrorCode)
 	CAsyncSocket::OnAccept(nErrorCode);
 }
 
-
-
-//CObList CMyListen::getSockList(void)
-//{
-//	return m_sockList;
-//}
+CObList * CMyListen::getList(void)
+{
+	return &m_sockList;
+}

@@ -5,6 +5,7 @@
 #include "test.h"
 #include "ClientConf.h"
 #include "afxdialogex.h"
+#include "MyThread.h"
 
 #include <afxsock.h> // sock 함수 포함하는 라이브러리
 
@@ -96,25 +97,32 @@ void ClientConf::receiveData(CClientSocket *s)
 
 	s->Receive((LPCSTR *)&tmp, sizeof(KPACKET));
 
-	tmp = unpackMessage(tmp); // 메시지 언팩
+	TRACE("keycode : %d\n", tmp.keyCode);
 
-	AfxMessageBox(_T("receiveData!!!"));
+	unpackMessage(tmp); // 메시지 언팩
+
+	//AfxMessageBox(_T("receiveData!!!"));
 }
 
 
 void ClientConf::OnBnClickedCancel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CPACKET c;
+	c.c_id = clientID;
+	c.msgType = 3;
+	c.first = 0;
+	c.pad2 = 1;
 
-	//	p.id = 
+	clientSock.Send((LPCSTR *)&c, sizeof(CPACKET)); // 연결 종료 패킷 보냄
 
-	//	sendData
+
 	m_connectFlag = false;
 	m_CBtn_ClientConnect.EnableWindow(TRUE);
 
 
 
-	//	CDialogEx::OnCancel();
+	CDialogEx::OnCancel();
 }
 
 KPACKET ClientConf::packMessage(int msgType, int sendDev, int recvDev, int devType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3){
@@ -182,14 +190,12 @@ KPACKET ClientConf::packMessage(int msgType, int sendDev, int recvDev, int devTy
 		memcpy(&keyboard, &data, sizeof(KPACKET));
 
 		break;
-
 	}
-
 	return keyboard;
 
 }
 
-KPACKET ClientConf::unpackMessage(KPACKET p){
+void ClientConf::unpackMessage(KPACKET p){
 	keyboard.msgType = 0;
 	keyboard.sendDev = 0;
 	keyboard.recvDev = 0;
@@ -202,18 +208,20 @@ KPACKET ClientConf::unpackMessage(KPACKET p){
 	keyboard.pad3 = 0;
 	switch(p.msgType){
 	case 1: // Keyboard
-		keyboard.msgType = p.msgType;
+		/*keyboard.msgType = p.msgType;
 		keyboard.sendDev = p.sendDev;
 		keyboard.recvDev = p.recvDev;
 		keyboard.deviceType = p.deviceType;
 		keyboard.relativeField = p.relativeField;
 		keyboard.updownFlag = p.updownFlag;
-		keyboard.keyCode = p.keyCode;
-
-
+		keyboard.keyCode = p.keyCode;*/
+		TRACE("keyCode : %d\n", p.keyCode);
+		keybd_event(p.keyCode, 0, 0, 0); // 전달받은 keyCode를 그대로 입력한다.
+		
+		TRACE("keybd_event success\n");
 	case 2: // Mouse
 		
-		mouse.msgType = p.msgType;
+	/*	mouse.msgType = p.msgType;
 		mouse.sendDev = p.sendDev;
 		mouse.recvDev = p.recvDev;
 		mouse.deviceType = p.deviceType;
@@ -224,7 +232,11 @@ KPACKET ClientConf::unpackMessage(KPACKET p){
 		mouse.xCoord = p.pad2;
 		mouse.yCoord = p.pad3;
 
-		memcpy(&keyboard, &mouse, sizeof(KPACKET));
+		memcpy(&keyboard, &mouse, sizeof(KPACKET));*/
+		
+		
+	//	SetCursorPos(p.pad2, p.pad3); // 마우스 커서 그대로 이동
+
 
 	case 3: // Client
 		client.msgType = p.msgType;
@@ -242,7 +254,7 @@ KPACKET ClientConf::unpackMessage(KPACKET p){
 
 	}
 
-	return keyboard;
+	return ;
 }
 
 

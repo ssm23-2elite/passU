@@ -15,19 +15,22 @@ public:
 	virtual ~ServerConf();
 	
 	int m_deviceFlag; // 모니터인가, 스마트폰 그림인가를 판별하는 플래그 ( -1 : 초기값, 0 : 모니터, 1 : 스마트폰 )
-	int m_settingFlag[9]; // 버튼에 모니터 or 스마트폰 or 빈 칸인지 판별하는 플래그 ( -1 : 초기값, 0 : 모니터, 1 : 스마트폰 )
 	bool m_bDragFlag; // 드래그 판별 플래그
 	bool m_applyFlag; // apply 눌렀나 판별하는 플래그
 	bool m_startFlag; // 서버 구동중인가 아닌가를 판별하는 플래그
+	int m_settingFlag[9]; // 버튼에 모니터 or 스마트폰 or 빈 칸인지 판별하는 플래그 ( -1 : 초기값, 0 : 모니터, 1 : 스마트폰 )
+	int m_whereisPoint; // 마우스가 어느 위치에 있느냐? 기본값 : 5, 1 ~ 9 까지있음 , 이 변수의 -1 한 값이 아래 배열의 인덱스가 됨(클라이언트ID)
 	
-	CPoint m_ptltemText; // 특정 아이템 텍스트의 좌표
-	
-	int nSocket; // 클라이언트 소켓 하나하나에 번호 부여. 시작 : 0부터
+	int nSocket; // 클라이언트가 몇 명 들어왔는지 판별하는 변수
+	int client_id[9]; // 각 버튼마다 몇 번의 클라이언트 id가 저장되어 있는지 저장하는 배열
+	// 인덱스 + 1 : 버튼번호, 값 : 클라이언트 ID 
 
 	//typedef CTypedPtrArray<CObArray, CMySocket *> CSocketList;
 	
-	HINSTANCE hinstDLL;
-	HHOOK hHook;
+	CPoint m_ptltemText; // 특정 아이템 텍스트의 좌표
+	
+	HINSTANCE hinstDLL; // DLL 로딩
+	HHOOK hHook; // HHOOK
 
 	BOOL m_keyBoardHook;
 	BOOL m_mouseHook;
@@ -39,25 +42,23 @@ public:
 	CWnd *btnControl[9];
 	CWnd *picControl[2];
 
-	typedef struct tagHEVENT{
+
+	typedef struct tagHEVENT{ // DLL 파일에서 받아오는 구조체 ( 키코드 포함 )
 		int type;
 		int keyCode;
 		WPARAM data;
 		LPARAM lParam;
 	}HEVENT;
 
-	CObList sockList;
 
 	KPACKET keyP;
 	MPACKET mouseP;
 	CPACKET clientP;
 	DPACKET dataP;
-	CWnd *pWnd ;
-	HWND hWnd;
-	bool m_sendFlag;
 	
-	CMyThread *p;
-	
+	CMyThread *cThread;
+	CObList *tmp;
+
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 // 대화 상자 데이터입니다.
 	enum { IDD = IDD_DIALOG1 };
@@ -69,7 +70,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedStart();
-	afx_msg void OnBnClickedStop();
+	afx_msg void OnBnClickedCancel();
 	CButton m_CButton_one;
 	CButton m_CButton_two;
 	CButton m_CButton_three;
@@ -105,9 +106,9 @@ public:
 	CButton m_CBtn_stop;
 	void initFlag(void);
 //	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	void sendData(CMySocket * s);
 	KPACKET packMessage(int msgType, int sendDev, int recvDev, int devType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3);
-	KPACKET unpackMessage(KPACKET p);
+	void unpackMessage(KPACKET p, CMySocket *s);
 	//afx_msg BOOL OnCopyData(CWnd *pWnd, COPYDATASTRUCT *pCopyDataStruct);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
+	afx_msg void OnBnClickedButton14();
 };

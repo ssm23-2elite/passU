@@ -13,13 +13,10 @@
 
 typedef HHOOK (*InstallKeyboardHook)();
 typedef HHOOK (*InstallMouseHook)();
-typedef void (*SetWindowHandleToDll)(HWND hWnd);
 
 typedef void (*UnInstallKeyboardHook)();
 typedef void  (*UnInstallMouseHook)();
 
-
-SetWindowHandleToDll setwindowHandleToDll;
 InstallKeyboardHook installKeyhook;
 InstallMouseHook installMousehook;
 
@@ -50,7 +47,6 @@ IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 		WSACleanup();
 	}
 	serverIPAddress.Append(strIpAddress); // static control에 서버 IP 주소를 붙여넣음
-	nSocket = 0;
 	initFlag(); // 각종 Flag 초기화
 
 	hinstDLL = NULL;
@@ -59,22 +55,14 @@ IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 	hinstDLL = LoadLibrary(_T("KeyHook.dll"));
 	if(!hinstDLL)
 		AfxMessageBox(_T("KeyHook.dll 로드 실패!"));
-		
-	
-	
-	
-	setwindowHandleToDll = (SetWindowHandleToDll)GetProcAddress(hinstDLL, "SetWindowHandleToDll");
-	
+
 	installKeyhook = (InstallKeyboardHook)GetProcAddress(hinstDLL, "InstallKeyboardHook");
 	installMousehook = (InstallMouseHook)GetProcAddress(hinstDLL, "InstallMouseHook");
-	
+
 	uninstallKeyhook = (UnInstallKeyboardHook)GetProcAddress(hinstDLL, "UnInstallKeyboardHook");
 	uninstallMousehook = (UnInstallMouseHook)GetProcAddress(hinstDLL, "UnInstallMouseHook");
-	
-			
-	pWnd = AfxGetMainWnd();
-	hWnd = pWnd->m_hWnd;
-	
+
+
 	AfxSocketInit(); // 소켓 초기화
 }
 
@@ -108,7 +96,7 @@ void ServerConf::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(ServerConf, CDialogEx)
 	ON_BN_CLICKED(IDOK, &ServerConf::OnBnClickedStart)
-	ON_BN_CLICKED(IDCANCEL, &ServerConf::OnBnClickedStop)
+	ON_BN_CLICKED(IDCANCEL, &ServerConf::OnBnClickedCancel)
 	ON_BN_CLICKED(IDC_BUTTON12, &ServerConf::OnBnClickedPortApply)
 	ON_BN_CLICKED(IDC_BUTTON13, &ServerConf::OnBnClickedPortCancel)
 	ON_WM_LBUTTONDOWN()
@@ -123,8 +111,9 @@ BEGIN_MESSAGE_MAP(ServerConf, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON7, &ServerConf::OnBnClickedButton7)
 	ON_BN_CLICKED(IDC_BUTTON8, &ServerConf::OnBnClickedButton8)
 	ON_BN_CLICKED(IDC_BUTTON9, &ServerConf::OnBnClickedButton9)
-//	ON_WM_KEYDOWN()
-ON_WM_COPYDATA()
+	//	ON_WM_KEYDOWN()
+	ON_WM_COPYDATA()
+	ON_BN_CLICKED(IDC_BUTTON14, &ServerConf::OnBnClickedButton14)
 END_MESSAGE_MAP()
 
 
@@ -134,10 +123,10 @@ END_MESSAGE_MAP()
 void ServerConf::OnBnClickedStart()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	/*if(m_applyFlag == FALSE){
-	AfxMessageBox(_T("Plz Enter Port Number !!"));
-	return ;
-	}*/
+	if(m_applyFlag == FALSE){
+		AfxMessageBox(_T("Plz Enter Port Number !!"));
+		return ;
+	}
 
 	int nPort;
 
@@ -158,11 +147,11 @@ void ServerConf::OnBnClickedStart()
 }
 
 
-void ServerConf::OnBnClickedStop()
+void ServerConf::OnBnClickedCancel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	initFlag();
-	
+
 	uninstallKeyhook();
 	uninstallMousehook();
 
@@ -288,7 +277,6 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 
 				if(m_deviceFlag == 0){ // 컴퓨터
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
-					
 
 					m_settingFlag[0] = 0;
 				} else if(m_deviceFlag == 1){ // 스마트폰
@@ -527,8 +515,8 @@ void ServerConf::OnMouseMove(UINT nFlags, CPoint point)
 void ServerConf::initServer(int nPort)
 {
 
-	listen.Create(nPort);
-	listen.Listen();
+ 	listen.Create(nPort);
+ 	listen.Listen();
 
 	m_startFlag = TRUE; // 서버 시작 플래그 True
 	AfxMessageBox(_T("Accept Complete"));
@@ -693,22 +681,20 @@ void ServerConf::closeClient(CMySocket *s)
 void ServerConf::receiveData(CMySocket *s)
 {
 	KPACKET tmp;
-	
+
 	s->Receive((LPCSTR *)&tmp, sizeof(KPACKET));
 
-	tmp = unpackMessage(tmp);
+	if(tmp.recvDev == 1){ // first message 
+		TRACE("before nSocket : %d\n", nSocket);
+		nSocket += 1;
 
-	if(m_sendFlag == 1){ // 처음 플래그를 받았을 때 클라이언트한테 클라이언트 ID를 알려준다.
-		s->Send((LPCSTR *)&tmp ,sizeof(KPACKET)); 
-
+		TRACE("after nSocket : %d\n", nSocket);
 	}
-
-	/* Nagle 알고리즘을 해제하는 코드, 우리 프로그램에서는 Nagle 알고리즘 필요없엉 */
-	const char opt_val = true;
-	setsockopt(*s, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
+	
+	unpackMessage(tmp, s);
 
 	AfxMessageBox(_T("receive Success!!")); 
- }
+}
 
 
 void ServerConf::initFlag(void)
@@ -719,7 +705,11 @@ void ServerConf::initFlag(void)
 	m_deviceFlag = -1;
 	for(int i = 0 ; i < 9 ; i++ )
 		m_settingFlag[i] = -1;
+	m_settingFlag[4] = 0;
 	m_startFlag = TRUE;
+	m_whereisPoint = 5; // 기본값 5 ( 서버에 위치 )
+	m_keyBoardHook = FALSE;
+	m_mouseHook = FALSE;
 
 }
 
@@ -737,13 +727,6 @@ BOOL ServerConf::PreTranslateMessage(MSG* pMsg) // PostMessage를 받아 Parsing하�
 	case WM_TEST_MESSAGE:
 
 		//	AfxMessageBox(_T("receive PostMessage"));
-
-		 // 키보드 후킹 시작
-
-
-		//여기다가 바로 후킹 시작함 (키보드, 마우스) 
-
-		//그러다가 마우스를 넘어가게되면 PostMessage로 넘겨줘서 그 정보를 클라이언트한테 보내서 클라이언트에서s 작동하는 마우스와 키보드 핸들을 얻어와서 제어, 서버쪽 마우스와 키보드는 핸들을 내려놓음
 		return TRUE;
 	case WM_KEYBOARD_MESSAGE:
 		return TRUE;;
@@ -846,51 +829,34 @@ KPACKET ServerConf::packMessage(int msgType, int sendDev, int recvDev, int devTy
 
 }
 
-KPACKET ServerConf::unpackMessage(KPACKET p){
-	KPACKET k;
-
-	k.msgType = 0;
-	k.sendDev = 0;
-	k.recvDev = 0;
-	k.deviceType = 0;
-	k.relativeField = 0;
-	k.updownFlag = 0;;
-	k.pad1 = 0;
-	k.keyCode = 0;
-	k.pad2 = 0;
-	k.pad3 = 0;
-
+void ServerConf::unpackMessage(KPACKET p, CMySocket *s){
+	tmp = &listen.m_sockList; // 쓰레드 리스트 가져옴
+	int count = tmp->GetCount();
+	POSITION pos = tmp->GetHeadPosition(); // 맨 처음 헤드를 포인팅함
 	switch(p.msgType){
 	case 1: // Keyboard
-
-		k.deviceType = p.deviceType;
+/*		k.deviceType = p.deviceType;
 		k.keyCode = p.keyCode;
 		k.msgType = p.msgType;
 		k.sendDev = p.sendDev;
 		k.recvDev = p.recvDev;
 		k.updownFlag = p.updownFlag;
-		k.relativeField = p.relativeField;
-
-		//	PostMessage(WM_KEYBOARD_MESSAGE, 0, 0);
+		k.relativeField = p.relativeField;*/
 
 		break;
 
 	case 2: // Mouse
 		MPACKET m;
 
-		m.deviceType = p.deviceType;
-		m.msgType = p.msgType;
-		m.sendDev = p.sendDev;
-		m.recvDev = p.recvDev;
-		m.relativeField = p.relativeField;
-		m.updownFlag = p.updownFlag;
-		m.wheelFlag = p.pad1;
-		m.xCoord = p.keyCode;
-		m.yCoord = p.pad2;
-
-		//		PostMessage(WM_MOUSE_MESSAGE, 0, 0);
-
-		memcpy(&k, &m, sizeof(KPACKET));
+		//m.deviceType = p.deviceType;
+		//m.msgType = p.msgType;
+		//m.sendDev = p.sendDev;
+		//m.recvDev = p.recvDev;
+		//m.relativeField = p.relativeField;
+		//m.updownFlag = p.updownFlag;
+		//m.wheelFlag = p.pad1;
+		//m.xCoord = p.keyCode;
+		//m.yCoord = p.pad2;
 
 		break;
 
@@ -899,23 +865,34 @@ KPACKET ServerConf::unpackMessage(KPACKET p){
 
 		c.c_id = p.sendDev;
 		c.msgType = p.msgType;
-		c.first = p.recvDev;
+		c.hello = p.recvDev;
+		c.bye = p.deviceType;
 
-		if(c.first == 1){
-			c.first = 0;
+		if(c.hello == 1){ // 헬로 패킷인 경우
+			c.hello = 0;
 			keyP = packMessage(3, nSocket, 0, 0, 0, 0, 0, 0, 0, 200);
-			nSocket += 1;
+			TRACE("unpackMessage nSocket : %d\n", nSocket);
+
+			s->Send((LPCSTR)&keyP, sizeof(KPACKET));
+
 			if(nSocket == 1){
-	installKeyhook();
-	installMousehook();
+				installKeyhook();
+				installMousehook();
 			}
-			m_sendFlag = true;
-			return keyP;
+		}
+
+		if(c.bye == 1){ // bye 패킷인 경우
+
+			nSocket -= 1;
+			
+			if(nSocket == 0){
+				uninstallKeyhook();
+				uninstallMousehook();
+			}
 		}
 
 		//	PostMessage(WM_CLIENT_MESSAGE, 0, 0);
 
-		memcpy(&k, &c, sizeof(KPACKET));
 		break;
 
 	case 4: // Server
@@ -924,15 +901,13 @@ KPACKET ServerConf::unpackMessage(KPACKET p){
 		d.msgType = p.msgType;
 		d.len = p.sendDev;
 		//		PostMessage(WM_SERVER_MESSAGE, 0, 0);
-		memcpy(&k, &d, sizeof(KPACKET));
-
+	
 		break;
 
 	default: // unpacking 실패
 		AfxMessageBox(_T("Unpacking Failed!"));
 	}
-
-	return k;
+	return ;
 }
 
 BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
@@ -940,10 +915,13 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	HEVENT *hEVENT; 
 	MPACKET *mEVENT;
-	POSITION pos = ((CMyListen *)AfxGetApp())->m_sockList.GetHeadPosition();
-	TRACE("pos");
+//	TRACE("pos : %d\n", pos);
 	//BYTE keyData[256];
 	
+	tmp = &listen.m_sockList; // 쓰레드 리스트 가져옴
+	int count = tmp->GetCount();
+	POSITION pos = tmp->GetHeadPosition(); // 맨 처음 헤드를 포인팅함
+	TRACE("count : %d\n", count);
 	switch(pCopyDataStruct -> dwData){
 
 	case 0: // keyboard
@@ -951,45 +929,62 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
 
-			
+
 			keyP.deviceType = 1;
 			keyP.msgType = 1;
 			keyP.keyCode = hEVENT->keyCode;
 			
-			TRACE("nSocket : %d\n", nSocket);
-		//	nSocket = 1;
-			if(nSocket > 0){////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			if(count > 0){// 소켓이 최소 1명 이상일 때
+
+				// 키보드도 마찬가지로, 마우스가 위치한 인덱스에 보냄. 서버일 경우에는 필요없음
 
 				TRACE("before SEND!!!\n");
- 			p = (CMyThread *)((CMyListen *)AfxGetApp())->m_sockList.GetAt(pos);
-
-				p->m_mySocket->Send(&keyP, sizeof(KPACKET));
+				cThread = (CMyThread *)tmp->GetAt(pos);
+				cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
+				
 				TRACE("after SEND!!!\n");
 			}
-			TRACE("msgtype : keyboard, keyCode : %d\n", keyP.keyCode);
+		//	TRACE("msgtype : keyboard, keyCode : %d\n", keyP.keyCode);
 
 
 			// 아........개짜증 여기서 안되면 ㅠㅠ
 			//CObList tmp = ((CMyListen *)AfxGetApp())->getSockList();
-			
+
 			//CMyThread *p = ((CMyThread *)tmp.GetAt(0));
-			
-		//	p->m_mySocket->Send(&keyP, sizeof(KPACKET));
 
-			
+			//	p->m_mySocket->Send(&keyP, sizeof(KPACKET));
+
+
 			// 소켓.send(&keyp, sizeof(KPACKET));
-
-
 		}
 		break;
 	case 1:
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
-		
-		TRACE("msgtype : MOUSe, x : %d, y : %d\n", mEVENT->xCoord, mEVENT->yCoord);
-		
+
+	
+
+
+		cThread = (CMyThread *)tmp->GetAt(pos);
+
+		cThread->m_mySocket->Send((LPCSTR)&mEVENT, sizeof(MPACKET));
+
+
+	//	TRACE("msgtype : MOUSe, x : %d, y : %d\n", mEVENT->xCoord, mEVENT->yCoord);
+
 		// 소켓.send(mEVENT, sizeof(MPACKET));
 		break;
 	}
 
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
+}
+
+
+void ServerConf::OnBnClickedButton14() // 서버 Stop하는 함수
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+
+
+
+
 }

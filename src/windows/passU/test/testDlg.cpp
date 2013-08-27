@@ -179,16 +179,14 @@ void CtestDlg::OnBnClickedStart()
 void CtestDlg::OnBnClickedServerConfiguration()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	ServerConf serverconf;
-	serverconf.DoModal();
+	server.DoModal();
 }
 
 
 void CtestDlg::OnBnClickedClientConfiguration()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	ClientConf clientconf;
-	clientconf.DoModal();
+	client.DoModal();
 }
 
 
