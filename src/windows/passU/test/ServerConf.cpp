@@ -56,7 +56,6 @@ IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 	hinstDLL = NULL;
 	hHook = NULL;
 
-
 	hinstDLL = LoadLibrary(_T("KeyHook.dll"));
 	if(!hinstDLL)
 		AfxMessageBox(_T("KeyHook.dll 로드 실패!"));
@@ -75,7 +74,6 @@ IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 			
 	pWnd = AfxGetMainWnd();
 	hWnd = pWnd->m_hWnd;
-	setwindowHandleToDll(hWnd);
 	
 	AfxSocketInit(); // 소켓 초기화
 }
@@ -147,9 +145,6 @@ void ServerConf::OnBnClickedStart()
 
 	AfxMessageBox(_T("Start!!"));
 
-	installKeyhook();
-	installMousehook();
-	
 	m_startFlag = TRUE;
 	//initServer(nPort);
 	initServer(nPort);
@@ -910,6 +905,10 @@ KPACKET ServerConf::unpackMessage(KPACKET p){
 			c.first = 0;
 			keyP = packMessage(3, nSocket, 0, 0, 0, 0, 0, 0, 0, 200);
 			nSocket += 1;
+			if(nSocket == 1){
+	installKeyhook();
+	installMousehook();
+			}
 			m_sendFlag = true;
 			return keyP;
 		}
@@ -939,13 +938,15 @@ KPACKET ServerConf::unpackMessage(KPACKET p){
 BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	HEVENT *hEVENT;
+	HEVENT *hEVENT; 
 	MPACKET *mEVENT;
+	POSITION pos = ((CMyListen *)AfxGetApp())->m_sockList.GetHeadPosition();
+	TRACE("pos");
 	//BYTE keyData[256];
 	
 	switch(pCopyDataStruct -> dwData){
 
-	case 0:
+	case 0: // keyboard
 		hEVENT = (tagHEVENT *) pCopyDataStruct->lpData; // hEvent 구조체 연결(후킹된 자료)
 
 		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
@@ -955,6 +956,16 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			keyP.msgType = 1;
 			keyP.keyCode = hEVENT->keyCode;
 			
+			TRACE("nSocket : %d\n", nSocket);
+		//	nSocket = 1;
+			if(nSocket > 0){////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+				TRACE("before SEND!!!\n");
+ 			p = (CMyThread *)((CMyListen *)AfxGetApp())->m_sockList.GetAt(pos);
+
+				p->m_mySocket->Send(&keyP, sizeof(KPACKET));
+				TRACE("after SEND!!!\n");
+			}
 			TRACE("msgtype : keyboard, keyCode : %d\n", keyP.keyCode);
 
 
@@ -973,6 +984,7 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		break;
 	case 1:
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
+		
 		TRACE("msgtype : MOUSe, x : %d, y : %d\n", mEVENT->xCoord, mEVENT->yCoord);
 		
 		// 소켓.send(mEVENT, sizeof(MPACKET));

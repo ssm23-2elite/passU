@@ -55,8 +55,8 @@ public:
 	CWnd *pWnd ;
 	HWND hWnd;
 	bool m_sendFlag;
-
-	CMyThread *currentThread;
+	
+	CMyThread *p;
 	
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 // 대화 상자 데이터입니다.

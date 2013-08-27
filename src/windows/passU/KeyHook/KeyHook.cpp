@@ -22,15 +22,16 @@ typedef struct tagHEVENT{
 
 typedef struct mousepacket{ // 마우스 위치 정보를 가지고 있는 패킷(TCP)
 	int msgType:32; // msgType : 2
-	int sendDev:32;
-	int recvDev:32;
-	int deviceType:8;
-	int relativeField:8;
+	int sendDev:32; // server : 5, client : clnt_id
+	int recvDev:32; // server : 5, client : clnt_id
+	int deviceType:8; // mouse or keyboard
+	int relativeField:8; // 상대적인 필드................
 	int updownFlag:8; // 0 : up, 1 : down
 	int leftRight:8; // 0 : left , 1 : right
 	int wheelFlag:32; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
-	int xCoord:32;
-	int yCoord:32;
+	int xCoord:32; // x좌표
+	int yCoord:32; // y좌표
+	//mouse move 일때의 상태를 만들어야함?.......
 } MPACKET;
 /* _______________________________________________________________________________ 
 
@@ -80,7 +81,7 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
-		TRACE("Event.data : %d\n", pKey->vkCode);
+		TRACE("key Code : %d\n", pKey->vkCode);
 	//	TRACE("SENDMESSAGE...과연 copyData에서 받을까?\n");
 
 	}
@@ -238,11 +239,11 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 		CDS.cbData = sizeof(tmp);
 		CDS.lpData = &tmp;
 
-		tmp.msgType = 2; 
+		tmp.msgType = 2; // mouse
 		tmp.xCoord = pt.x;
 		tmp.yCoord = pt.y;
 		
-		TRACE("x : %d, y : %d\n", pt.x, pt.y);
+		//TRACE("x : %d, y : %d\n", pt.x, pt.y);
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 			
 	}

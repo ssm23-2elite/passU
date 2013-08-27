@@ -18,7 +18,8 @@ public:
 	CSocketList m_clientSock;
 */
 	CMyListen();
-	
+	CObList m_sockList;
+	int m_AcceptCount;
 	virtual ~CMyListen();
 	virtual void OnAccept(int nErrorCode);
 

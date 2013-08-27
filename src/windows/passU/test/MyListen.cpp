@@ -33,8 +33,11 @@ void CMyListen::OnAccept(int nErrorCode)
 
 		if(pThread){
 			pThread->m_hSocket = tmp.Detach();
-		//	m_sockList.AddTail(pThread);
+			m_sockList.AddTail(pThread);
+			m_AcceptCount = m_sockList.GetCount();
 			pThread->ResumeThread(); 
+			TRACE("m_sockList Add success, m_Acceptcount : %d\n", m_AcceptCount);
+			
 		}
 
 		AfxMessageBox(_T("쓰레드 생성, 연결 완료!"));
