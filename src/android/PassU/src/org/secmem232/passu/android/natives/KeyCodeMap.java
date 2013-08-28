@@ -2,6 +2,7 @@ package org.secmem232.passu.android.natives;
 
 import java.util.HashMap;
 
+import android.os.Build;
 import android.util.Log;
 
 public class KeyCodeMap {
@@ -51,11 +52,14 @@ public class KeyCodeMap {
 		M.put(WindowsKeyCode.VK_SQUARE_LEFT_BRACKET, NativeKeyCode.KEY_LEFTBRACE);
 		M.put(WindowsKeyCode.VK_SQUARE_RIGHT_BRACKET, NativeKeyCode.KEY_RIGHTBRACE);
 		M.put(WindowsKeyCode.KEY_BACK, NativeKeyCode.KEY_DEL);
-		M.put(WindowsKeyCode.KEY_F1, NativeKeyCode.KEY_HOME);
+		if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1)
+			M.put(WindowsKeyCode.KEY_F1, NativeKeyCode.KEY_MOVE_HOME);
+		else
+			M.put(WindowsKeyCode.KEY_F1, NativeKeyCode.KEY_HOME);
 		M.put(WindowsKeyCode.KEY_F2, NativeKeyCode.KEY_BACK);
 		M.put(WindowsKeyCode.KEY_F3, NativeKeyCode.KEY_VOLUMEUP);
 		M.put(WindowsKeyCode.KEY_F4, NativeKeyCode.KEY_VOLUMEDOWN);
-		M.put(WindowsKeyCode.KEY_F5, NativeKeyCode.KEY_CAMERA);
+		M.put(WindowsKeyCode.KEY_F5, NativeKeyCode.KEY_MENU);
 		M.put(WindowsKeyCode.KEY_F6, NativeKeyCode.KEY_POWER);
 		M.put(WindowsKeyCode.VK_OEM_COMMA, NativeKeyCode.KEY_COMMA);
 		M.put(WindowsKeyCode.KEY_LCONTROL, NativeKeyCode.KEY_LCTRL);
