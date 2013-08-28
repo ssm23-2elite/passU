@@ -37,6 +37,7 @@ public:
 	void sendKeyDown(UINT keyCode);
 	void sendKeyData(KPACKET *packet);
 
+	void sendClientData(CPACKET *pPacket);
 // 재정의입니다.
 public:
 	virtual BOOL InitInstance();
