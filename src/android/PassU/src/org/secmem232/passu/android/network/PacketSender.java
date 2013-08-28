@@ -13,9 +13,9 @@ public class PacketSender {
 	public void setOutputStream(OutputStream stream){
 		this.sendStream = stream;
 	}
-	public void send(Packet packet) throws IOException{		
+	public void send(byte[] b) throws IOException{		
 		synchronized(java.lang.Object.class){
-			sendStream.write(packet.asByteArray(), 0, Packet.LENGTH);
+			sendStream.write(b, 0, b.length);
 		}
 	}
 }

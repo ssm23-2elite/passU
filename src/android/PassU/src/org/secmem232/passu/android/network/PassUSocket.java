@@ -21,6 +21,7 @@ public class PassUSocket implements PacketListener {
 
 	private PacketReceiver packetReceiver;	
 
+	private int client_id;
 	// Event listeners
 	private VirtualEventListener mVirtEventListener;
 	private ServerConnectionListener mServerConnectionListener;
@@ -58,11 +59,11 @@ public class PassUSocket implements PacketListener {
 	 * @param ipAddr ip address
 	 * @throws IOException
 	 */
-	public synchronized void connect(String ip, int port){
+	public synchronized boolean connect(String ip, int port){
 		if(D.D) Log.w(LOG, "connect");
 		try{
 			socket = new Socket();
-			socket.connect(new InetSocketAddress(ip, port), 5000); // Set timeout to 5 seconds
+			socket.connect(new InetSocketAddress(ip, port), 2000); // Set timeout to 2 seconds
 
 			// Open outputStream
 			sendStream = socket.getOutputStream();
@@ -77,9 +78,13 @@ public class PassUSocket implements PacketListener {
 			packetReceiver.start();	
 
 			mServerConnectionListener.onServerConnected(ip, port);
+			
+			return true;
 		} catch(IOException e) {
 			e.printStackTrace();
 			mServerConnectionListener.onServerConnectionFailed();
+			
+			return false;
 		}
 	}
 
@@ -89,6 +94,9 @@ public class PassUSocket implements PacketListener {
 	 */
 	public void disconnect(){
 		if(D.D) Log.w(LOG, "disconnect");
+		Packet packet = new Packet(PacketHeader.Message_Type.CLIENT, client_id, 0, 1);
+		sendEcho(packet.asByteArray());
+		
 		synchronized(this){
 			if(socket != null){
 				try{				
@@ -108,6 +116,9 @@ public class PassUSocket implements PacketListener {
 
 	private void cleanup(){
 		if(D.D) Log.w(LOG, "cleanup");
+		Packet packet = new Packet(PacketHeader.Message_Type.CLIENT, client_id, 0, 1);
+		sendEcho(packet.asByteArray());
+		
 		synchronized(this){
 			if(socket != null){
 				try{
@@ -127,16 +138,7 @@ public class PassUSocket implements PacketListener {
 	//Send screen state(On or Off)
 	public void sendScreenOnOffState(boolean state){
 		if(D.D) Log.w(LOG, "sendScreenOnOffState");
-		/*try{
 
-			if(state){				
-				packetSender.send(new Packet(OpCode.SCREEN_ON_STATE_INFO, null, 0));
-			}else{
-				packetSender.send(new Packet(OpCode.SCREEN_OFF_STATE_INFO, null, 0));
-			}
-		}catch(IOException e){
-			e.printStackTrace();
-		}*/
 	}
 
 	public void setClipboardText(Packet packet){
@@ -146,10 +148,10 @@ public class PassUSocket implements PacketListener {
 	}
 
 	//Send notification to Host
-	public void sendEcho(Packet packet){
+	public void sendEcho(byte[] b){
 		if(D.D) Log.w(LOG, "sendEcho");
 		try{
-			packetSender.send(packet);
+			packetSender.send(b);
 		}catch(IOException e){
 			e.printStackTrace();
 		}
@@ -159,65 +161,41 @@ public class PassUSocket implements PacketListener {
 	public void onPacketReceived(Packet packet) {
 		if(D.D) Log.w(LOG, "onPacketReceived");
 		Log.w(LOG, packet.toString());
-		if( packet.getDeviceType() == PacketHeader.Device_Type.KEYBOARD ) {
-			if( packet.getUpdownFlag() == PacketHeader.Updown_Flag.UP ) {
+		if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.KEYBOARD ) {
+			
+			if( packet.getUpdownFlag() == Packet.Updown_Flag.UP ) {
 				Integer keyCode = KeyCodeMap.M.get(packet.getKeyCode());
 				if(keyCode != null)
 					mVirtEventListener.onKeyUp(keyCode);
-			} else if( packet.getUpdownFlag() == PacketHeader.Updown_Flag.DOWN ) {
+			} else if( packet.getUpdownFlag() == Packet.Updown_Flag.DOWN ) {
 				Integer keyCode = KeyCodeMap.M.get(packet.getKeyCode());
 				if(keyCode != null)
 					mVirtEventListener.onKeyDown(keyCode);
 			}
-		} else if( packet.getDeviceType() == PacketHeader.Device_Type.MOUSE ) {
-			if( packet.getUpdownFlag() == PacketHeader.Updown_Flag.UP ) {
-				AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
-				mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
-				mVirtEventListener.onTouchUp();
-			} else if( packet.getUpdownFlag() == PacketHeader.Updown_Flag.DOWN ) {
-				AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
-				mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
-				mVirtEventListener.onTouchDown();
-			} else {
-				AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
-				mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
+			sendEcho(packet.asByteArray());
+		} else if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.MOUSE ) {
+			
+			if( packet.getLeftRight() == Packet.LeftRight.LEFT ) {
+				if( packet.getUpdownFlag() == Packet.Updown_Flag.UP ) {
+					AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
+					mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
+					mVirtEventListener.onTouchUp();
+				} else if( packet.getUpdownFlag() == Packet.Updown_Flag.DOWN ) {
+					AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
+					mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
+					mVirtEventListener.onTouchDown();
+				} else {
+					AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
+					mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
+				}
 			}
+			sendEcho(packet.asByteArray());
+		} else if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.CLIENT ) {
+			client_id = packet.getCId();
+			packet.setHello(1);
+			packet.setBye(0);
+			sendEcho(packet.asByteArray());
 		}
-		sendEcho(packet);
-
-		/*
-		switch(packet.get.GetEventCode()){
-		case EventPacket.SETCOORDINATES:
-			mVirtEventListener.onSetCoordinates(eventPacket.GetXPosition(), eventPacket.GetYPosition());
-			break;
-		case EventPacket.TOUCHDOWN:
-			mVirtEventListener.onSetCoordinates(eventPacket.GetXPosition(), eventPacket.GetYPosition());
-			mVirtEventListener.onTouchDown();
-			break;
-		case EventPacket.TOUCHUP:
-			mVirtEventListener.onTouchUp();
-			break;
-		case EventPacket.BACK:
-			mVirtEventListener.onKeyStroke(NativeKeyCode.KEY_BACK);
-			break;
-		case EventPacket.MENU:
-			mVirtEventListener.onKeyStroke(NativeKeyCode.KEY_MENU);
-			break;
-		case EventPacket.VOLUMEDOWN:
-			mVirtEventListener.onKeyStroke(NativeKeyCode.KEY_VOLUMEDOWN);			
-			break;
-		case EventPacket.VOLUMEUP:
-			mVirtEventListener.onKeyStroke(NativeKeyCode.KEY_VOLUMEUP);			
-			break;
-		case EventPacket.POWER:
-			mVirtEventListener.onKeyStroke(NativeKeyCode.KEY_POWER);			
-			break;
-		case EventPacket.HOME:
-			if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.GINGERBREAD_MR1)
-				mVirtEventListener.onKeyStroke(NativeKeyCode.KEY_MOVE_HOME);
-			else
-				mVirtEventListener.onKeyStroke(NativeKeyCode.KEY_HOME);
-		}*/
 	}
 
 	@Override
