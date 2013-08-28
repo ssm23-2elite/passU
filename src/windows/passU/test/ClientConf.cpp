@@ -84,7 +84,7 @@ void ClientConf::OnBnClickedOk()
 	CPACKET c;
 
 	c.msgType =3 ; // hello packet
-	c.first = 1;
+	c.hello = 1;
 
 	clientSock.Send((LPCSTR *)&c, sizeof(CPACKET)); // hello Packet
 
@@ -97,11 +97,9 @@ void ClientConf::receiveData(CClientSocket *s)
 
 	s->Receive((LPCSTR *)&tmp, sizeof(KPACKET));
 
-	TRACE("keycode : %d\n", tmp.keyCode);
-
 	unpackMessage(tmp); // 메시지 언팩
 
-	//AfxMessageBox(_T("receiveData!!!"));
+	AfxMessageBox(_T("receiveData!!!"));
 }
 
 
@@ -111,8 +109,8 @@ void ClientConf::OnBnClickedCancel()
 	CPACKET c;
 	c.c_id = clientID;
 	c.msgType = 3;
-	c.first = 0;
-	c.pad2 = 1;
+	c.hello = 0;
+	c.bye = 1;
 
 	clientSock.Send((LPCSTR *)&c, sizeof(CPACKET)); // 연결 종료 패킷 보냄
 
@@ -171,9 +169,9 @@ KPACKET ClientConf::packMessage(int msgType, int sendDev, int recvDev, int devTy
 	case 3: // Client
 		client.msgType = msgType;
 		client.c_id = sendDev;
-		client.first = recvDev;
-		client.pad2 = devType;
-		client.pad3 = relativeField;
+		client.pad3 = recvDev;
+		client.hello = devType;
+		client.bye = relativeField;
 		client.pad4 = updownFlag;
 		client.pad5 = pad1;
 		client.pad6 = keyCode;
@@ -196,16 +194,6 @@ KPACKET ClientConf::packMessage(int msgType, int sendDev, int recvDev, int devTy
 }
 
 void ClientConf::unpackMessage(KPACKET p){
-	keyboard.msgType = 0;
-	keyboard.sendDev = 0;
-	keyboard.recvDev = 0;
-	keyboard.deviceType = 0;
-	keyboard.relativeField = 0;
-	keyboard.updownFlag = 0;
-	keyboard.pad1 = 0;
-	keyboard.keyCode = 0;
-	keyboard.pad2 = 0;
-	keyboard.pad3 = 0;
 	switch(p.msgType){
 	case 1: // Keyboard
 		/*keyboard.msgType = p.msgType;
@@ -216,7 +204,7 @@ void ClientConf::unpackMessage(KPACKET p){
 		keyboard.updownFlag = p.updownFlag;
 		keyboard.keyCode = p.keyCode;*/
 		TRACE("keyCode : %d\n", p.keyCode);
-		keybd_event(p.keyCode, 0, 0, 0); // 전달받은 keyCode를 그대로 입력한다.
+		//keybd_event(p.keyCode, 0, 0, 0); // 전달받은 keyCode를 그대로 입력한다.
 		
 		TRACE("keybd_event success\n");
 	case 2: // Mouse
@@ -239,18 +227,25 @@ void ClientConf::unpackMessage(KPACKET p){
 
 
 	case 3: // Client
-		client.msgType = p.msgType;
+		/*client.msgType = p.msgType;
 		client.c_id = p.sendDev;
-		clientID = client.c_id;
+		clientID = client.c_id;*/
 
+		if(p.deviceType == 1){ // hello packet에 대한 답변을 받았을 때
+			clientID = p.sendDev;
+			m_connectFlag = true;
+			m_CBtn_ClientConnect.EnableWindow(FALSE);
+		} else if(p.deviceType == 1){ // bye 패킷을 받았을 때
+			AfxMessageBox(_T("Server가 닫혔습니다!"));
+			clientSock.Close();
+			m_connectFlag = false;
+			m_CBtn_ClientConnect.EnableWindow(TRUE);
+		}
 
-		memcpy(&keyboard, &mouse, sizeof(KPACKET));
 
 	case 4: // Data
 		data.msgType = p.msgType;
 		data.len = p.sendDev;
-
-		memcpy(&keyboard, &mouse, sizeof(KPACKET));
 
 	}
 

@@ -1,7 +1,15 @@
 
 #include <afxwin.h>
 #include <Windows.h>
+
+#define WM_KEYBOARD_MESSAGE	WM_USER + 1001
+#define WM_MOUSE_MESSAGE	WM_USER + 1002
+#define WM_CLIENT_MESSAGE	WM_USER + 1003
+#define WM_SERVER_MESSAGE	WM_USER + 1004
+
 HINSTANCE g_hInstance;		// Instance Handle
+CRITICAL_SECTION cs;
+
 
 HHOOK	g_hKeyboardHook;	// KeyBoard Hook Handle
 HHOOK	g_hMouseHook;		// Mouse Hook Handle
@@ -9,7 +17,10 @@ HHOOK	g_hMouseHook;		// Mouse Hook Handle
 // Shared DATA
 #pragma data_seg(".shared")
 HWND g_hWnd = NULL;		// Main hwnd. We will get this from the App
+HWND g_hMsgWnd = NULL;
 #pragma data_seg()
+
+BOOL m_overFlag = FALSE; // 커서가 클라이언트 쪽으로 넘어간 것을 확인하는 변수 /TRUE : 넘어감
 
 char *szMessageString(int ID);
 
@@ -52,9 +63,7 @@ _______________________________________________________________________________ 
 // Keyboard Hook Procedure
 extern "C" __declspec(dllexport)
 LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
-{
-	//TCHAR s[256];
-						
+{				
 
 	HWND hwnd = FindWindow(NULL, TEXT("PassU - Server"));
 	KBDLLHOOKSTRUCT *pKey = (KBDLLHOOKSTRUCT *)lParam;
@@ -85,9 +94,6 @@ LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 	//	TRACE("SENDMESSAGE...과연 copyData에서 받을까?\n");
 
 	}
-	// MessageBox(NULL, "Keyboard", "Hook", MB_OK);  <-- 짜증졸라 남..
-
-//	return 1;		// 다음 훅체인에 메시지 전달 안함--> 자기 스스로도 키보드 메세지를 못 받는다?
 	return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 }
 
@@ -97,7 +103,8 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 	COPYDATASTRUCT CDS;
 	POINT pt = {0};
 	GetCursorPos(&pt);
-	
+	int nWidth = GetSystemMetrics(SM_CXSCREEN);
+	int nHeight = GetSystemMetrics(SM_CYSCREEN);
 
 	HWND hwnd = FindWindow(NULL, TEXT("PassU - Server"));
 
@@ -195,12 +202,7 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 	
 		TRACE("x : %d, y : %d\n", pt.x, pt.y);
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-	//	MessageBox(g_hWnd, "MOUSEWHEEL", "WM_MOUSEWHEEL", MB_OK);
-	
-	//} else if(wParam == WM_MOUSEMOVE){ // 마우스 움직일 때
-	//		
-	//	//MessageBox(g_hWnd, "MOUSEMOVE", "WM_MOUSEMOVE", MB_OK);
-	//
+
 	} else if(wParam == WM_MBUTTONDOWN){ // 휠 버튼 DOWN
 			CDS.dwData = 1;
 		CDS.cbData = sizeof(tmp);
@@ -235,6 +237,12 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 	//	TRACE("WHEELBUTTONUP\n");
 	} else if(wParam == WM_MOUSEMOVE){ // 마우스 이동
+		
+				TRACE("%d, %d\n", nWidth, nHeight);
+				TRACE("%d, %d\n", pt.x, pt.y);
+		//if(m_overFlag == TRUE){
+		
+	//	}
 		CDS.dwData = 1;
 		CDS.cbData = sizeof(tmp);
 		CDS.lpData = &tmp;
@@ -244,7 +252,8 @@ LRESULT CALLBACK MouseHookProc(int nCode, WPARAM wParam, LPARAM lParam){
 		tmp.yCoord = pt.y;
 		
 		//TRACE("x : %d, y : %d\n", pt.x, pt.y);
-		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		if(m_overFlag)
+			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 			
 	}
 
@@ -293,6 +302,54 @@ void UnInstallMouseHook()
 	UnhookWindowsHookEx(g_hMouseHook);
 }
 
+LRESULT CALLBACK WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam);
+
+BOOL CreateMsgWnd(HINSTANCE hInst, HWND *phWnd){
+	WNDCLASS stWndClass;
+
+	stWndClass.cbClsExtra = 0;
+	stWndClass.cbWndExtra = 0;
+	stWndClass.cbClsExtra = 0;
+    stWndClass.cbWndExtra = 0;
+    stWndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+    stWndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+    stWndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    stWndClass.hInstance = hInst;
+    stWndClass.lpfnWndProc = (WNDPROC)WndProc;
+    stWndClass.lpszClassName = "MsgWnd";
+    stWndClass.lpszMenuName = NULL;
+    stWndClass.style = CS_HREDRAW | CS_VREDRAW;
+    RegisterClass(&stWndClass);
+ 
+    *phWnd = CreateWindow("MsgWnd", NULL, WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+        NULL, (HMENU)NULL, hInst, NULL);
+    if(*phWnd == NULL){
+        return FALSE;
+    }
+ 
+    return TRUE;
+}
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
+{
+    switch(uiMsg){
+	case WM_KEYBOARD_MESSAGE:
+        // 여기서 메세지 처리
+        break;
+    case WM_MOUSE_MESSAGE:
+        // 여기서 메세지 처리
+         break;
+	case WM_CLIENT_MESSAGE:
+        // 여기서 메세지 처리
+        break;
+	case WM_SERVER_MESSAGE:
+
+		break;
+    }
+ 
+    return DefWindowProc(hWnd, uiMsg, wParam, lParam);
+}
 /* _______________________________________________________________________________ 
 
 		Dll Main
@@ -300,6 +357,21 @@ _______________________________________________________________________________ 
 
 BOOL WINAPI DllMain(HINSTANCE hInst,DWORD fdwReason,LPVOID lpRes)
 {
-	g_hInstance = hInst;
+	switch(fdwReason){
+	case DLL_PROCESS_ATTACH:
+		CreateMsgWnd(hInst, &g_hMsgWnd);
+		break;
+	case DLL_PROCESS_DETACH:
+		if(g_hMsgWnd != NULL){
+			DestroyWindow(g_hMsgWnd);
+			g_hMsgWnd = NULL;
+		}
+				break;
+	case DLL_THREAD_ATTACH:
+		break;
+	case DLL_THREAD_DETACH:
+		break;
+
+	}
 	return TRUE;
 }
