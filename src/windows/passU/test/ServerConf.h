@@ -18,11 +18,9 @@ public:
 	bool m_bDragFlag; // 드래그 판별 플래그
 	bool m_applyFlag; // apply 눌렀나 판별하는 플래그
 	bool m_startFlag; // 서버 구동중인가 아닌가를 판별하는 플래그
-	int m_settingFlag[9]; // 버튼에 모니터 or 스마트폰 or 빈 칸인지 판별하는 플래그 ( -1 : 초기값, 0 : 모니터, 1 : 스마트폰 )
+	int *m_setFlag; // 동적 배열
 	int m_whereisPoint; // 마우스가 어느 위치에 있느냐? 기본값 : 5, 1 ~ 9 까지있음 , 이 변수의 -1 한 값이 아래 배열의 인덱스가 됨(클라이언트ID)
 	
-	int nSocket; // 클라이언트가 몇 명 들어왔는지 판별하는 변수
-	int client_id[9]; // 각 버튼마다 몇 번의 클라이언트 id가 저장되어 있는지 저장하는 배열
 	// 인덱스 + 1 : 버튼번호, 값 : 클라이언트 ID 
 
 	//typedef CTypedPtrArray<CObArray, CMySocket *> CSocketList;
@@ -111,4 +109,10 @@ public:
 	//afx_msg BOOL OnCopyData(CWnd *pWnd, COPYDATASTRUCT *pCopyDataStruct);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 	afx_msg void OnBnClickedButton14();
+	
+	int nSocket; // 클라이언트가 몇 명 들어왔는지 판별하는 변수
+	int client_id[9]; // 각 버튼마다 몇 번의 클라이언트 id가 저장되어 있는지 저장하는 배열
+	int m_settingFlag[9]; // 버튼에 모니터 or 스마트폰 or 빈 칸인지 판별하는 플래그 ( -1 : 초기값, 0 : 모니터, 1 : 스마트폰 )
+	
+	
 };

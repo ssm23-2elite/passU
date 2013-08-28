@@ -29,7 +29,7 @@ IMPLEMENT_DYNAMIC(ServerConf, CDialogEx)
 	, m_serverPortEdit(_T(""))
 	, serverIPAddress(_T(""))
 {
-
+	TRACE("초기화 코드 - 생성자");
 	/* 현재 서버가 될 컴퓨터의 IP를 알아내는 코드 */
 	WORD wVersionRequested;
 	WSADATA wsaData;
@@ -122,8 +122,9 @@ END_MESSAGE_MAP()
 
 void ServerConf::OnBnClickedStart()
 {
+	TRACE("---------------------------Start Button Click---------------------------");
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(m_applyFlag == FALSE){
+ 	if(m_applyFlag == FALSE){
 		AfxMessageBox(_T("Plz Enter Port Number !!"));
 		return ;
 	}
@@ -144,7 +145,7 @@ void ServerConf::OnBnClickedStart()
 }
 void ServerConf::initServer(int nPort)
 {
-
+		TRACE("---------------------------initServer---------------------------");
 	listen.Create(nPort);
 	listen.Listen();
 
@@ -154,6 +155,7 @@ void ServerConf::initServer(int nPort)
 
 void ServerConf::OnBnClickedCancel()
 {
+			TRACE("---------------------------OnBnClickedCancel---------------------------");
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	initFlag();
 
@@ -185,6 +187,7 @@ void ServerConf::OnBnClickedCancel()
 
 void ServerConf::OnBnClickedPortApply()
 {
+			TRACE("---------------------------OnBnClickedPortApply---------------------------");
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	UpdateData();
@@ -206,6 +209,7 @@ void ServerConf::OnBnClickedPortApply()
 
 void ServerConf::OnBnClickedPortCancel()
 {
+			TRACE("---------------------------OnBnClickedPortCancel---------------------------");
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_CButton_portApply.EnableWindow(TRUE);
 	m_portEditControl.EnableWindow(TRUE);
@@ -215,7 +219,7 @@ void ServerConf::OnBnClickedPortCancel()
 void ServerConf::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
+			TRACE("---------------------------OnLButtonDown---------------------------");
 	picControl[0] = this->GetDlgItem(IDC_PICCOM);
 	picControl[1] = this->GetDlgItem(IDC_PICPHN);
 
@@ -250,6 +254,7 @@ void ServerConf::OnLButtonDown(UINT nFlags, CPoint point)
 
 void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 {
+				TRACE("---------------------------OnLButtonUp---------------------------");
 	CPoint m_tmpPoint;
 	CBitmap m_tmpBitmap;
 
@@ -286,20 +291,19 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 
 				if(m_deviceFlag == 0){ // 컴퓨터
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
-
 					m_settingFlag[0] = 0;
+					m_setFlag[0] = 0;
 				} else if(m_deviceFlag == 1){ // 스마트폰
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP2);
-
 					m_settingFlag[0] =  1;
-				} else{ // 둘 다 아니면 그냥 리턴
-
+					m_setFlag[0] = 1;
+				} else{ // 둘 다 아니면 그냥 리턴6
 					m_settingFlag[0] = -1;
+					m_setFlag[0] = -1;
 					return;
 				}
 
 				m_CButton_one.SetBitmap(m_tmpBitmap); // 버튼에 이미지 로딩
-
 
 				UpdateData();Invalidate();RedrawWindow();
 				// 
@@ -312,13 +316,13 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 
 
 					m_settingFlag[1] = 0;
-
+					m_setFlag[1] = 0;
 				} else if(m_deviceFlag == 1){ // 스마트폰
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP2);
-
+					m_setFlag[1] = 1;
 					m_settingFlag[1] = 1;
 				} else{ // 둘 다 아니면 그냥 리턴
-
+					m_setFlag[1] = -1;
 					m_settingFlag[1] = -1;
 					return;
 				}
@@ -332,14 +336,14 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 			point.y >= getCoord[2].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 3일 때
 				if(m_deviceFlag == 0){ // 컴퓨터
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
-
+					m_setFlag[2] = 0;
 					m_settingFlag[2] = 0;
 				} else if(m_deviceFlag == 1){ // 스마트폰
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP2);
-
+				m_setFlag[2] = 1;
 					m_settingFlag[2] = 1;
 				} else{ // 둘 다 아니면 그냥 리턴
-
+					m_setFlag[2] = -1;
 					m_settingFlag[2] = -1;
 					return;
 				}
@@ -353,14 +357,14 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 			point.y >= getCoord[3].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 4일 때
 				if(m_deviceFlag == 0){ // 컴퓨터
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
-
+					m_setFlag[3] = 0;
 					m_settingFlag[3] = 0;
 				} else if(m_deviceFlag == 1){ // 스마트폰
-
+					m_setFlag[3] = 1;
 					m_settingFlag[3] = 1;
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP2);
 				} else{ // 둘 다 아니면 그냥 리턴
-
+					m_setFlag[3] = -1;
 					m_settingFlag[3] = -1;
 					return;
 				}
@@ -398,14 +402,14 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 		  point.y >= getCoord[5].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 6일 때
 			  if(m_deviceFlag == 0){ // 컴퓨터
 				  m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
-
+				  m_setFlag[5] = 0;
 				  m_settingFlag[5] = 0;
 			  } else if(m_deviceFlag == 1){ // 스마트폰
 				  m_tmpBitmap.LoadBitmapW(IDB_BITMAP2);
-
+				  m_setFlag[5] = 1;
 				  m_settingFlag[5] = 1;
 			  } else{ // 둘 다 아니면 그냥 리턴
-
+				  m_setFlag[5] = -1;
 				  m_settingFlag[5] = -1;
 				  return;
 			  }
@@ -418,15 +422,15 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 			point.y >= getCoord[6].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 7일 때
 				if(m_deviceFlag == 0){ // 컴퓨터
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
-
+					m_setFlag[6] = 0;
 					m_settingFlag[6] = 0;
 				} else if(m_deviceFlag == 1){ // 스마트폰
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP2);
-
+					m_setFlag[6] = 1;
 					m_settingFlag[6] = 1;
 
 				} else{ // 둘 다 아니면 그냥 리턴
-
+					m_setFlag[6] = -1;
 					m_settingFlag[6] = -1;
 					return;
 				}
@@ -439,15 +443,15 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 			point.y >= getCoord[7].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 8일 때
 				if(m_deviceFlag == 0){ // 컴퓨터
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
-
+					m_setFlag[7] = 0;
 					m_settingFlag[7] = 0;
 				} else if(m_deviceFlag == 1){ // 스마트폰
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP2);
-
+					m_setFlag[7] = 1;
 					m_settingFlag[7] = 1;
 
 				} else{ // 둘 다 아니면 그냥 리턴
-
+					m_setFlag[7] = -1;
 					m_settingFlag[7] = -1;
 					return;
 
@@ -463,15 +467,15 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 			point.y >= getCoord[8].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 9일 때
 				if(m_deviceFlag == 0){ // 컴퓨터
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP1);
-
+					m_setFlag[8] = 0;
 					m_settingFlag[8] = 0;
 				} else if(m_deviceFlag == 1){ // 스마트폰
 					m_tmpBitmap.LoadBitmapW(IDB_BITMAP2);
 
-
+					m_setFlag[8] = 1;
 					m_settingFlag[8] = 1;
 				} else{ // 둘 다 아니면 그냥 리턴
-
+					m_setFlag[8] = -1;
 					m_settingFlag[8] = -1;
 					return;
 				}
@@ -493,6 +497,7 @@ void ServerConf::OnLButtonUp(UINT nFlags, CPoint point)
 
 void ServerConf::OnMouseMove(UINT nFlags, CPoint point)
 {
+				TRACE("---------------------------OnMouseMove---------------------------");
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	CClientDC dc(this);
 	CString str;
@@ -512,6 +517,7 @@ void ServerConf::OnMouseMove(UINT nFlags, CPoint point)
 
 void ServerConf::OnBnClickedButton1()
 {
+				TRACE("---------------------------OnBnClickedButton1---------------------------");
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_settingFlag[0] != -1){
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
@@ -527,7 +533,7 @@ void ServerConf::OnBnClickedButton1()
 
 
 void ServerConf::OnBnClickedButton2()
-{
+{TRACE("---------------------------OnBnClickedButton2---------------------------");
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_settingFlag[1] != -1){
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
@@ -543,7 +549,7 @@ void ServerConf::OnBnClickedButton2()
 
 
 void ServerConf::OnBnClickedButton3()
-{
+{TRACE("---------------------------OnBnClickedButton3---------------------------");
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_settingFlag[2] != -1){
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
@@ -559,7 +565,7 @@ void ServerConf::OnBnClickedButton3()
 
 
 void ServerConf::OnBnClickedButton4()
-{
+{TRACE("---------------------------OnBnClickedButton4---------------------------");
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_settingFlag[3] != -1){
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
@@ -591,7 +597,7 @@ void ServerConf::OnBnClickedButton4()
 
 
 void ServerConf::OnBnClickedButton6()
-{
+{TRACE("---------------------------OnBnClickedButton6---------------------------");
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_settingFlag[5] != -1){
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
@@ -607,7 +613,7 @@ void ServerConf::OnBnClickedButton6()
 
 
 void ServerConf::OnBnClickedButton7()
-{
+{TRACE("---------------------------OnBnClickedButton7---------------------------");
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_settingFlag[6] != -1){
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
@@ -623,7 +629,7 @@ void ServerConf::OnBnClickedButton7()
 
 
 void ServerConf::OnBnClickedButton8()
-{
+{TRACE("---------------------------OnBnClickedButton8---------------------------");
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_settingFlag[7] != -1){
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
@@ -639,7 +645,7 @@ void ServerConf::OnBnClickedButton8()
 
 
 void ServerConf::OnBnClickedButton9()
-{
+{TRACE("---------------------------OnBnClickedButton9---------------------------");
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_settingFlag[8] != -1){
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
@@ -655,6 +661,7 @@ void ServerConf::OnBnClickedButton9()
 
 void ServerConf::closeClient(CMySocket *s)
 {
+	TRACE("---------------------------closeClient---------------------------");
 	if(m_startFlag == TRUE){
 		m_startFlag = FALSE;
 
@@ -665,7 +672,7 @@ void ServerConf::closeClient(CMySocket *s)
 }
 
 void ServerConf::receiveData(CMySocket *s)
-{
+{TRACE("---------------------------receiveData---------------------------");
 	KPACKET tmp;
 
 	s->Receive((LPCSTR *)&tmp, sizeof(KPACKET));
@@ -696,6 +703,7 @@ void ServerConf::receiveData(CMySocket *s)
 
 void ServerConf::initFlag(void)
 {
+	TRACE("---------------------------initFlag---------------------------");
 	nSocket = 0;
 	m_applyFlag = FALSE;
 	m_bDragFlag = FALSE;
@@ -704,7 +712,14 @@ void ServerConf::initFlag(void)
 		m_settingFlag[i] = -1;
 		client_id[i] = 0;
 	}
+	int n = 9;
+	m_setFlag = new int[n];
+
+	memset(m_setFlag, -1, 9);
+	m_setFlag[4] = 0;
+
 	m_settingFlag[4] = 0;
+
 	m_startFlag = TRUE;
 	m_whereisPoint = 5; // 기본값 5 ( 서버에 위치 )
 	m_keyBoardHook = FALSE;
@@ -719,26 +734,6 @@ BOOL ServerConf::PreTranslateMessage(MSG* pMsg) // PostMessage를 받아 Parsing하�
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 
-	// 일단은 KEY DOWN이라고는 하지만..
-	// ㅌ그냥 바로 실행해야할듯?
-	switch(pMsg->message){
-
-	case WM_TEST_MESSAGE:
-
-		//	AfxMessageBox(_T("receive PostMessage"));
-		return TRUE;
-	case WM_KEYBOARD_MESSAGE:
-		return TRUE;;
-
-	case WM_MOUSE_MESSAGE:
-		return TRUE;
-
-	case WM_CLIENT_MESSAGE:
-		return TRUE;
-
-	case WM_SERVER_MESSAGE:
-		return TRUE;
-	}
 	return CDialogEx::PreTranslateMessage(pMsg);
 }
 
@@ -753,6 +748,7 @@ BOOL ServerConf::PreTranslateMessage(MSG* pMsg) // PostMessage를 받아 Parsing하�
 
 
 KPACKET ServerConf::packMessage(int msgType, int sendDev, int recvDev, int devType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3){
+TRACE("---------------------------packMessage---------------------------");
 	KPACKET k;
 	k.msgType = 0;
 	k.sendDev = 0;
@@ -829,6 +825,7 @@ KPACKET ServerConf::packMessage(int msgType, int sendDev, int recvDev, int devTy
 }
 
 void ServerConf::unpackMessage(KPACKET p, CMySocket *s){
+	TRACE("---------------------------unpackMessage---------------------------");
 	tmp = &listen.m_sockList; // 쓰레드 리스트 가져옴
 	int count = tmp->GetCount();
 	POSITION pos = tmp->GetHeadPosition(); // 맨 처음 헤드를 포인팅함
@@ -880,7 +877,6 @@ void ServerConf::unpackMessage(KPACKET p, CMySocket *s){
 		}
 
 		if(c.bye == 1){ // bye 패킷인 경우
-			if(c.c_id != 0){
 				nSocket -= 1;
 
 				// 클라이언트 id 가 1 2 3 4 6 7 8 9 이렇게 8개 잇는데, 만약 c_id 가 
@@ -898,7 +894,6 @@ void ServerConf::unpackMessage(KPACKET p, CMySocket *s){
 					uninstallKeyhook();
 					uninstallMousehook();
 				}
-			}
 		}
 
 		//	PostMessage(WM_CLIENT_MESSAGE, 0, 0);
@@ -921,14 +916,14 @@ void ServerConf::unpackMessage(KPACKET p, CMySocket *s){
 }
 
 BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
-{
+{TRACE("---------------------------OnCopyData---------------------------");
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	HEVENT *hEVENT; 
 	MPACKET *mEVENT;
 	int nWidth = GetSystemMetrics(SM_CXSCREEN);
 	int nHeight = GetSystemMetrics(SM_CYSCREEN);
-
-	//TRACE("nWidth : %d, nHeight : %d\n", nWidth, nHeight);
+	HWND dllWnd = FindWindowA(NULL, "MsgWnd");
+	TRACE("nWidth : %d, nHeight : %d\n", nWidth, nHeight);
 
 	tmp = &listen.m_sockList; // 쓰레드 리스트 가져옴
 	int count = tmp->GetCount();
@@ -941,24 +936,24 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
 
-
 			keyP.deviceType = 1;
 			keyP.msgType = 1;
 			keyP.keyCode = hEVENT->keyCode;
 
-			for(int i = 0 ; i < 9 ; i ++){
-				tmp->GetNext(pos);
-				if((m_whereisPoint == i) && (i != 5)){ // 
-					cThread = (CMyThread *)tmp->GetAt(pos);
-					cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
-				}
-			}
+			//for(int i = 0 ; i < 9 ; i ++){
+			//	tmp->GetNext(pos);
+			//	if((m_whereisPoint == i) && (i != 5)){ // 
+			//		cThread = (CMyThread *)tmp->GetAt(pos);
+			//		cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
+			//	}
+			//}
 		}
 		break;
 	case 1: // 마우스 정보를 얻어오면
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
-
 		if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
+			TRACE("m_whereisPoint : %d, client_id[3] : %d, m_settingflag[3] : %d\n", m_whereisPoint, m_settingFlag[3], client_id[3]);
+		
 			if(m_whereisPoint == 5 && m_settingFlag[3] != -1 && client_id[3] != 0){ // 4번 버튼이 비지 않았고, 서버 쪽에 포인트가 있으면,
 				m_whereisPoint = 4; // 4번 버튼으로 포인트를 옮긴 후 마우스 이동 
 				mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (nWidth - 15)* 65535 / nWidth, mEVENT->yCoord * 65535 / nHeight, 0, 0);
@@ -966,7 +961,8 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				// 마우스 커서 없애고 키보드, 마우스 이벤트 처리 전부 무시하게 만듬
 
 
-
+				SendMessageA(dllWnd, WM_KEYBOARD_FALSE, 0, 0);
+				SendMessageA(dllWnd, WM_MOUSE_FALSE, 0, 0);
 
 			} else if(m_whereisPoint == 6){ // 만약 6번에 포인터가 있었다면
 				m_whereisPoint = 5; // 서버쪽으로 포인트를 옮긴 후 마우스 이동
@@ -974,27 +970,30 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 				// 마우스 커서 출력하고 마우스, 키보드 전부 다시 이벤트 받도록 함
 
-
-
+				SendMessageA(dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+				SendMessageA(dllWnd, WM_MOUSE_TRUE, 0, 0);
 
 			} else
 				return true;
-			for(int i = 0 ; i < client_id[3] - 1; i ++){ // 이게... 0부터 시작하는거니깐 id의 값보다 1만큼 작게 for문이 돌아야 정확한 pos가 나온다.
-				tmp->GetNext(pos);
-			}
+			//for(int i = 0 ; i < client_id[3] - 1; i ++){ // 이게... 0부터 시작하는거니깐 id의 값보다 1만큼 작게 for문이 돌아야 정확한 pos가 나온다.
+			//	tmp->GetNext(pos);
+			//}
 
-			cThread = (CMyThread *)tmp->GetAt(pos);
-			cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
+			//cThread = (CMyThread *)tmp->GetAt(pos);
+			//cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
 		} 
 
 		if(mEVENT->yCoord<= 2) { // 화면 위족에 붙을 때
+		TRACE("m_whereisPoint : %d, client_id[1] : %d, m_settingflag[1] : %d\n", m_whereisPoint, m_settingFlag[1], client_id[1]);
+		
 			if(m_whereisPoint == 5 && m_settingFlag[1] != -1 && client_id[1] != 0){ // 2번 버튼이 비지 않았고, 서버 쪽에 포인트가 있으면,
 				m_whereisPoint = 2; // 2번 버튼으로 옮긴 후 마우스 이동
 				mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, (nHeight - 15) * 65535 / nHeight, 0, 0);
 
 				// 마우스 커서 없애고 키보드, 마우스 이벤트 처리 전부 무시하게 만듬
 
-
+				SendMessageA(dllWnd, WM_KEYBOARD_FALSE, 0, 0);
+				SendMessageA(dllWnd, WM_MOUSE_FALSE, 0, 0);
 
 
 			} else if(m_whereisPoint == 8){ // 8번에 포인터가 있었다면
@@ -1004,27 +1003,31 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 				// 마우스 커서 출력하고 마우스, 키보드 전부 다시 이벤트 받도록 함
 
-
+				SendMessageA(dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+				SendMessageA(dllWnd, WM_MOUSE_TRUE, 0, 0);
 
 
 			} else
 				return true;
 
-			for(int i = 0 ; i < client_id[1] - 1; i ++){ // 이게... 0부터 시작하는거니깐 id의 값보다 1만큼 작게 for문이 돌아야 정확한 pos가 나온다.
-				tmp->GetNext(pos);
-			}
-			cThread = (CMyThread *)tmp->GetAt(pos);
-			cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
+			//for(int i = 0 ; i < client_id[1] - 1; i ++){ // 이게... 0부터 시작하는거니깐 id의 값보다 1만큼 작게 for문이 돌아야 정확한 pos가 나온다.
+			//	tmp->GetNext(pos);
+			//}
+			//cThread = (CMyThread *)tmp->GetAt(pos);
+			//cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
 
 		} 
 
 		if(mEVENT->xCoord >= nWidth - 2){	 // 화면 오른 쪽에 붙을 때
+			TRACE("m_whereisPoint : %d, client_id[5] : %d, m_settingflag[5] : %d\n", m_whereisPoint, m_settingFlag[5], client_id[5]);
+		
 			if(m_whereisPoint == 5 && m_settingFlag[5] != -1 && client_id[5] != 0){ // 6번 버튼이 비지 않았고, 서버 쪽에 포인트가 있으면,
 				m_whereisPoint = 6;
 				mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, 15 * 65535 / nWidth, mEVENT->yCoord * 65535 / nHeight, 0, 0);
 
 				// 마우스 커서 없애고 키보드, 마우스 이벤트 처리 전부 무시하게 만듬
-
+				SendMessageA(dllWnd, WM_KEYBOARD_FALSE, 0, 0);
+				SendMessageA(dllWnd, WM_MOUSE_FALSE, 0, 0);
 
 
 
@@ -1034,27 +1037,31 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 				// 마우스 커서 출력하고 마우스, 키보드 전부 다시 이벤트 받도록 함
 
-
+				SendMessageA(dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+				SendMessageA(dllWnd, WM_MOUSE_TRUE, 0, 0);
 
 
 			}else
 				return true;
 
-			for(int i = 0 ; i < client_id[5] - 1; i ++){ // 이게... 0부터 시작하는거니깐 id의 값보다 1만큼 작게 for문이 돌아야 정확한 pos가 나온다.
-				tmp->GetNext(pos);
-			}
-			cThread = (CMyThread *)tmp->GetAt(pos);
-			cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
+			//for(int i = 0 ; i < client_id[5] - 1; i ++){ // 이게... 0부터 시작하는거니깐 id의 값보다 1만큼 작게 for문이 돌아야 정확한 pos가 나온다.
+			//	tmp->GetNext(pos);
+			//}
+			//cThread = (CMyThread *)tmp->GetAt(pos);
+			//cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
 		} 
 
 		if(mEVENT->yCoord >= nHeight - 2){ // 화면 아래쪽에 붙을 때
+			TRACE("m_whereisPoint : %d, client_id[7] : %d, m_settingflag[7] : %d\n", m_whereisPoint, m_settingFlag[7], client_id[7]);
+		
 			if(m_whereisPoint == 5 && m_settingFlag[7] != -1 && client_id[7] != 0){ // 8번 버튼이 비지 않았고, 서버 쪽에 포인트가 있으면,
 				m_whereisPoint = 8;
 				mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, 15 * 65535 / nHeight, 0, 0);
 
 				// 마우스 커서 없애고 키보드, 마우스 이벤트 처리 전부 무시하게 만듬
-
-
+				
+				SendMessageA(dllWnd, WM_KEYBOARD_FALSE, 0, 0);
+				SendMessageA(dllWnd, WM_MOUSE_FALSE, 0, 0);
 
 
 			} else if(m_whereisPoint == 2){
@@ -1064,16 +1071,19 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 				// 마우스 커서 출력하고 마우스, 키보드 전부 다시 이벤트 받도록 함
 
-
+				SendMessageA(dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+				SendMessageA(dllWnd, WM_MOUSE_TRUE, 0, 0);
 
 
 			}else
 				return true;
-			for(int i = 0 ; i < client_id[7] - 1; i ++){ // 이게... 0부터 시작하는거니깐 id의 값보다 1만큼 작게 for문이 돌아야 정확한 pos가 나온다.
-				tmp->GetNext(pos);
-			}
-			cThread = (CMyThread *)tmp->GetAt(pos);
-			cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
+		
+			
+			//for(int i = 0 ; i < client_id[7] - 1; i ++){ // 이게... 0부터 시작하는거니깐 id의 값보다 1만큼 작게 for문이 돌아야 정확한 pos가 나온다.
+			//	tmp->GetNext(pos);
+			//}	
+			//cThread = (CMyThread *)tmp->GetAt(pos);
+			//cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
 
 		}
 		break;
