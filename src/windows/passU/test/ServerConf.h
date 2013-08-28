@@ -12,14 +12,15 @@ class ServerConf : public CDialogEx
 
 public:
 	ServerConf(CWnd* pParent = NULL);   // 표준 생성자입니다.
-	virtual ~ServerConf();
 	
+	int nSocket; // 클라이언트가 몇 명 들어왔는지 판별하는 변수
 	int m_deviceFlag; // 모니터인가, 스마트폰 그림인가를 판별하는 플래그 ( -1 : 초기값, 0 : 모니터, 1 : 스마트폰 )
 	bool m_bDragFlag; // 드래그 판별 플래그
 	bool m_applyFlag; // apply 눌렀나 판별하는 플래그
 	bool m_startFlag; // 서버 구동중인가 아닌가를 판별하는 플래그
-	int *m_setFlag; // 동적 배열
 	int m_whereisPoint; // 마우스가 어느 위치에 있느냐? 기본값 : 5, 1 ~ 9 까지있음 , 이 변수의 -1 한 값이 아래 배열의 인덱스가 됨(클라이언트ID)
+	int client_id[9]; // 각 버튼마다 몇 번의 클라이언트 id가 저장되어 있는지 저장하는 배열
+	
 	
 	// 인덱스 + 1 : 버튼번호, 값 : 클라이언트 ID 
 
@@ -57,10 +58,13 @@ public:
 	CMyThread *cThread;
 	CObList *tmp;
 
+	int m_settingFlag[9]; // 버튼에 모니터 or 스마트폰 or 빈 칸인지 판별하는 플래그 ( -1 : 초기값, 0 : 모니터, 1 : 스마트폰 )
+
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 // 대화 상자 데이터입니다.
 	enum { IDD = IDD_DIALOG1 };
-
+	virtual ~ServerConf();
+	
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
 	
@@ -79,15 +83,17 @@ public:
 	CButton m_CButton_eight;
 	CButton m_CButton_nine;
 	CString m_serverPortEdit;
-	afx_msg void OnBnClickedPortApply();
+	CButton m_CBtn_Start;
+	CButton m_CBtn_stop;
 	CButton m_CButton_portApply;
-	afx_msg void OnBnClickedPortCancel();
 	CButton m_CButton_portCancel;
+	CEdit m_portEditControl;
+	CString serverIPAddress;
+	afx_msg void OnBnClickedPortApply();
+	afx_msg void OnBnClickedPortCancel();
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	CEdit m_portEditControl;
-	CString serverIPAddress;
 	void initServer(int nPort);
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnBnClickedButton2();
@@ -100,8 +106,7 @@ public:
 	afx_msg void OnBnClickedButton9();
 	void closeClient(CMySocket *s);
 	void receiveData(CMySocket *s);
-	CButton m_CBtn_Start;
-	CButton m_CBtn_stop;
+	//void receiveData(void);
 	void initFlag(void);
 //	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	KPACKET packMessage(int msgType, int sendDev, int recvDev, int devType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3);
@@ -109,10 +114,6 @@ public:
 	//afx_msg BOOL OnCopyData(CWnd *pWnd, COPYDATASTRUCT *pCopyDataStruct);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 	afx_msg void OnBnClickedButton14();
-	
-	int nSocket; // 클라이언트가 몇 명 들어왔는지 판별하는 변수
-	int client_id[9]; // 각 버튼마다 몇 번의 클라이언트 id가 저장되어 있는지 저장하는 배열
-	int m_settingFlag[9]; // 버튼에 모니터 or 스마트폰 or 빈 칸인지 판별하는 플래그 ( -1 : 초기값, 0 : 모니터, 1 : 스마트폰 )
 	
 	
 };

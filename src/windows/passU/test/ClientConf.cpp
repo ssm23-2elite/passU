@@ -256,24 +256,6 @@ void ClientConf::unpackMessage(KPACKET p){
 BOOL ClientConf::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
-	switch(pMsg->message){
-	case WM_KEYBOARD_MESSAGE:
-		return TRUE;
-		break;
-
-	case WM_MOUSE_MESSAGE:
-		return TRUE;
-		break;
-
-	case WM_CLIENT_MESSAGE:
-		return TRUE;
-		break;
-
-	case WM_SERVER_MESSAGE:
-		return TRUE;
-		break;
-
-	}
 	return CDialogEx::PreTranslateMessage(pMsg);
 }
 

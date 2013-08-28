@@ -78,6 +78,7 @@ extern "C" __declspec(dllexport)
 		return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 
 	if(wParam == WM_KEYDOWN){
+	TRACE("" + m_keyboard);
 		if(m_keyboard == TRUE){
 			COPYDATASTRUCT CDS;
 			HEVENT Event;
@@ -115,6 +116,7 @@ extern "C" __declspec(dllexport)
 
 		if(nCode < 0 )
 			return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
+			TRACE("" + m_mouse);
 		if(m_mouse == TRUE){
 			if(wParam == WM_LBUTTONDOWN){ // ¿ÞÂÊ ¹öÆ° DOWN
 
