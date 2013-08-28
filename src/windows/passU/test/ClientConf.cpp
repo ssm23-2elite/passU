@@ -98,8 +98,6 @@ void ClientConf::receiveData(CClientSocket *s)
 	s->Receive((LPCSTR *)&tmp, sizeof(KPACKET));
 
 	unpackMessage(tmp); // 메시지 언팩
-
-	AfxMessageBox(_T("receiveData!!!"));
 }
 
 
@@ -207,6 +205,7 @@ void ClientConf::unpackMessage(KPACKET p){
 		//keybd_event(p.keyCode, 0, 0, 0); // 전달받은 keyCode를 그대로 입력한다.
 		
 		TRACE("keybd_event success\n");
+		break;
 	case 2: // Mouse
 		
 	/*	mouse.msgType = p.msgType;
@@ -219,12 +218,12 @@ void ClientConf::unpackMessage(KPACKET p){
 		mouse.wheelFlag = p.keyCode;
 		mouse.xCoord = p.pad2;
 		mouse.yCoord = p.pad3;
-
+		
 		memcpy(&keyboard, &mouse, sizeof(KPACKET));*/
-		
-		
+		TRACE("Mouse Event\n");
+		TRACE("x : %d, y : %d\n", p.pad2, p.pad3);
 	//	SetCursorPos(p.pad2, p.pad3); // 마우스 커서 그대로 이동
-
+		break;
 
 	case 3: // Client
 		/*client.msgType = p.msgType;
@@ -234,12 +233,12 @@ void ClientConf::unpackMessage(KPACKET p){
 		if(p.deviceType == 1){ // hello packet에 대한 답변을 받았을 때
 			clientID = p.sendDev;
 			m_connectFlag = true;
-			m_CBtn_ClientConnect.EnableWindow(FALSE);
+	//		m_CBtn_ClientConnect.EnableWindow(FALSE);
 		} else if(p.deviceType == 1){ // bye 패킷을 받았을 때
 			AfxMessageBox(_T("Server가 닫혔습니다!"));
 			clientSock.Close();
 			m_connectFlag = false;
-			m_CBtn_ClientConnect.EnableWindow(TRUE);
+	//		m_CBtn_ClientConnect.EnableWindow(TRUE);
 		}
 
 

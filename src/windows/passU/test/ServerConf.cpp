@@ -670,15 +670,13 @@ void ServerConf::closeClient(CMySocket *s)
 
 void ServerConf::receiveData(CMySocket *s) // 여기서 갑자기 m_settingFlag, nSocket, client_id 의 값이 바뀐다. 왜? 딱히 바뀔만한 상황이 없는데...
 {
-
-	TRACE("%d\n", nSocket);
 	TRACE("---------------------------receiveData---------------------------\n");
 	KPACKET tmp;
 	//initFlag();
 	s->Receive((LPCSTR *)&tmp, sizeof(KPACKET));
 
 	unpackMessage(tmp, s);
-
+	 
 	AfxMessageBox(_T("receive Success!!")); 
 }
 
@@ -806,27 +804,10 @@ void ServerConf::unpackMessage(KPACKET p, CMySocket *s){
 	TRACE("---------------------------unpackMessage---------------------------\n");
 	switch(p.msgType){
 	case 1: // Keyboard
-		/*		k.deviceType = p.deviceType;
-		k.keyCode = p.keyCode;
-		k.msgType = p.msgType;
-		k.sendDev = p.sendDev;
-		k.recvDev = p.recvDev;
-		k.updownFlag = p.updownFlag;
-		k.relativeField = p.relativeField;*/
-
+	
 		break;
 
 	case 2: // Mouse
-
-		//m.deviceType = p.deviceType;
-		//m.msgType = p.msgType;
-		//m.sendDev = p.sendDev;
-		//m.recvDev = p.recvDev;
-		//m.relativeField = p.relativeField;
-		//m.updownFlag = p.updownFlag;
-		//m.wheelFlag = p.pad1;
-		//m.xCoord = p.keyCode;
-		//m.yCoord = p.pad2;
 
 		break;
 
@@ -840,22 +821,26 @@ void ServerConf::unpackMessage(KPACKET p, CMySocket *s){
 
 		if(c.hello == 1){ // 헬로 패킷인 경우 그 클라이언트 id를 알려준다.
 
-			nSocket += 1;
+			nSocket = 1;
 
-			for(int i = 0 ; i < 9 ; i ++){ // 클라이언트 id와 버튼 연결
-				if((m_settingFlag[i] != -1) && (i != 4) && (client_id[i] == 0)){
-					if(nSocket > 4){
-						client_id[i] = (nSocket + 1); //server(5) 때문에 클라이언트 수보다 하나 더한 값이 클라이언트 id가 된다.
-						break;
-					} else if(nSocket <= 4){
-						client_id[i] = nSocket;
-						break;
-					}
-				}
-			}
+			//for(int i = 0 ; i < 9 ; i ++){ // 클라이언트 id와 버튼 연결
+			//	if((m_settingFlag[i] != -1) && (i != 4) && (client_id[i] == 0)){
+			//		if(nSocket > 4){
+			//			client_id[i] = (nSocket + 1); //server(5) 때문에 클라이언트 수보다 하나 더한 값이 클라이언트 id가 된다.
+			//			break;
+			//		} else if(nSocket <= 4){
+			//			client_id[i] = nSocket;
+			//			break;
+			//		}
+			//	}
+			//}
+
+			client_id[3] = 1;
+			m_settingFlag[3] = 0;
+
 			TRACE("after nSocket : %d\n", nSocket);
 			c.hello = 0;
-			keyP = packMessage(3, nSocket, 0, 1, 0, 0, 0, 0, 0, 0);
+			keyP = packMessage(3, 1, 0, 1, 0, 0, 0, 0, 0, 0);
 			TRACE("unpackMessage nSocket : %d\n", nSocket);
 
 			s->Send((LPCSTR)&keyP, sizeof(KPACKET));
@@ -907,12 +892,19 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	int nWidth = GetSystemMetrics(SM_CXSCREEN);
 	int nHeight = GetSystemMetrics(SM_CYSCREEN);
 	HWND dllWnd = FindWindowA(NULL, "MsgWnd");
-	TRACE("nWidth : %d, nHeight : %d\n", nWidth, nHeight);
+	//TRACE("nWidth : %d, nHeight : %d\n", nWidth, nHeight);
 
 	tmp = &listen.m_sockList; // 쓰레드 리스트 가져옴
 	int count = tmp->GetCount();
 	POSITION pos = tmp->GetHeadPosition(); // 맨 처음 헤드를 포인팅함
 	//TRACE("count : %d\n", count);
+
+	client_id[3] = 1;
+
+
+
+
+
 	switch(pCopyDataStruct -> dwData){
 
 	case 0: // keyboard
@@ -924,13 +916,8 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			keyP.msgType = 1;
 			keyP.keyCode = hEVENT->keyCode;
 
-			//for(int i = 0 ; i < 9 ; i ++){
-			//	tmp->GetNext(pos);
-			//	if((m_whereisPoint == i) && (i != 5)){ // 
-			//		cThread = (CMyThread *)tmp->GetAt(pos);
-			//		cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
-			//	}
-			//}
+			cThread = (CMyThread *) tmp->GetAt(pos);
+			cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
 		}
 		break;
 	case 1: // 마우스 정보를 얻어오면
@@ -955,12 +942,10 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 			} else
 				return true;
-			//for(int i = 0 ; i < client_id[3] - 1; i ++){ // 이게... 0부터 시작하는거니깐 id의 값보다 1만큼 작게 for문이 돌아야 정확한 pos가 나온다.
-			//	tmp->GetNext(pos);
-			//}
+			
 
-			//cThread = (CMyThread *)tmp->GetAt(pos);
-			//cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
+			cThread = (CMyThread *)tmp->GetAt(pos);
+			cThread->m_mySocket->Send((LPCSTR)&mEVENT, sizeof(MPACKET));
 		} 
 
 		if(mEVENT->yCoord<= 2) { // 화면 위족에 붙을 때
@@ -985,11 +970,9 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			} else
 				return true;
 
-			//for(int i = 0 ; i < client_id[1] - 1; i ++){ // 이게... 0부터 시작하는거니깐 id의 값보다 1만큼 작게 for문이 돌아야 정확한 pos가 나온다.
-			//	tmp->GetNext(pos);
-			//}
-			//cThread = (CMyThread *)tmp->GetAt(pos);
-			//cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
+			
+			cThread = (CMyThread *)tmp->GetAt(pos);
+			cThread->m_mySocket->Send((LPCSTR)&mEVENT, sizeof(MPACKET));
 
 		} 
 
@@ -1014,11 +997,9 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			}else
 				return true;
 
-			//for(int i = 0 ; i < client_id[5] - 1; i ++){ // 이게... 0부터 시작하는거니깐 id의 값보다 1만큼 작게 for문이 돌아야 정확한 pos가 나온다.
-			//	tmp->GetNext(pos);
-			//}
-			//cThread = (CMyThread *)tmp->GetAt(pos);
-			//cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
+			
+			cThread = (CMyThread *)tmp->GetAt(pos);
+			cThread->m_mySocket->Send((LPCSTR)&mEVENT, sizeof(MPACKET));
 		} 
 
 		if(mEVENT->yCoord >= nHeight - 2){ // 화면 아래쪽에 붙을 때
@@ -1041,13 +1022,10 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 			}else
 				return true;
-
-
-			//for(int i = 0 ; i < client_id[7] - 1; i ++){ // 이게... 0부터 시작하는거니깐 id의 값보다 1만큼 작게 for문이 돌아야 정확한 pos가 나온다.
-			//	tmp->GetNext(pos);
-			//}	
-			//cThread = (CMyThread *)tmp->GetAt(pos);
-			//cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
+			
+			TRACE("%d %d\n", mEVENT->xCoord, mEVENT->yCoord);
+			cThread = (CMyThread *)tmp->GetAt(pos);
+			cThread->m_mySocket->Send((LPCSTR)&mEVENT, sizeof(MPACKET));
 
 		}
 		break;
