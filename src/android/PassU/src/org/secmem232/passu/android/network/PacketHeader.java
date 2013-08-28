@@ -7,7 +7,7 @@ import org.secmem232.passu.android.util.Util;
  * @author Jake
  */
 public class PacketHeader{
-	public static final int LENGTH = 11;
+	public static final int LENGTH = 4;
 	public static final int MESSAGE_TYPE_LENGTH = 4;
 	
 	/*
