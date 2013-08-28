@@ -3,6 +3,8 @@ package org.secmem232.passu.android.network;
 import org.secmem232.passu.android.AR;
 import org.secmem232.passu.android.util.Util;
 
+import android.util.Log;
+
 /**
  * This class is parser for Packet ( PacketHeader + (keyCode, wheelFlag + xCoordinate + yCoordinate) ) 
  * @see PacketHeader
@@ -26,6 +28,7 @@ public class Packet {
 	public static final int Y_COORDINATE_LENGTH = 4;
 	
 	public static final int C_ID_LENGTH = 4;
+	public static final int PAD3_LENGTH = 4;
 	public static final int HELLO_LENGTH = 1;
 	public static final int BYE_LENGTH = 1;
 	
@@ -108,6 +111,7 @@ public class Packet {
 	private int xCoordinate;
 	private int yCoordinate;
 	private int c_id;
+	private int pad3;
 	private int hello;
 	private int bye;
 	private int len;
@@ -126,6 +130,7 @@ public class Packet {
 	private static byte[] xCoordinateBuffer = new byte[X_COORDINATE_LENGTH];
 	private static byte[] yCoordinateBuffer = new byte[Y_COORDINATE_LENGTH];
 	private static byte[] cidBuffer = new byte[C_ID_LENGTH];
+	private static byte[] pad3Buffer = new byte[PAD3_LENGTH];
 	private static byte[] helloBuffer = new byte[HELLO_LENGTH];
 	private static byte[] byeBuffer = new byte[BYE_LENGTH];
 	
@@ -166,11 +171,13 @@ public class Packet {
 		header = new PacketHeader(messageType);
 		
 		this.c_id = c_id;
+		this.pad3 = 0;
 		this.hello = hello;
 		this.bye = bye;
 	}
 	
 	public static Packet parse(byte[] rawPacket){
+		Log.w("parse", rawPacket.toString());
 		Packet packet = new Packet();		
 		
 		// Get header
@@ -254,10 +261,13 @@ public class Packet {
 			System.arraycopy(rawPacket, PacketHeader.LENGTH, cidBuffer, 0, C_ID_LENGTH);
 			packet.setCId(Util.ByteToInt(cidBuffer));
 			
-			System.arraycopy(rawPacket, PacketHeader.LENGTH + C_ID_LENGTH, helloBuffer, 0, HELLO_LENGTH);
+			System.arraycopy(rawPacket, PacketHeader.LENGTH + C_ID_LENGTH, pad3Buffer, 0, PAD3_LENGTH);
+			packet.setHello(Util.ByteToInt(pad3Buffer));
+			
+			System.arraycopy(rawPacket, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH, helloBuffer, 0, HELLO_LENGTH);
 			packet.setHello(Util.ByteToInt(helloBuffer));
 			
-			System.arraycopy(rawPacket, PacketHeader.LENGTH + C_ID_LENGTH + HELLO_LENGTH, 
+			System.arraycopy(rawPacket, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH, 
 					byeBuffer, 0, BYE_LENGTH);
 			packet.setBye(Util.ByteToInt(byeBuffer));
 			
@@ -275,7 +285,7 @@ public class Packet {
 			return String.format("%s%4d%4d%1d%1d%1d%1d%4d%4d%4d", getHeader(), 
 					sendDevice, receiveDevice, deviceType, relativeField, updownFlag, leftright, wheelFlag, xCoordinate, yCoordinate );
 		} else if (getHeader().getMessageType() == PacketHeader.Message_Type.CLIENT){
-			return String.format("UNKNOWN");
+			return String.format("%s%4d%4d%1d%1d", getHeader(), c_id, pad3, hello, bye);
 		} else {
 			return String.format("UNKNOWN");
 		}
@@ -323,8 +333,10 @@ public class Packet {
 					DEVICE_TYPE_LENGTH + RELATIVE_FIELD_LENGTH + UPDOWN_FLAG_LENGTH + LEFTRIGHT_LENGTH + WHEEL_FLAG_LENGTH + X_COORDINATE_LENGTH, yCoordinateBuffer.length);
 		} else if(getHeader().getMessageType() == PacketHeader.Message_Type.CLIENT) {
 			System.arraycopy(cidBuffer, 0, packetBuffer, PacketHeader.LENGTH, cidBuffer.length);
-			System.arraycopy(helloBuffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH, helloBuffer.length);
-			System.arraycopy(byeBuffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH + HELLO_LENGTH, byeBuffer.length);
+			System.arraycopy(pad3Buffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH, pad3Buffer.length);
+			System.arraycopy(helloBuffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH, helloBuffer.length);
+			System.arraycopy(byeBuffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH, byeBuffer.length);
+			
 		}
 		return packetBuffer;
 	}
