@@ -77,28 +77,28 @@ extern "C" __declspec(dllexport)
 	if(nCode<0)
 		return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 
-	if(wParam == WM_KEYDOWN){
-	TRACE("" + m_keyboard);
-		if(m_keyboard == TRUE){
-			COPYDATASTRUCT CDS;
-			HEVENT Event;
+	if(wParam == WM_KEYDOWN || WM_KEYUP){
+		//TRACE("" + m_keyboard);
+		//if(m_keyboard == TRUE){
+		COPYDATASTRUCT CDS;
+		HEVENT Event;
 
-			CDS.dwData = 0; // keyboard
-			CDS.cbData = sizeof(Event);
-			CDS.lpData = &Event;
+		CDS.dwData = 0; // keyboard
+		CDS.cbData = sizeof(Event);
+		CDS.lpData = &Event;
 
-			Event.type = 1; // WM_KEY
-			Event.keyCode = pKey->vkCode;
-			Event.data = wParam;
-			Event.lParam = lParam;
+		Event.type = 1; // WM_KEY
+		Event.keyCode = pKey->vkCode;
+		Event.data = wParam;
+		Event.lParam = lParam;
 
 
-			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
-			TRACE("key Code : %d\n", pKey->vkCode);
-			//	TRACE("SENDMESSAGE...과연 copyData에서 받을까?\n");
-		} else
-			return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
+		TRACE("key Code : %d\n", pKey->vkCode);
+		//	TRACE("SENDMESSAGE...과연 copyData에서 받을까?\n");
+		//	} else
+		//		return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 	}
 	return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 }
@@ -116,155 +116,157 @@ extern "C" __declspec(dllexport)
 
 		if(nCode < 0 )
 			return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
-			TRACE("" + m_mouse);
-		if(m_mouse == TRUE){
-			if(wParam == WM_LBUTTONDOWN){ // 왼쪽 버튼 DOWN
+		//	TRACE("" + m_mouse);
+		//if(m_mouse == TRUE){
+		if(wParam == WM_LBUTTONDOWN){ // 왼쪽 버튼 DOWN
 
 
-				CDS.dwData = 1; // mouse;
-				CDS.cbData = sizeof(tmp);
-				CDS.lpData = &tmp;
+			CDS.dwData = 1; // mouse;
+			CDS.cbData = sizeof(tmp);
+			CDS.lpData = &tmp;
 
-				tmp.msgType = 2; // mouse
-				tmp.updownFlag = 1; // down
-				tmp.leftRight = 0; // left
-				tmp.wheelFlag = 0;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
-				tmp.xCoord = pt.x;
-				tmp.yCoord = pt.y;
+			tmp.msgType = 2; // mouse
+			tmp.updownFlag = 1; // down
+			tmp.leftRight = 0; // left
+			tmp.wheelFlag = 0;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
+			tmp.xCoord = pt.x;
+			tmp.yCoord = pt.y;
 
-				TRACE("x : %d, y : %d\n", pt.x, pt.y);
+			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
 
-				int a = ::SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
-				//TRACE("LBUTTONDOWN\n");
-
-
-			} else if (wParam == WM_LBUTTONUP){ // 왼쪽 버튼 UP
-				CDS.dwData = 1;
-				CDS.cbData = sizeof(tmp);
-				CDS.lpData = &tmp;
-
-				tmp.msgType = 2; // mouse
-				tmp.updownFlag = 0; // up
-				tmp.leftRight = 0; // left
-				tmp.wheelFlag = 0; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
-				tmp.xCoord = pt.x;
-				tmp.yCoord = pt.y;
-
-				TRACE("x : %d, y : %d\n", pt.x, pt.y);
-				SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-				//TRACE("LBUTTONUP\n");
-
-				//	MessageBox(g_hWnd, "LBUTTONUP", "WM_LBUTTONUP", MB_OK);
-
-			} else if (wParam == WM_RBUTTONDOWN){ // 오른쪽 버튼 DOWN
-				CDS.dwData = 1;
-				CDS.cbData = sizeof(tmp);
-				CDS.lpData = &tmp;
-
-				tmp.msgType = 2; // mouse
-				tmp.updownFlag = 1; // down
-				tmp.leftRight = 1; // right
-				tmp.wheelFlag = 0;
-				tmp.xCoord = pt.x;
-				tmp.yCoord = pt.y;
-
-				TRACE("x : %d, y : %d\n", pt.x, pt.y);
-				SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-				//	TRACE("RBUTTONDOWN\n");
-
-				//	MessageBox(g_hWnd, "RBUTTONDOWN", "WM_RBUTTONDOWN", MB_OK);
-
-			} else if(wParam == WM_RBUTTONUP){ // 오른쪽 버튼 UP
-				CDS.dwData = 1;
-				CDS.cbData = sizeof(tmp);
-				CDS.lpData = &tmp;
-
-				tmp.msgType = 2; // mouse
-				tmp.updownFlag = 0; // up
-				tmp.leftRight = 1; // right
-				tmp.wheelFlag = 0;
-				tmp.xCoord = pt.x;
-				tmp.yCoord = pt.y;
-				//	TRACE("RBUTTONUP\n");
-
-				TRACE("x : %d, y : %d\n", pt.x, pt.y);
-				SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-
-				//	MessageBox(g_hWnd, "RBUTTONUP", "WM_RBUTTONUP", MB_OK);
-
-			} else if(wParam == WM_MOUSEWHEEL){ // 휠 움직일 때
-				CDS.dwData = 1;
-				CDS.cbData = sizeof(tmp);
-				CDS.lpData = &tmp;
-
-				tmp.msgType = 2; // mouse
-				//tmp.updownFlag = 0; // up
-				//tmp.leftRight = 1; // right
-				tmp.wheelFlag = 3;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
-				tmp.xCoord = pt.x;
-				tmp.yCoord = pt.y;
-
-				//	TRACE("MOUSEWHEEL\n");
-
-				TRACE("x : %d, y : %d\n", pt.x, pt.y); 
-				SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-
-			} else if(wParam == WM_MBUTTONDOWN){ // 휠 버튼 DOWN
-				CDS.dwData = 1;
-				CDS.cbData = sizeof(tmp);
-				CDS.lpData = &tmp;
-
-				tmp.msgType = 2; // mouse
-				//tmp.updownFlag = 0; // up
-				//tmp.leftRight = 1; // right
-				tmp.wheelFlag = 1; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
-				tmp.xCoord = pt.x;
-				tmp.yCoord = pt.y;
+			//TRACE("LBUTTONDOWN\n");
 
 
-				TRACE("x : %d, y : %d\n", pt.x, pt.y);
-				SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		} else if (wParam == WM_LBUTTONUP){ // 왼쪽 버튼 UP
+			CDS.dwData = 1;
+			CDS.cbData = sizeof(tmp);
+			CDS.lpData = &tmp;
 
-				//	TRACE("WHEELBUTTONDOWN\n");
+			tmp.msgType = 2; // mouse
+			tmp.updownFlag = 0; // up
+			tmp.leftRight = 0; // left
+			tmp.wheelFlag = 0; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
+			tmp.xCoord = pt.x;
+			tmp.yCoord = pt.y;
 
-			} else if(wParam == WM_MBUTTONUP){ // 휠 버튼 UP
-				CDS.dwData = 1;
-				CDS.cbData = sizeof(tmp);
-				CDS.lpData = &tmp;
+			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
+			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+			//TRACE("LBUTTONUP\n");
 
-				tmp.msgType = 2; // mouse
-				//tmp.updownFlag = 0; // up
-				//tmp.leftRight = 1; // right
-				tmp.wheelFlag = 2;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
-				tmp.xCoord = pt.x;
-				tmp.yCoord = pt.y;
+			//	MessageBox(g_hWnd, "LBUTTONUP", "WM_LBUTTONUP", MB_OK);
 
-				TRACE("x : %d, y : %d\n", pt.x, pt.y);
-				SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-				//	TRACE("WHEELBUTTONUP\n");
-			} else if(wParam == WM_MOUSEMOVE){ // 마우스 이동
+		} else if (wParam == WM_RBUTTONDOWN){ // 오른쪽 버튼 DOWN
+			CDS.dwData = 1;
+			CDS.cbData = sizeof(tmp);
+			CDS.lpData = &tmp;
 
-				TRACE("%d, %d\n", nWidth, nHeight);
-				TRACE("%d, %d\n", pt.x, pt.y);
-				//if(m_overFlag == TRUE){
+			tmp.msgType = 2; // mouse
+			tmp.updownFlag = 1; // down
+			tmp.leftRight = 1; // right
+			tmp.wheelFlag = 0;
+			tmp.xCoord = pt.x;
+			tmp.yCoord = pt.y;
 
-				//	}
-				CDS.dwData = 1;
-				CDS.cbData = sizeof(tmp);
-				CDS.lpData = &tmp;
+			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
+			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+			//	TRACE("RBUTTONDOWN\n");
 
-				tmp.msgType = 2; // mouse
-				tmp.xCoord = pt.x;
-				tmp.yCoord = pt.y;
+			//	MessageBox(g_hWnd, "RBUTTONDOWN", "WM_RBUTTONDOWN", MB_OK);
 
-				//TRACE("x : %d, y : %d\n", pt.x, pt.y);
-				if(m_overFlag)
-					SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		} else if(wParam == WM_RBUTTONUP){ // 오른쪽 버튼 UP
+			CDS.dwData = 1;
+			CDS.cbData = sizeof(tmp);
+			CDS.lpData = &tmp;
 
-			}
-		} else
-			return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
+			tmp.msgType = 2; // mouse
+			tmp.updownFlag = 0; // up
+			tmp.leftRight = 1; // right
+			tmp.wheelFlag = 0;
+			tmp.xCoord = pt.x;
+			tmp.yCoord = pt.y;
+			//	TRACE("RBUTTONUP\n");
+
+			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
+			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
+			//	MessageBox(g_hWnd, "RBUTTONUP", "WM_RBUTTONUP", MB_OK);
+
+		} else if(wParam == WM_MOUSEWHEEL){ // 휠 움직일 때
+			CDS.dwData = 1;
+			CDS.cbData = sizeof(tmp);
+			CDS.lpData = &tmp;
+
+			tmp.msgType = 2; // mouse
+			//tmp.updownFlag = 0; // up
+			//tmp.leftRight = 1; // right
+			tmp.wheelFlag = 3;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
+			tmp.xCoord = pt.x;
+			tmp.yCoord = pt.y;
+
+			//	TRACE("MOUSEWHEEL\n");
+
+		//	TRACE("x : %d, y : %d\n", pt.x, pt.y); 
+			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
+		} else if(wParam == WM_MBUTTONDOWN){ // 휠 버튼 DOWN
+			CDS.dwData = 1;
+			CDS.cbData = sizeof(tmp);
+			CDS.lpData = &tmp;
+
+			tmp.msgType = 2; // mouse
+			//tmp.updownFlag = 0; // up
+			//tmp.leftRight = 1; // right
+			tmp.wheelFlag = 1; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
+			tmp.xCoord = pt.x;
+			tmp.yCoord = pt.y;
+
+
+		//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
+			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
+			//	TRACE("WHEELBUTTONDOWN\n");
+
+		} else if(wParam == WM_MBUTTONUP){ // 휠 버튼 UP
+			CDS.dwData = 1;
+			CDS.cbData = sizeof(tmp);
+			CDS.lpData = &tmp;
+
+			tmp.msgType = 2; // mouse
+			//tmp.updownFlag = 0; // up
+			//tmp.leftRight = 1; // right
+			tmp.wheelFlag = 2;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
+			tmp.xCoord = pt.x;
+			tmp.yCoord = pt.y;
+
+		//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
+		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+			//	TRACE("WHEELBUTTONUP\n");
+		} else if(wParam == WM_MOUSEMOVE){ // 마우스 이동
+
+			//	TRACE("%d, %d\n", nWidth, nHeight);
+			//	TRACE("%d, %d\n", pt.x, pt.y);
+			//if(m_overFlag == TRUE){
+
+			//	}
+			CDS.dwData = 1;
+			CDS.cbData = sizeof(tmp);
+			CDS.lpData = &tmp;
+
+			tmp.msgType = 2; // mouse
+			tmp.xCoord = pt.x;
+			tmp.yCoord = pt.y;
+
+			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
+			//if(m_overFlag)
+
+		//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
+			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
+		}
+		//	} else
+		//		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
 
 		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
 }

@@ -116,6 +116,8 @@ BEGIN_MESSAGE_MAP(ServerConf, CDialogEx)
 	//	ON_WM_KEYDOWN()
 	ON_WM_COPYDATA()
 	ON_BN_CLICKED(IDC_BUTTON14, &ServerConf::OnBnClickedButton14)
+	ON_WM_RBUTTONDOWN()
+	ON_WM_RBUTTONUP()
 END_MESSAGE_MAP()
 
 
@@ -146,7 +148,7 @@ void ServerConf::OnBnClickedStart()
 
 }
 void ServerConf::initServer(int nPort)
- {
+{
 	TRACE("---------------------------initServer---------------------------\n");
 	listen.Create(nPort);
 	listen.Listen();
@@ -676,7 +678,7 @@ void ServerConf::receiveData(CMySocket *s) // 여기서 갑자기 m_settingFlag, nSock
 	s->Receive((LPCSTR *)&tmp, sizeof(KPACKET));
 
 	unpackMessage(tmp, s);
-	 
+
 	AfxMessageBox(_T("receive Success!!")); 
 }
 
@@ -688,6 +690,7 @@ void ServerConf::initFlag(void)
 	m_applyFlag = FALSE;
 	m_bDragFlag = FALSE;
 	m_deviceFlag = -1;
+	m_mouseMove = TRUE;
 	for(int i = 0 ; i < 9 ; i++ ){
 		m_settingFlag[i] = -1;
 		client_id[i] = 0;
@@ -804,7 +807,7 @@ void ServerConf::unpackMessage(KPACKET p, CMySocket *s){
 	TRACE("---------------------------unpackMessage---------------------------\n");
 	switch(p.msgType){
 	case 1: // Keyboard
-	
+
 		break;
 
 	case 2: // Mouse
@@ -870,8 +873,8 @@ void ServerConf::unpackMessage(KPACKET p, CMySocket *s){
 	case 4: // Server
 		DPACKET d;
 
-		d.msgType = p.msgType;
 		d.len = p.sendDev;
+		d.msgType = p.msgType;
 		//		PostMessage(WM_SERVER_MESSAGE, 0, 0);
 
 		break;
@@ -899,12 +902,11 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	POSITION pos = tmp->GetHeadPosition(); // 맨 처음 헤드를 포인팅함
 	//TRACE("count : %d\n", count);
 
-	client_id[3] = 1;
-
-
-
-
-
+	for(int i = 0 ; i < 9 ; i ++){
+		client_id[i] = i;
+		m_settingFlag[i] = 0;
+	}
+	
 	switch(pCopyDataStruct -> dwData){
 
 	case 0: // keyboard
@@ -915,125 +917,62 @@ BOOL ServerConf::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			keyP.deviceType = 1;
 			keyP.msgType = 1;
 			keyP.keyCode = hEVENT->keyCode;
+			keyP.updownFlag = (hEVENT->data == WM_KEYDOWN ? 1:0);
+
+			if(keyP.keyCode == VK_SCROLL)
+			{
+				m_changeMaster = false;
+				SendMessageA(dllWnd, WM_KEYBOARD_FALSE, 0, 0);
+				SendMessageA(dllWnd, WM_MOUSE_FALSE, 0, 0);
+
+
+			}
+			//	if(m_changeMaster){
+			//		m_changeMaster = false; // 이 땐 slave로 넘어감
+			//		
+
+			//		SendMessageA(dllWnd, WM_KEYBOARD_FALSE, 0, 0);
+			//		SendMessageA(dllWnd, WM_MOUSE_FALSE, 0, 0);
+			//	}else{
+			//		m_changeMaster = true;
+			//		SendMessageA(dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+			//	SendMessageA(dllWnd, WM_MOUSE_TRUE, 0, 0);
+			//	}
+			//}
 
 			cThread = (CMyThread *) tmp->GetAt(pos);
-			cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET));
+			cThread->m_mySocket->Send((LPCSTR)&keyP, sizeof(KPACKET)); // 그대로 전송
 		}
 		break;
 	case 1: // 마우스 정보를 얻어오면
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
-		if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
-			TRACE("m_whereisPoint : %d, client_id[3] : %d, m_settingflag[3] : %d\n", m_whereisPoint, m_settingFlag[3], client_id[3]);
-
-			if(m_whereisPoint == 5 && m_settingFlag[3] != -1 && client_id[3] != 0){ // 4번 버튼이 비지 않았고, 서버 쪽에 포인트가 있으면,
-				m_whereisPoint = 4; // 4번 버튼으로 포인트를 옮긴 후 마우스 이동 
-				mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (nWidth - 15)* 65535 / nWidth, mEVENT->yCoord * 65535 / nHeight, 0, 0);
-
-				// 마우스 커서 없애고 키보드, 마우스 이벤트 처리 전부 무시하게 만듬
-
-
-
-			} else if(m_whereisPoint == 6){ // 만약 6번에 포인터가 있었다면
-				m_whereisPoint = 5; // 서버쪽으로 포인트를 옮긴 후 마우스 이동
-				mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (nWidth - 15)* 65535 / nWidth, mEVENT->yCoord * 65535 / nHeight, 0, 0);
-
-				// 마우스 커서 출력하고 마우스, 키보드 전부 다시 이벤트 받도록 함
-
-
-			} else
-				return true;
+		
+			MPACKET t;
 			
+			t.msgType = 2;
+			t.deviceType = mEVENT->deviceType;
+			t.leftRight = mEVENT->leftRight;
+			t.wheelFlag = mEVENT->wheelFlag;
+			t.updownFlag = mEVENT->updownFlag;
+			t.xCoord = mEVENT->xCoord;
+			t.yCoord = mEVENT->yCoord;
+			
+			TRACE("msgType : %d\n", mEVENT->msgType);
+			TRACE("%d %d %d %d %d\n", mEVENT->xCoord, mEVENT->yCoord,mEVENT->wheelFlag, mEVENT->updownFlag, mEVENT->leftRight);
 
 			cThread = (CMyThread *)tmp->GetAt(pos);
-			cThread->m_mySocket->Send((LPCSTR)&mEVENT, sizeof(MPACKET));
-		} 
-
-		if(mEVENT->yCoord<= 2) { // 화면 위족에 붙을 때
-			TRACE("m_whereisPoint : %d, client_id[1] : %d, m_settingflag[1] : %d\n", m_whereisPoint, m_settingFlag[1], client_id[1]);
-
-			if(m_whereisPoint == 5 && m_settingFlag[1] != -1 && client_id[1] != 0){ // 2번 버튼이 비지 않았고, 서버 쪽에 포인트가 있으면,
-				m_whereisPoint = 2; // 2번 버튼으로 옮긴 후 마우스 이동
-				mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, (nHeight - 15) * 65535 / nHeight, 0, 0);
-
-				// 마우스 커서 없애고 키보드, 마우스 이벤트 처리 전부 무시하게 만듬
-
-
-			} else if(m_whereisPoint == 8){ // 8번에 포인터가 있었다면
-				m_whereisPoint = 5; // 서버버튼으로 옮긴 후 마우스 이동
-				mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, (nHeight - 15) * 65535 / nHeight, 0, 0);
-
-
-				// 마우스 커서 출력하고 마우스, 키보드 전부 다시 이벤트 받도록 함
-
-
-
-			} else
-				return true;
-
-			
-			cThread = (CMyThread *)tmp->GetAt(pos);
-			cThread->m_mySocket->Send((LPCSTR)&mEVENT, sizeof(MPACKET));
-
-		} 
-
-		if(mEVENT->xCoord >= nWidth - 2){	 // 화면 오른 쪽에 붙을 때
-			TRACE("m_whereisPoint : %d, client_id[5] : %d, m_settingflag[5] : %d\n", m_whereisPoint, m_settingFlag[5], client_id[5]);
-
-			if(m_whereisPoint == 5 && m_settingFlag[5] != -1 && client_id[5] != 0){ // 6번 버튼이 비지 않았고, 서버 쪽에 포인트가 있으면,
-				m_whereisPoint = 6;
-				mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, 15 * 65535 / nWidth, mEVENT->yCoord * 65535 / nHeight, 0, 0);
-
-				// 마우스 커서 없애고 키보드, 마우스 이벤트 처리 전부 무시하게 만듬
-				
-
-
-			} else if(m_whereisPoint == 4){
-				m_whereisPoint = 5;
-				mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, 15 * 65535 / nWidth, mEVENT->yCoord * 65535 / nHeight, 0, 0);
-
-				// 마우스 커서 출력하고 마우스, 키보드 전부 다시 이벤트 받도록 함
-
-
-			}else
-				return true;
-
-			
-			cThread = (CMyThread *)tmp->GetAt(pos);
-			cThread->m_mySocket->Send((LPCSTR)&mEVENT, sizeof(MPACKET));
-		} 
-
-		if(mEVENT->yCoord >= nHeight - 2){ // 화면 아래쪽에 붙을 때
-			TRACE("m_whereisPoint : %d, client_id[7] : %d, m_settingflag[7] : %d\n", m_whereisPoint, m_settingFlag[7], client_id[7]);
-
-			if(m_whereisPoint == 5 && m_settingFlag[7] != -1 && client_id[7] != 0){ // 8번 버튼이 비지 않았고, 서버 쪽에 포인트가 있으면,
-				m_whereisPoint = 8;
-				mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, 15 * 65535 / nHeight, 0, 0);
-
-				// 마우스 커서 없애고 키보드, 마우스 이벤트 처리 전부 무시하게 만듬
-
-
-			} else if(m_whereisPoint == 2){
-				m_whereisPoint = 5;
-				mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, 15 * 65535 / nHeight, 0, 0);
-
-
-				// 마우스 커서 출력하고 마우스, 키보드 전부 다시 이벤트 받도록 함
-
-
-			}else
-				return true;
-			
+			cThread->m_mySocket->Send((LPCSTR)&t, sizeof(KPACKET));
+		
+			TRACE("msgType : %d\n", mEVENT->msgType);
 			TRACE("%d %d\n", mEVENT->xCoord, mEVENT->yCoord);
-			cThread = (CMyThread *)tmp->GetAt(pos);
-			cThread->m_mySocket->Send((LPCSTR)&mEVENT, sizeof(MPACKET));
 
-		}
+			
 		break;
+
 	}
 
 	tmp = NULL;
 	cThread = NULL;
-
 
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
 }
@@ -1047,4 +986,20 @@ void ServerConf::OnBnClickedButton14() // 서버 Stop하는 함수
 	uninstallKeyhook();
 	uninstallMousehook();
 
+}
+
+
+void ServerConf::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	CDialogEx::OnRButtonDown(nFlags, point);
+}
+
+
+void ServerConf::OnRButtonUp(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	CDialogEx::OnRButtonUp(nFlags, point);
 }

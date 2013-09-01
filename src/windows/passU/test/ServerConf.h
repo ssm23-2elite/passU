@@ -20,8 +20,8 @@ public:
 	bool m_startFlag; // 서버 구동중인가 아닌가를 판별하는 플래그
 	int m_whereisPoint; // 마우스가 어느 위치에 있느냐? 기본값 : 5, 1 ~ 9 까지있음 , 이 변수의 -1 한 값이 아래 배열의 인덱스가 됨(클라이언트ID)
 	int client_id[9]; // 각 버튼마다 몇 번의 클라이언트 id가 저장되어 있는지 저장하는 배열
-	
-	
+	bool m_changeMaster;
+	bool m_mouseMove;
 	// 인덱스 + 1 : 버튼번호, 값 : 클라이언트 ID 
 
 	//typedef CTypedPtrArray<CObArray, CMySocket *> CSocketList;
@@ -116,4 +116,6 @@ public:
 	afx_msg void OnBnClickedButton14();
 	
 	
+	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 };

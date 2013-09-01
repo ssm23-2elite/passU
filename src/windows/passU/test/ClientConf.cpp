@@ -71,13 +71,11 @@ void ClientConf::OnBnClickedOk()
 	m_ip.GetAddress(ipFirst, ipSecond, ipThird, ipForth);
 	m_address.Format(_T("%d.%d.%d.%d"), ipFirst, ipSecond, ipThird, ipForth);
 
-	m_address.Format(_T("127.0.0.1"));
 	int nPort;
 
 
 	nPort = _ttoi(m_PortNum);
 
-	nPort = 7000;
 
 	connect(nPort);
 
@@ -97,9 +95,12 @@ void ClientConf::receiveData(CClientSocket *s)
 
 	s->Receive((LPCSTR *)&tmp, sizeof(KPACKET));
 
-	unpackMessage(tmp); // 메시지 언팩
-}
+	
+	TRACE("msgType : %d\n xCoord : %d, yCoord : %d\n%d, %d, %d", tmp.msgType, tmp.pad2, tmp.pad3, tmp.keyCode, tmp.pad1, tmp.updownFlag);
 
+	unpackMessage(tmp); // 메시지 언팩
+
+}
 
 void ClientConf::OnBnClickedCancel()
 {
@@ -194,51 +195,56 @@ KPACKET ClientConf::packMessage(int msgType, int sendDev, int recvDev, int devTy
 void ClientConf::unpackMessage(KPACKET p){
 	switch(p.msgType){
 	case 1: // Keyboard
-		/*keyboard.msgType = p.msgType;
-		keyboard.sendDev = p.sendDev;
-		keyboard.recvDev = p.recvDev;
-		keyboard.deviceType = p.deviceType;
-		keyboard.relativeField = p.relativeField;
-		keyboard.updownFlag = p.updownFlag;
-		keyboard.keyCode = p.keyCode;*/
+		TRACE("p.updownFlag : %d\n", p.updownFlag);
 		TRACE("keyCode : %d\n", p.keyCode);
-		//keybd_event(p.keyCode, 0, 0, 0); // 전달받은 keyCode를 그대로 입력한다.
 		
+		//if(p.updownFlag == 1){
+		//	keybd_event(p.keyCode, 0, KEYEVENTF_EXTENDEDKEY, 0);
+		//} else if(p.updownFlag == 0){
+		//	keybd_event(p.keyCode, 0 , KEYEVENTF_KEYUP , 0); // 전달받은 keyCode를 그대로 입력한다.
+		//	
+		//}
+		
+		keybd_event(p.keyCode, 0, 0, 0);
+
+
 		TRACE("keybd_event success\n");
 		break;
 	case 2: // Mouse
-		
-	/*	mouse.msgType = p.msgType;
-		mouse.sendDev = p.sendDev;
-		mouse.recvDev = p.recvDev;
-		mouse.deviceType = p.deviceType;
-		mouse.relativeField = p.relativeField;
-		mouse.updownFlag = p.updownFlag;
-		mouse.leftRight = p.pad1;
-		mouse.wheelFlag = p.keyCode;
-		mouse.xCoord = p.pad2;
-		mouse.yCoord = p.pad3;
-		
-		memcpy(&keyboard, &mouse, sizeof(KPACKET));*/
+	
 		TRACE("Mouse Event\n");
 		TRACE("x : %d, y : %d\n", p.pad2, p.pad3);
-	//	SetCursorPos(p.pad2, p.pad3); // 마우스 커서 그대로 이동
+		SetCursorPos(p.pad2, p.pad3); // 마우스 커서 그대로 이동
+
+		TRACE("p.pad1 : %d, p.updownFlag : %d, p.keyCode = %d", p.pad1, p.updownFlag, p.keyCode);
+		if(p.pad1 == 1 && p.updownFlag== 0){ // right up
+			mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+		} else if(p.pad1 == 1 && p.updownFlag == 1){ // right down
+			mouse_event(MOUSEEVENTF_RIGHTDOWN,  0, 0, 0, 0);
+		} else if(p.pad1 == 0 && p.updownFlag == 0){ // left up
+			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+		} else if(p.pad1 == 0 && p.updownFlag == 1){ // left down
+			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+		}
+		if(p.keyCode == 2){ // wheel btn up
+			mouse_event(MOUSEEVENTF_MIDDLEUP,  0, 0, 0, 0);
+		} else if(p.keyCode == 2){ // wheel btn down
+			mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, 0);
+		} else if(p.keyCode == 3){ // wheel move
+			mouse_event(MOUSEEVENTF_WHEEL,  0, 0, 0, 5);
+		}
+		
 		break;
 
 	case 3: // Client
-		/*client.msgType = p.msgType;
-		client.c_id = p.sendDev;
-		clientID = client.c_id;*/
 
 		if(p.deviceType == 1){ // hello packet에 대한 답변을 받았을 때
 			clientID = p.sendDev;
 			m_connectFlag = true;
-	//		m_CBtn_ClientConnect.EnableWindow(FALSE);
 		} else if(p.deviceType == 1){ // bye 패킷을 받았을 때
 			AfxMessageBox(_T("Server가 닫혔습니다!"));
 			clientSock.Close();
 			m_connectFlag = false;
-	//		m_CBtn_ClientConnect.EnableWindow(TRUE);
 		}
 
 
@@ -263,7 +269,7 @@ void ClientConf::connect(int nPort)
 {
 	clientSock.Create();
 
-	clientSock.Connect(m_address, 7000);
+	clientSock.Connect(m_address, nPort);
 
 
 }
