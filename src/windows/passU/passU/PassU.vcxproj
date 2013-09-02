@@ -103,6 +103,10 @@
     <ClInclude Include="packet.h" />
     <ClInclude Include="PassU.h" />
     <ClInclude Include="PassUDlg.h" />
+    <ClInclude Include="PassULoactionInfo.h" />
+    <ClInclude Include="PassUServerListen.h" />
+    <ClInclude Include="PassUServerSocket.h" />
+    <ClInclude Include="PassUServerThread.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="stdafx.h" />
@@ -112,6 +116,10 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="PassU.cpp" />
     <ClCompile Include="PassUDlg.cpp" />
+    <ClCompile Include="PassULoactionInfo.cpp" />
+    <ClCompile Include="PassUServerListen.cpp" />
+    <ClCompile Include="PassUServerSocket.cpp" />
+    <ClCompile Include="PassUServerThread.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -125,8 +133,10 @@
     <None Include="res\PassU.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\monitor.bmp" />
     <Image Include="res\passu.bmp" />
     <Image Include="res\PassU.ico" />
+    <Image Include="res\phone.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

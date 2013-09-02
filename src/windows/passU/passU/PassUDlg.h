@@ -40,4 +40,6 @@ public:
 	CWnd *m_pwndShow;
 
 	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);
+	CClient m_tab_client;
+	CServer m_tab_server;
 };

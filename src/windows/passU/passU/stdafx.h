@@ -53,3 +53,7 @@
 #endif
 
 
+
+#define STATUS_EMPTY	0
+#define STATUS_PC		1
+#define STSTUS_MOBILE	2

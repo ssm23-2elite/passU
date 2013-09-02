@@ -42,6 +42,18 @@
     <ClInclude Include="packet.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="PassUServerSocket.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PassUServerListen.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PassUServerThread.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="PassULoactionInfo.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PassU.cpp">
@@ -57,6 +69,18 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Client.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PassUServerSocket.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PassUServerListen.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PassUServerThread.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="PassULoactionInfo.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -75,6 +99,12 @@
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="res\passu.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\monitor.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\phone.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>
