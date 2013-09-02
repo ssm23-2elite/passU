@@ -80,6 +80,7 @@ public class PassU extends Activity {
 				printOutput("Disconnected");
 			} else if(PassUIntent.ACTION_INTERRUPTED.equals(action)) {
 				printOutput("Interrupted Server");
+				onDestroy();
 			} else if(PassUIntent.ACTION_CONNECTION_FAILED.equals(action)){
 				printOutput("Connection Failed");
 			}

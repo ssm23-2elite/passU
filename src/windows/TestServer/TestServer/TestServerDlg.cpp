@@ -28,6 +28,7 @@ CTestServerDlg::CTestServerDlg(CWnd* pParent /*=NULL*/)
 void CTestServerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_BUTTON1, m_tempBtn);
 }
 
 BEGIN_MESSAGE_MAP(CTestServerDlg, CDialog)
@@ -37,6 +38,8 @@ BEGIN_MESSAGE_MAP(CTestServerDlg, CDialog)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONUP()
+	ON_WM_KEYDOWN()
+	ON_WM_KEYUP()
 END_MESSAGE_MAP()
 
 
@@ -97,22 +100,18 @@ void CTestServerDlg::OnBnClickedServeron()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	((CTestServerApp *)AfxGetApp())->initServer(3737);
+	m_tempBtn.SetFocus();
 }
 
 void CTestServerDlg::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	DWORD curTime = timeGetTime();
-	
-	if(curTime - prevTime > 40) {
-		CString str;
-		str.Format(_T("x: %d y: %d"), point.x, point.y);
-		SetDlgItemText(IDC_LOC, str);
 
-		prevTime = curTime;
+	CString str;
+	str.Format(_T("x: %d y: %d"), point.x, point.y);
+	SetDlgItemText(IDC_LOC, str);
 
-		((CTestServerApp *)AfxGetApp())->sendMouseMove(point.x, point.y);
-	}
+	((CTestServerApp *)AfxGetApp())->sendMouseMove(point.x, point.y);
 
 	CDialog::OnMouseMove(nFlags, point);
 }
@@ -121,17 +120,12 @@ void CTestServerDlg::OnMouseMove(UINT nFlags, CPoint point)
 void CTestServerDlg::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	DWORD curTime = timeGetTime();
-	
-	if(curTime - prevTime > 20) {
-		CString str;
-		str.Format(_T("x: %d y: %d"), point.x, point.y);
-		SetDlgItemText(IDC_LOC, str);
 
-		prevTime = curTime;
+	CString str;
+	str.Format(_T("x: %d y: %d"), point.x, point.y);
+	SetDlgItemText(IDC_LOC, str);
 
-		((CTestServerApp *)AfxGetApp())->sendMouseDown(point.x, point.y);
-	}
+	((CTestServerApp *)AfxGetApp())->sendMouseDown(point.x, point.y);
 
 	CDialog::OnLButtonDown(nFlags, point);
 }
@@ -140,17 +134,61 @@ void CTestServerDlg::OnLButtonDown(UINT nFlags, CPoint point)
 void CTestServerDlg::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	DWORD curTime = timeGetTime();
-	
-	if(curTime - prevTime > 40) {
-		CString str;
-		str.Format(_T("x: %d y: %d"), point.x, point.y);
-		SetDlgItemText(IDC_LOC, str);
+	CString str;
+	str.Format(_T("x: %d y: %d"), point.x, point.y);
+	SetDlgItemText(IDC_LOC, str);
 
-		prevTime = curTime;
-
-		((CTestServerApp *)AfxGetApp())->sendMouseUp(point.x, point.y);
-	}
+	((CTestServerApp *)AfxGetApp())->sendMouseUp(point.x, point.y);
 
 	CDialog::OnLButtonUp(nFlags, point);
+}
+
+
+void CTestServerDlg::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	CString str;
+	str.Format(_T("keyCode: %d Down"), nChar);
+	SetDlgItemText(IDC_KEY, str);
+
+	((CTestServerApp *)AfxGetApp())->sendKeyDown(nChar);
+
+	CDialog::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+
+void CTestServerDlg::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	CString str;
+	str.Format(_T("keyCode: %d Up"), nChar);
+	SetDlgItemText(IDC_KEY, str);
+
+	((CTestServerApp *)AfxGetApp())->sendKeyUp(nChar);
+
+	CDialog::OnKeyUp(nChar, nRepCnt, nFlags);
+}
+
+
+BOOL CTestServerDlg::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	if( pMsg->message == WM_KEYDOWN )  
+	{
+		CString str;
+		str.Format(_T("keyCode: %d Down"), pMsg->wParam);
+		SetDlgItemText(IDC_KEY, str);
+
+		((CTestServerApp *)AfxGetApp())->sendKeyDown(pMsg->wParam);
+		return TRUE;
+	} else if (pMsg->message == WM_KEYUP )
+	{
+		CString str;
+		str.Format(_T("keyCode: %d Up"), pMsg->wParam);
+		SetDlgItemText(IDC_KEY, str);
+
+		((CTestServerApp *)AfxGetApp())->sendKeyUp(pMsg->wParam);
+		return TRUE;
+	}
+	return CDialog::PreTranslateMessage(pMsg);
 }

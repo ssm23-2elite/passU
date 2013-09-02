@@ -14,7 +14,7 @@
 // CTestServerApp
 
 BEGIN_MESSAGE_MAP(CTestServerApp, CWinApp)
-	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
+	//ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 
@@ -87,30 +87,26 @@ void CTestServerApp::initServer(int port)
 		AfxMessageBox(_T("Socket Create Failed\n"));
 		return;
 	}
-	
+
 	if(!server.Listen())                                          //리슨
 	{            
 		AfxMessageBox(_T("Socket Listen Failed\n"));
 		return;        
 	}
-	
+
 	if(!server.Accept(client))      //클라이언트 접속 기다림 (접속될때까지블락!!)
 	{          
 		AfxMessageBox(_T("Socket Accept Failed\n"));
 		return;
 	}
 
-	MPACKET packet;
-		packet.sendDev = 5;
-		packet.recvDev = 6;
-		packet.deviceType = 1;
-		packet.relativeField = 0;
-		packet.updownFlag = -1;
-		packet.wheelFlag = 0;
-		packet.xCoord = 100;
-		packet.yCoord = 200;
-
-		sendMouseData(&packet);
+	CPACKET packet;
+	packet.msgType = 3;
+	packet.c_id = 6;
+	packet.hello = 1;
+	packet.bye = 0;
+	
+	sendClientData(&packet);
 	bClientConnected = TRUE;
 	bMouseDown = FALSE;
 }
@@ -119,11 +115,13 @@ void CTestServerApp::sendMouseMove(int x, int y)
 {
 	if(bClientConnected) {
 		MPACKET packet;
+		packet.msgType = 2;
 		packet.sendDev = 5;
 		packet.recvDev = 6;
 		packet.deviceType = 1;
 		packet.relativeField = 0;
-		packet.updownFlag = (bMouseDown == TRUE)?0:1;
+		packet.updownFlag = (bMouseDown == TRUE)?1:0;
+		packet.leftRight = 0;
 		packet.wheelFlag = 0;
 		packet.xCoord = x;
 		packet.yCoord = y;
@@ -137,11 +135,13 @@ void CTestServerApp::sendMouseDown(int x, int y)
 	if(bClientConnected) {
 		bMouseDown = TRUE;
 		MPACKET packet;
+		packet.msgType = 2;
 		packet.sendDev = 5;
 		packet.recvDev = 6;
 		packet.deviceType = 1;
 		packet.relativeField = 0;
-		packet.updownFlag = (bMouseDown == TRUE)?0:1;
+		packet.updownFlag = (bMouseDown == TRUE)?1:0;
+		packet.leftRight = 0;
 		packet.wheelFlag = 0;
 		packet.xCoord = x;
 		packet.yCoord = y;
@@ -156,11 +156,13 @@ void CTestServerApp::sendMouseUp(int x, int y)
 	if(bClientConnected) {
 		bMouseDown = FALSE;
 		MPACKET packet;
+		packet.msgType = 2;
 		packet.sendDev = 5;
 		packet.recvDev = 6;
 		packet.deviceType = 1;
 		packet.relativeField = 0;
-		packet.updownFlag = (bMouseDown == TRUE)?0:1;
+		packet.updownFlag = (bMouseDown == TRUE)?1:0;
+		packet.leftRight = 0;
 		packet.wheelFlag = 0;
 		packet.xCoord = x;
 		packet.yCoord = y;
@@ -169,22 +171,96 @@ void CTestServerApp::sendMouseUp(int x, int y)
 	}
 }
 
+void CTestServerApp::sendClientData(CPACKET *pPacket)
+{
+	char buf2[100];
+
+	sprintf_s(buf2, "%4d%4d%1d%1d%14d", 
+		pPacket->msgType, pPacket->pad3, pPacket->hello, pPacket->bye, 0);
+	CPACKET buf;
+	if(bClientConnected) {
+		int bytes = client.Send((void*)buf2, sizeof(CPACKET));    //데이터전송
+
+		CString str;
+		str.Format(_T("real[%d] want[%d]"), bytes, sizeof(CPACKET));
+
+		ZeroMemory(&buf, sizeof(CPACKET));
+		bytes = client.Receive((void*)&buf, sizeof(CPACKET)); 
+	}
+}
 
 void CTestServerApp::sendMouseData(MPACKET *pPacket)
 {
 	char buf2[100];
 
-   sprintf_s(buf2, "%4d%4d%1d%1d%1d%1d%4d%4d%4d", pPacket->sendDev, pPacket->recvDev, pPacket->deviceType, 
-	   pPacket->relativeField, pPacket->updownFlag,
-	   pPacket->wheelFlag, pPacket->xCoord, pPacket->yCoord, 0);
+	sprintf_s(buf2, "%4d%4d%4d%1d%1d%1d%1d%4d%4d%4d", 
+		pPacket->msgType, pPacket->sendDev, pPacket->recvDev, 
+		pPacket->deviceType, pPacket->relativeField, pPacket->updownFlag, pPacket->leftRight, 
+		pPacket->wheelFlag, pPacket->xCoord, pPacket->yCoord);
 	MPACKET buf;
 	if(bClientConnected) {
 		int bytes = client.Send((void*)buf2, sizeof(MPACKET));    //데이터전송
 
 		CString str;
 		str.Format(_T("real[%d] want[%d]"), bytes, sizeof(MPACKET));
-		
+
 		ZeroMemory(&buf, sizeof(MPACKET));
-		bytes = client.Receive((void*)&buf, sizeof(MPACKET));
+		bytes = client.Receive((void*)&buf, sizeof(MPACKET)); 
+	}
+}
+
+void CTestServerApp::sendKeyDown(UINT keyCode)
+{
+	if(bClientConnected) {
+		bKeyDown = TRUE;
+		KPACKET packet;
+		packet.msgType = 1;
+		packet.sendDev = 5;
+		packet.recvDev = 6;
+		packet.deviceType = 0;
+		packet.relativeField = 0;
+		packet.updownFlag = (bKeyDown == TRUE)?1:0;
+		packet.keyCode = keyCode;
+
+		sendKeyData(&packet);
+	}
+}
+
+
+void CTestServerApp::sendKeyUp(UINT keyCode)
+{
+	if(bClientConnected) {
+		bKeyDown = FALSE;
+		KPACKET packet;
+		packet.msgType = 1;
+		packet.sendDev = 5;
+		packet.recvDev = 6;
+		packet.deviceType = 0;
+		packet.relativeField = 0;
+		packet.updownFlag = (bKeyDown == TRUE)?1:0;
+		packet.keyCode = keyCode;
+
+		sendKeyData(&packet);
+	}
+}
+
+
+void CTestServerApp::sendKeyData(KPACKET *pPacket)
+{
+	char buf2[100];
+
+	sprintf_s(buf2, "%4d%4d%4d%1d%1d%1d%1d%4d%4d%4d", 
+		pPacket->msgType, pPacket->sendDev, pPacket->recvDev, 
+		pPacket->deviceType, pPacket->relativeField, pPacket->updownFlag, pPacket->pad1, 
+		pPacket->keyCode, pPacket->pad2, pPacket->pad3);
+	KPACKET buf;
+	if(bClientConnected) {
+		int bytes = client.Send((void*)buf2, sizeof(KPACKET));    //데이터전송
+
+		CString str;
+		str.Format(_T("real[%d] want[%d]"), bytes, sizeof(KPACKET));
+
+		ZeroMemory(&buf, sizeof(KPACKET));
+		bytes = client.Receive((void*)&buf, sizeof(KPACKET));
 	}
 }

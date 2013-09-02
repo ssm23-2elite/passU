@@ -73,15 +73,17 @@ public class PassUService extends Service implements
 				protected Void doInBackground(Void... params) {
 					if(D.D) Log.w(LOG, "connect");
 					
-					mInputHandler.open();					
 					// Start connection and receive events from server
-					mSocket.connect(ip, port);
-					//Send devices resolution to host for coordinate transformation;
-					if(mSocket != null && mSocket.isConnected()){
-						mState = ServiceState.CONNECTING;
-						sendBroadcast(new Intent(PassUIntent.ACTION_CONNECTED));
+					if( mSocket.connect(ip, port) == true ) {
+						mInputHandler.open();					
 						
-						//mSocket.sendDeviceInfo(getApplicationContext().getResources().getDisplayMetrics());
+						//Send devices resolution to host for coordinate transformation;
+						if(mSocket != null && mSocket.isConnected()){
+							mState = ServiceState.CONNECTING;
+							sendBroadcast(new Intent(PassUIntent.ACTION_CONNECTED));
+							
+							//mSocket.sendDeviceInfo(getApplicationContext().getResources().getDisplayMetrics());
+						}
 					}
 					return null;
 				}
@@ -273,6 +275,7 @@ public class PassUService extends Service implements
 	public void onServerConnectionInterrupted() {
 		if(D.D) Log.w(LOG, "onServerConnectionInterrupted");
 		mState = ServiceState.IDLE;
+		HideCursor();
 		sendBroadcast(new Intent(PassUIntent.ACTION_INTERRUPTED));
 
 		Looper.prepare();

@@ -34,7 +34,7 @@ public class PacketReceiver extends Thread {
 	}
 	
 	private int readPacketDataFromStream() throws IOException{
-		int readLen = recvStream.read(buffer, bufferOffset, Packet.LENGTH);			
+		int readLen = recvStream.read(buffer, 0, Packet.LENGTH);
 		if(D.D) Log.w(LOG, "readPacketDataFromStream" + readLen);	
 		if(readLen > 0)
 			bufferOffset += readLen;
