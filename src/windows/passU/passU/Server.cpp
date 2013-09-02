@@ -381,6 +381,14 @@ BOOL CServer::OnInitDialog()
 	}
 
 	m_status = STATUS_PC;
+
+	m_bmp_monitor.LoadBitmapA(IDB_MONITOR);
+	m_bmp_phone.LoadBitmapA(IDB_PHONE);
+	m_imgList.Create(60, 60, ILC_COLOR24, 1, 1);
+	m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
+	
+	m_imgList.Add(&m_bmp_monitor, RGB(0, 0, 0));
+	m_waiting_client.InsertItem(0, _T("127.0.0.1"));
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }

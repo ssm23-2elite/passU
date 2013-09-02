@@ -53,7 +53,11 @@ public:
 	MPACKET *m;
 	CPACKET *c;
 
+	// for listctrl
 	CImageList m_imgList;
+	// bmp load
+	CBitmap m_bmp_monitor;
+	CBitmap m_bmp_phone;
 
 	void OnStartServer();
 	void OnChangeLocationInfo(int index);
