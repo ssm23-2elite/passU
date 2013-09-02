@@ -67,13 +67,7 @@ IMPLEMENT_DYNAMIC(CServer, CDialogEx)
 		AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
 		return ;
 	}
-	CBitmap bitmap;
 
-	bitmap.LoadBitmapA(IDB_BITMAP2);
-	m_imgList.Create(15, 15, ILC_COLOR8, 1, 1);
-	m_imgList.Add(&bitmap, RGB(255, 0, 255));
-	m_wating_client.SetImageList(&m_imgList, LVSIL_SMALL);
-	m_wating_client.InsertItem(0, "tmp", 0);
 
 }
 
@@ -130,13 +124,13 @@ void CServer::OnStartServer()
 
 void CServer::OnChangeLocationInfo(int index)
 {
-
+	// 
 }
 
 
 void CServer::bindWatingClient(int client_index)
 {
-
+	// 클라이언트 index를 넣어줘서 버튼하고 binding시키는 것
 }
 
 
@@ -164,6 +158,10 @@ void CServer::OnDisconnectedClient(int client_index)
 
 	//socket list에서 제거
 	listen.m_sockList.RemoveAt(pos);
+	if(listen.m_sockList.GetCount() == 0){ // 클라이언트 다사라져버리면 uninstall 후킹
+		uninstallKeyhook();
+		uninstallMousehook();
+	}
 
 }
 
@@ -194,7 +192,7 @@ void CServer::OnBnClickedServerStop()
 void CServer::OnBnClickedButton1()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
+	
 }
 
 
@@ -258,12 +256,12 @@ void CServer::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CServer::ReceiveData(CPassUServerSocket * s)
 {
-	KPACKET tmp;
-	s->Receive(&tmp, sizeof(KPACKET));
+	PACKET tmp;
+	s->Receive(&tmp, sizeof(PACKET));
 	COPYDATASTRUCT CDS;
 
-	CDS.dwData = 0; // receiveData
-	CDS.cbData = sizeof(KPACKET);
+	CDS.dwData = 2; // receiveData
+	CDS.cbData = sizeof(PACKET);
 	CDS.lpData = &tmp;
 	SendMessage(WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 }
@@ -272,16 +270,29 @@ void CServer::ReceiveData(CPassUServerSocket * s)
 BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	POSITION pos = listen.m_sockList.GetHeadPosition();
+	
+	sockList = &listen.m_sockList;
+	POSITION pos = sockList->GetTailPosition();
 
 	switch(pCopyDataStruct->dwData){
-	case 0: // receiveData
-		k = (KPACKET *) pCopyDataStruct->lpData; // 구조체 연결
+	case 0: // keyboard
+
+		break;
+
+
+	case 1: // mouse
+
+		break;
+
+
+	case 2: // receiveData
+		p = (PACKET *) pCopyDataStruct->lpData; // 구조체 연결
 
 		switch(k->msgType){
 		case 1: // keyboard
-			break;
 
+			break;
+			
 		case 2: // mouse
 			break;
 
@@ -301,12 +312,13 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 				m_wating_client.InsertItem(0, "tmp", 0);
 
-
-
 				cThread = (CPassUServerThread *)listen.m_sockList.GetAt(pos);
-
-
-
+				if(listen.m_sockList.GetCount() == 1){
+					installKeyhook();
+					installMousehook();
+				}
+				PACKET pack = packMessage(3, cThread->getClientID() , 0 , 1, 0, 0, 0, 0, 0, 0);
+				cThread->m_passUSocket->Send((LPCSTR *)&pack, sizeof(CPACKET)); // hello packet 답신 
 
 			} else if(k->relativeField == 1){ // bye packet
 				// 굿바이패킷이면
@@ -326,4 +338,23 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		break;
 	}
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
+}
+
+
+PACKET CServer::packMessage(int msgType, int sendDev, int recvDev, int deviceType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3)
+{
+	PACKET tmp;
+
+	tmp.msgType = msgType;
+	tmp.sendDev = sendDev;
+	tmp.recvDev = recvDev;
+	tmp.deviceType = deviceType;
+	tmp.relativeField = relativeField;
+	tmp.updownFlag = updownFlag;
+	tmp.pad1 = pad1;
+	tmp.keyCode = keyCode;
+	tmp.pad2 = pad2;
+	tmp.pad3 = pad3;
+
+	return tmp;
 }

@@ -53,3 +53,15 @@ END_MESSAGE_MAP()
 
 
 // CPassUServerThread 메시지 처리기입니다.
+
+
+void CPassUServerThread::setClientID(int clientID)
+{
+	c_id = clientID;
+}
+
+
+int CPassUServerThread::getClientID(void)
+{
+	return c_id;
+}

@@ -23,6 +23,9 @@ public:
 
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	void setClientID(int clientID);
+	int getClientID(void);
 };
 
 

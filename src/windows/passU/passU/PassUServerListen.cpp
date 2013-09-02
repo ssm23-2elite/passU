@@ -10,6 +10,7 @@
 
 CPassUServerListen::CPassUServerListen()
 {
+	nClient = 0;
 }
 
 CPassUServerListen::~CPassUServerListen()
@@ -37,10 +38,10 @@ void CPassUServerListen::OnAccept(int nErrorCode)
 		if(pThread){
 			pThread->m_hSocket = tmp.Detach();
 			m_sockList.AddTail(pThread);
-			pThread->c_id = m_sockList.GetCount();
 			pThread->ResumeThread();
+			nClient += 1;
+			pThread->c_id = nClient;
 			TRACE("m_sockList Add Tail Success, pThread Sucess !\n");
-
 		}
 
 		AfxMessageBox(_T("쓰레드 생성, Accept 완료!"));

@@ -53,8 +53,17 @@ void CClient::OnConnectServer(void)
 	m_clientSock.Create();
 	m_clientSock.Connect(m_address, 30000);
 
+	CPACKET tmp;
+	
+	tmp.msgType = 3;
+	tmp.c_id = 0; // 아직 모르니깐.
+	tmp.hello = 1; // hello 패킷
+	tmp.bye = 0;
+
+	m_clientSock.Send((LPCSTR *)&tmp, sizeof(CPACKET));
 	// HELLO 패킷을 보냄.
 
+	HandleClient();
 }
 
 void CClient::OnDisconnect(void)
