@@ -76,7 +76,82 @@ BEGIN_MESSAGE_MAP(CServer, CDialogEx)
 	ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
 
+BOOL CServer::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
 
+	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+	TRACE("CServer Init\n");
+
+	/* 현재 서버가 될 컴퓨터의 IP를 알아내는 코드 */
+	WORD wVersionRequested;
+	WSADATA wsaData;
+	char name[255];
+	PHOSTENT hostinfo;
+	CString strIpAddress;
+	wVersionRequested = MAKEWORD(2, 0);
+	if(WSAStartup(wVersionRequested, &wsaData) == 0)
+	{
+		if(gethostname(name, sizeof(name)) == 0)
+		{
+			if((hostinfo = gethostbyname(name)) != NULL)
+				strIpAddress = inet_ntoa (*(struct in_addr *)*hostinfo->h_addr_list);
+		} 
+		WSACleanup();
+	}
+
+	serverIPAddress.Append(strIpAddress);
+
+
+	hinstDLL = LoadLibrary(_T("KeyHook.dll"));
+	if(!hinstDLL)
+		AfxMessageBox(_T("KeyHook.dll 로드 실패!"));
+
+	installKeyhook = (InstallKeyboardHook)GetProcAddress(hinstDLL, "InstallKeyboardHook");
+	installMousehook = (InstallMouseHook)GetProcAddress(hinstDLL, "InstallMouseHook");
+
+	uninstallKeyhook = (UnInstallKeyboardHook)GetProcAddress(hinstDLL, "UnInstallKeyboardHook");
+	uninstallMousehook = (UnInstallMouseHook)GetProcAddress(hinstDLL, "UnInstallMouseHook");
+
+
+	if (!AfxSocketInit())
+	{
+		AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
+		return FALSE;
+	}
+	m_bmp_monitor.LoadBitmapA(IDB_MONITOR);
+	m_bmp_phone.LoadBitmapA(IDB_PHONE);
+
+
+	m_imgList.Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
+	m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
+
+	m_imgList.Add(&m_bmp_monitor, RGB(0, 0, 0));
+	LVITEM lvitem = {0};
+
+	lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
+	lvitem.iItem = 0;
+	lvitem.pszText = "127.0.0.1";
+	lvitem.lParam = (LPARAM)STATUS_PC;
+	lvitem.iImage = 0;
+
+	m_waiting_client.InsertItem(&lvitem);
+
+	btnControl[0] = this->GetDlgItem(IDC_BUTTON1);
+	btnControl[1] = this->GetDlgItem(IDC_BUTTON2);
+	btnControl[2] = this->GetDlgItem(IDC_BUTTON3);
+	btnControl[3] = this->GetDlgItem(IDC_BUTTON4);
+	btnControl[4] = this->GetDlgItem(IDC_BUTTON5);
+	btnControl[5] = this->GetDlgItem(IDC_BUTTON6);
+	btnControl[6] = this->GetDlgItem(IDC_BUTTON7);
+	btnControl[7] = this->GetDlgItem(IDC_BUTTON8);
+	btnControl[8] = this->GetDlgItem(IDC_BUTTON9);
+
+	for(int i = 0 ; i < 9 ; i ++)
+		btnControl[i]->GetWindowPlacement(&getCoord[i]);
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}
 // CServer 메시지 처리기입니다.
 
 void CServer::OnStartServer()
@@ -211,18 +286,7 @@ void CServer::OnLButtonUp(UINT nFlags, CPoint point)
 	HBITMAP m_hBitmap;
 
 	LVITEM Item; 
-	btnControl[0] = this->GetDlgItem(IDC_BUTTON1);
-	btnControl[1] = this->GetDlgItem(IDC_BUTTON2);
-	btnControl[2] = this->GetDlgItem(IDC_BUTTON3);
-	btnControl[3] = this->GetDlgItem(IDC_BUTTON4);
-	btnControl[4] = this->GetDlgItem(IDC_BUTTON5);
-	btnControl[5] = this->GetDlgItem(IDC_BUTTON6);
-	btnControl[6] = this->GetDlgItem(IDC_BUTTON7);
-	btnControl[7] = this->GetDlgItem(IDC_BUTTON8);
-	btnControl[8] = this->GetDlgItem(IDC_BUTTON9);
 
-	for(int i = 0 ; i < 9 ; i ++)
-		btnControl[i]->GetWindowPlacement(&getCoord[i]);
 
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (m_bDrag)
@@ -257,128 +321,26 @@ void CServer::OnLButtonUp(UINT nFlags, CPoint point)
 		Item.iItem = nDest;   
 		m_waiting_client.InsertItem(&Item);   
 
-		if(point.x >= getCoord[0].rcNormalPosition.left &&
-			point.x <= getCoord[0].rcNormalPosition.right &&
-			point.y <= getCoord[0].rcNormalPosition.bottom &&
-			point.y >= getCoord[0].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 1일 때
+		for(int i = 0; i < sizeof(m_cBtn)/sizeof(m_cBtn[0]); i++) {
+			if(point.x >= getCoord[i].rcNormalPosition.left &&
+				point.x <= getCoord[i].rcNormalPosition.right &&
+				point.y <= getCoord[i].rcNormalPosition.bottom &&
+				point.y >= getCoord[i].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 1일 때
 
-				// 처음에 클릭한 그림이 스마트폰인지 컴퓨터인지 걸러내서
-				// 컴퓨터이면 버튼에 컴퓨터 삽입, 스마트폰이면 버튼에 스마트폰 삽입
-				if(Item.lParam == STATUS_PC){
-					m_hBitmap = (HBITMAP)m_bmp_monitor;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				} else{
-					m_hBitmap = (HBITMAP)m_bmp_phone;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				}
+					// 처음에 클릭한 그림이 스마트폰인지 컴퓨터인지 걸러내서
+					// 컴퓨터이면 버튼에 컴퓨터 삽입, 스마트폰이면 버튼에 스마트폰 삽입
+					if(Item.lParam == STATUS_PC){
+						m_cBtn[i].SetBitmap(HBITMAP(m_bmp_monitor));
+					} else{
+						m_cBtn[i].SetBitmap(HBITMAP(m_bmp_phone));
+					}
 
-				UpdateData();Invalidate();RedrawWindow();
-				// 
-		} else if(point.x >= getCoord[1].rcNormalPosition.left &&
-			point.x <= getCoord[1].rcNormalPosition.right &&
-			point.y <= getCoord[1].rcNormalPosition.bottom &&
-			point.y >= getCoord[1].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 2일 때
-				if(Item.lParam == STATUS_PC){
-					m_hBitmap = (HBITMAP)m_bmp_monitor;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				} else{
-					m_hBitmap = (HBITMAP)m_bmp_phone;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				}
-
-
-				UpdateData();Invalidate();RedrawWindow();
-		} else if(point.x >= getCoord[2].rcNormalPosition.left &&
-			point.x <= getCoord[2].rcNormalPosition.right &&
-			point.y <= getCoord[2].rcNormalPosition.bottom &&
-			point.y >= getCoord[2].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 3일 때
-				if(Item.lParam == STATUS_PC){
-					m_hBitmap = (HBITMAP)m_bmp_monitor;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				} else{
-					m_hBitmap = (HBITMAP)m_bmp_phone;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				}
-
-
-
-				UpdateData();Invalidate();RedrawWindow();
-		} else if(point.x >= getCoord[3].rcNormalPosition.left &&
-			point.x <= getCoord[3].rcNormalPosition.right &&
-			point.y <= getCoord[3].rcNormalPosition.bottom &&
-			point.y >= getCoord[3].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 4일 때
-				if(Item.lParam == STATUS_PC){
-					m_hBitmap = (HBITMAP)m_bmp_monitor;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				} else{
-					m_hBitmap = (HBITMAP)m_bmp_phone;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				}
-
-
-				UpdateData();Invalidate();RedrawWindow();
-		} else if(point.x >= getCoord[5].rcNormalPosition.left &&
-			point.x <= getCoord[5].rcNormalPosition.right &&
-			point.y <= getCoord[5].rcNormalPosition.bottom &&
-			point.y >= getCoord[5].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 6일 때
-				if(Item.lParam == STATUS_PC){
-					m_hBitmap = (HBITMAP)m_bmp_monitor;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				} else{
-					m_hBitmap = (HBITMAP)m_bmp_phone;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				}
-
-
-				UpdateData();Invalidate();RedrawWindow();
-		} else if(point.x >= getCoord[6].rcNormalPosition.left &&
-			point.x <= getCoord[6].rcNormalPosition.right &&
-			point.y <= getCoord[6].rcNormalPosition.bottom &&
-			point.y >= getCoord[6].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 7일 때
-				if(Item.lParam == STATUS_PC){
-					m_hBitmap = (HBITMAP)m_bmp_monitor;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				} else{
-					m_hBitmap = (HBITMAP)m_bmp_phone;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				}
-
-				UpdateData();Invalidate();RedrawWindow();
-		} else if(point.x >= getCoord[7].rcNormalPosition.left &&
-			point.x <= getCoord[7].rcNormalPosition.right &&
-			point.y <= getCoord[7].rcNormalPosition.bottom &&
-			point.y >= getCoord[7].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 8일 때
-
-				if(Item.lParam == STATUS_PC){
-					m_hBitmap = (HBITMAP)m_bmp_monitor;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				} else{
-					m_hBitmap = (HBITMAP)m_bmp_phone;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				}
-
-
-				UpdateData();
-				Invalidate();RedrawWindow();
-		} else if(point.x >= getCoord[8].rcNormalPosition.left &&
-			point.x <= getCoord[8].rcNormalPosition.right &&
-			point.y <= getCoord[8].rcNormalPosition.bottom &&
-			point.y >= getCoord[8].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 9일 때
-				if(Item.lParam == STATUS_PC){
-					m_hBitmap = (HBITMAP)m_bmp_monitor;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				} else{
-					m_hBitmap = (HBITMAP)m_bmp_phone;
-					m_cBtn[0].SetBitmap(m_hBitmap);
-				}
-
-				UpdateData();
-				Invalidate();RedrawWindow();
-		} else { // 사각형(버튼) 아래가 아니면 그냥 리턴
-
-			return ; 
+					UpdateData();
+					Invalidate();
+					RedrawWindow();
+					break;
+			}
 		}
-
 	}   
 	CDialogEx::OnLButtonUp(nFlags, point);
 }
@@ -654,72 +616,6 @@ int CServer::GetHitIndex(CPoint point) // 커서 위치의 리스트아이템 인덱스를 찾는
 	HitInfo.pt.y = point.y - rcList.top;
 
 	return m_waiting_client.HitTest(&HitInfo);
-}
-
-
-BOOL CServer::OnInitDialog()
-{
-	CDialogEx::OnInitDialog();
-
-	// TODO:  여기에 추가 초기화 작업을 추가합니다.
-	TRACE("CServer Init\n");
-
-	/* 현재 서버가 될 컴퓨터의 IP를 알아내는 코드 */
-	WORD wVersionRequested;
-	WSADATA wsaData;
-	char name[255];
-	PHOSTENT hostinfo;
-	CString strIpAddress;
-	wVersionRequested = MAKEWORD(2, 0);
-	if(WSAStartup(wVersionRequested, &wsaData) == 0)
-	{
-		if(gethostname(name, sizeof(name)) == 0)
-		{
-			if((hostinfo = gethostbyname(name)) != NULL)
-				strIpAddress = inet_ntoa (*(struct in_addr *)*hostinfo->h_addr_list);
-		} 
-		WSACleanup();
-	}
-
-	serverIPAddress.Append(strIpAddress);
-
-
-	hinstDLL = LoadLibrary(_T("KeyHook.dll"));
-	if(!hinstDLL)
-		AfxMessageBox(_T("KeyHook.dll 로드 실패!"));
-
-	installKeyhook = (InstallKeyboardHook)GetProcAddress(hinstDLL, "InstallKeyboardHook");
-	installMousehook = (InstallMouseHook)GetProcAddress(hinstDLL, "InstallMouseHook");
-
-	uninstallKeyhook = (UnInstallKeyboardHook)GetProcAddress(hinstDLL, "UnInstallKeyboardHook");
-	uninstallMousehook = (UnInstallMouseHook)GetProcAddress(hinstDLL, "UnInstallMouseHook");
-
-
-	if (!AfxSocketInit())
-	{
-		AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
-		return FALSE;
-	}
-	m_bmp_monitor.LoadBitmapA(IDB_MONITOR);
-	m_bmp_phone.LoadBitmapA(IDB_PHONE);
-
-
-	m_imgList.Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
-	m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
-
-	m_imgList.Add(&m_bmp_monitor, RGB(0, 0, 0));
-	LVITEM lvitem = {0};
-
-	lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
-	lvitem.iItem = 0;
-	lvitem.pszText = "127.0.0.1";
-	lvitem.lParam = (LPARAM)STATUS_PC;
-	lvitem.iImage = 0;
-
-	m_waiting_client.InsertItem(&lvitem);
-
-	return TRUE;  // return TRUE unless you set the focus to a control
-	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
 
 PACKET CServer::packMessage(int msgType, int sendDev, int recvDev, int deviceType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3, int pad4)
