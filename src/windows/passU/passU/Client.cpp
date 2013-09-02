@@ -50,6 +50,7 @@ void CClient::OnConnectServer(void)
 	m_IpAddressCtrl.GetAddress(ipFirst, ipSecond, ipThird, ipForth);
 	m_address.Format(_T("%d.%d.%d.%d"), ipFirst, ipSecond, ipThird, ipForth);
 
+	m_clientSock.m_hWnd = this->m_hWnd;
 	m_clientSock.Create();
 	m_clientSock.Connect(m_address, 30000);
 
@@ -77,10 +78,10 @@ void CClient::OnDisconnect(void)
 void CClient::OnBnClickedConnect() // Connect 버튼을 눌렀을 때
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(m_address.GetLength() == 0){
+	/*if(m_address.GetLength() == 0){
 		AfxMessageBox(_T("IP 주소를 입력하세요."));
 		return ;
-	}
+	}*/
 
 	m_cBtn_connect.EnableWindow(FALSE);
 	OnConnectServer();

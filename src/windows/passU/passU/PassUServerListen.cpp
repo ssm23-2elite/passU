@@ -4,13 +4,14 @@
 #include "stdafx.h"
 #include "PassU.h"
 #include "PassUServerListen.h"
-
+#include "Server.h"
 
 // CPassUServerListen
 
 CPassUServerListen::CPassUServerListen()
 {
 	nClient = 0;
+	m_hWnd = NULL;
 }
 
 CPassUServerListen::~CPassUServerListen()
@@ -34,13 +35,16 @@ void CPassUServerListen::OnAccept(int nErrorCode)
 
 	if(Accept(tmp)){
 		pThread = (CPassUServerThread *)AfxBeginThread(RUNTIME_CLASS(CPassUServerThread), 0, 0, CREATE_SUSPENDED);
-
+		TRACE("pThreadCreate\n");
 		if(pThread){
 			pThread->m_hSocket = tmp.Detach();
 			m_sockList.AddTail(pThread);
-			pThread->ResumeThread();
 			nClient += 1;
 			pThread->c_id = nClient;
+			TRACE(_T("Listen¿¡¼­ÀÇ m_hwnd : %p\n", m_hWnd));
+			pThread->m_hWnd = m_hWnd;
+			pThread->ResumeThread();
+			
 			TRACE("m_sockList Add Tail Success, pThread Sucess !\n");
 		}
 

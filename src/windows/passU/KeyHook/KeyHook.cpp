@@ -67,8 +67,7 @@ _______________________________________________________________________________ 
 extern "C" __declspec(dllexport)
 	LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 {				
-	HWND chWnd = FindWindow(NULL, TEXT("PassU - Client"));
-	HWND hwnd = FindWindow(NULL, TEXT("PassU - Server"));
+	HWND hwnd = FindWindow(NULL, TEXT("PassU - Pass Your USB via Network(Server)"));
 	KBDLLHOOKSTRUCT *pKey = (KBDLLHOOKSTRUCT *)lParam;
 
 	//MessageBox(g_hWnd, "keyboardHook", "vkCode : ", MB_OK);

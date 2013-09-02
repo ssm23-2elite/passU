@@ -12,6 +12,7 @@ IMPLEMENT_DYNCREATE(CPassUServerThread, CWinThread)
 
 CPassUServerThread::CPassUServerThread()
 {
+	
 }
 
 CPassUServerThread::~CPassUServerThread()
@@ -21,7 +22,10 @@ CPassUServerThread::~CPassUServerThread()
 BOOL CPassUServerThread::InitInstance()
 {
 	// TODO: 여기에서 각 스레드에 대한 초기화를 수행합니다.
-	m_passUSocket = new CPassUServerSocket();
+	m_hWnd = NULL;
+	TRACE("Before passUsocket\n");
+	TRACE(_T("Thread에서의 m_hwnd : %p\n", m_hWnd));
+	m_passUSocket = new CPassUServerSocket(m_hWnd);
 
 	TRY{
 		m_passUSocket -> Attach(m_hSocket); 

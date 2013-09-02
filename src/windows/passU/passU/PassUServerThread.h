@@ -20,6 +20,7 @@ public:
 	SOCKET m_hSocket;
 	CPassUServerSocket *m_passUSocket;
 	int c_id;
+	HWND m_hWnd;
 
 protected:
 	DECLARE_MESSAGE_MAP()

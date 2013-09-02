@@ -7,6 +7,9 @@
 #include "afxdialogex.h"
 
 
+#define WM_RECEIVEMSG	(WM_USER + 1000)
+
+
 // 후킹을 위한 함수 포인터
 typedef HHOOK (*InstallKeyboardHook)();
 typedef HHOOK (*InstallMouseHook)();
@@ -29,46 +32,7 @@ IMPLEMENT_DYNAMIC(CServer, CDialogEx)
 	: CDialogEx(CServer::IDD, pParent)
 	, serverIPAddress(_T(""))
 {
-	TRACE("CServer Init\n");
-
-	/* 현재 서버가 될 컴퓨터의 IP를 알아내는 코드 */
-	WORD wVersionRequested;
-	WSADATA wsaData;
-	char name[255];
-	PHOSTENT hostinfo;
-	CString strIpAddress;
-	wVersionRequested = MAKEWORD(2, 0);
-	if(WSAStartup(wVersionRequested, &wsaData) == 0)
-	{
-		if(gethostname(name, sizeof(name)) == 0)
-		{
-			if((hostinfo = gethostbyname(name)) != NULL)
-				strIpAddress = inet_ntoa (*(struct in_addr *)*hostinfo->h_addr_list);
-		} 
-		WSACleanup();
-	}
-
-	serverIPAddress.Append(strIpAddress);
-
-
-	hinstDLL = LoadLibrary(_T("KeyHook.dll"));
-	if(!hinstDLL)
-		AfxMessageBox(_T("KeyHook.dll 로드 실패!"));
-
-	installKeyhook = (InstallKeyboardHook)GetProcAddress(hinstDLL, "InstallKeyboardHook");
-	installMousehook = (InstallMouseHook)GetProcAddress(hinstDLL, "InstallMouseHook");
-
-	uninstallKeyhook = (UnInstallKeyboardHook)GetProcAddress(hinstDLL, "UnInstallKeyboardHook");
-	uninstallMousehook = (UnInstallMouseHook)GetProcAddress(hinstDLL, "UnInstallMouseHook");
-
-
-	if (!AfxSocketInit())
-	{
-		AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
-		return ;
-	}
-
-
+	
 }
 
 CServer::~CServer()
@@ -88,7 +52,7 @@ void CServer::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON7, m_location_info[6]);
 	DDX_Control(pDX, IDC_BUTTON8, m_location_info[7]);
 	DDX_Control(pDX, IDC_BUTTON9, m_location_info[8]);
-	DDX_Control(pDX, IDC_LIST1, m_wating_client);
+	DDX_Control(pDX, IDC_LIST1, m_waiting_client);
 	DDX_Control(pDX, IDC_BUTTON10, m_CBtn_ServerStart);
 }
 
@@ -107,6 +71,7 @@ BEGIN_MESSAGE_MAP(CServer, CDialogEx)
 	ON_WM_LBUTTONUP()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_COPYDATA()
+	ON_MESSAGE(WM_RECEIVEMSG, &CServer::OnABC)
 END_MESSAGE_MAP()
 
 
@@ -115,16 +80,17 @@ END_MESSAGE_MAP()
 
 void CServer::OnStartServer()
 {
+	listen.m_hWnd = AfxGetMainWnd()->m_hWnd;
 	listen.Create(30000);
 	listen.Listen();
-
+	
+	TRACE("서버에서의 m_Wnd : %p, %p, %p\n", this->m_hWnd, AfxGetMainWnd()->m_hWnd, GetParent()->m_hWnd);
 	AfxMessageBox(_T("InitServer"));
 }
 
 
 void CServer::OnChangeLocationInfo(int index)
 {
-	// 
 }
 
 
@@ -132,7 +98,6 @@ void CServer::bindWatingClient(int client_index)
 {
 	// 클라이언트 index를 넣어줘서 버튼하고 binding시키는 것
 }
-
 
 void CServer::OnDisconnectedClient(int client_index)
 {
@@ -260,12 +225,23 @@ void CServer::ReceiveData(CPassUServerSocket * s)
 	s->Receive(&tmp, sizeof(PACKET));
 	COPYDATASTRUCT CDS;
 
+	m_status = STATUS_EMPTY;
+
 	CDS.dwData = 2; // receiveData
 	CDS.cbData = sizeof(PACKET);
 	CDS.lpData = &tmp;
-	SendMessage(WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	
+
+	HWND hWnd = ::FindWindow(NULL, TEXT("PassU - Pass Your USB via Network"));
+	TRACE(_T("%p\n", GetParent()->m_hWnd));
+	::SendMessage(hWnd, WM_RECEIVEMSG, 0, (LPARAM)(VOID *)&CDS);
 }
 
+LRESULT CServer::OnABC( WPARAM wParam, LPARAM lParam) {
+	AfxMessageBox("OnABC");
+	return 0;
+
+}
 
 BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
@@ -273,7 +249,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	
 	sockList = &listen.m_sockList;
 	POSITION pos = sockList->GetTailPosition();
-
+	AfxMessageBox(_T("OnCopyData"));
 	switch(pCopyDataStruct->dwData){
 	case 0: // keyboard
 
@@ -308,9 +284,9 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				bitmap.LoadBitmapA(IDB_BITMAP2);
 				m_imgList.Create(15, 15, ILC_COLOR8, 1, 1);
 				m_imgList.Add(&bitmap, RGB(255, 0, 255));
-				m_wating_client.SetImageList(&m_imgList, LVSIL_SMALL);
+				m_waiting_client.SetImageList(&m_imgList, LVSIL_SMALL);
 
-				m_wating_client.InsertItem(0, "tmp", 0);
+				m_waiting_client.InsertItem(0, "tmp", 0);
 
 				cThread = (CPassUServerThread *)listen.m_sockList.GetAt(pos);
 				if(listen.m_sockList.GetCount() == 1){
@@ -357,4 +333,54 @@ PACKET CServer::packMessage(int msgType, int sendDev, int recvDev, int deviceTyp
 	tmp.pad3 = pad3;
 
 	return tmp;
+}
+
+
+BOOL CServer::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+	TRACE("CServer Init\n");
+
+	/* 현재 서버가 될 컴퓨터의 IP를 알아내는 코드 */
+	WORD wVersionRequested;
+	WSADATA wsaData;
+	char name[255];
+	PHOSTENT hostinfo;
+	CString strIpAddress;
+	wVersionRequested = MAKEWORD(2, 0);
+	if(WSAStartup(wVersionRequested, &wsaData) == 0)
+	{
+		if(gethostname(name, sizeof(name)) == 0)
+		{
+			if((hostinfo = gethostbyname(name)) != NULL)
+				strIpAddress = inet_ntoa (*(struct in_addr *)*hostinfo->h_addr_list);
+		} 
+		WSACleanup();
+	}
+
+	serverIPAddress.Append(strIpAddress);
+
+
+	hinstDLL = LoadLibrary(_T("KeyHook.dll"));
+	if(!hinstDLL)
+		AfxMessageBox(_T("KeyHook.dll 로드 실패!"));
+
+	installKeyhook = (InstallKeyboardHook)GetProcAddress(hinstDLL, "InstallKeyboardHook");
+	installMousehook = (InstallMouseHook)GetProcAddress(hinstDLL, "InstallMouseHook");
+
+	uninstallKeyhook = (UnInstallKeyboardHook)GetProcAddress(hinstDLL, "UnInstallKeyboardHook");
+	uninstallMousehook = (UnInstallMouseHook)GetProcAddress(hinstDLL, "UnInstallMouseHook");
+
+
+	if (!AfxSocketInit())
+	{
+		AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
+		return FALSE;
+	}
+
+	m_status = STATUS_PC;
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }

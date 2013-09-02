@@ -34,7 +34,7 @@ public:
 	BOOL m_keyBoardHook;
 	BOOL m_mouseHook;
 
-	CListCtrl m_wating_client;
+	CListCtrl m_waiting_client;
 	CPassUServerThread *cThread;
 
 	CObList * sockList;
@@ -75,5 +75,7 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	void ReceiveData(CPassUServerSocket * s);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
+	afx_msg LRESULT OnABC( WPARAM wParam, LPARAM lParam) ;
 	PACKET packMessage(int msgType, int sendDev, int recvDev, int deviceType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3);
+	virtual BOOL OnInitDialog();
 };
