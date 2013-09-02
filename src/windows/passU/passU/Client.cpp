@@ -60,6 +60,7 @@ void CClient::OnConnectServer(void)
 	tmp.c_id = 0; // 아직 모르니깐.
 	tmp.hello = 1; // hello 패킷
 	tmp.bye = 0;
+	tmp.pad3 = 
 
 	m_clientSock.Send((LPCSTR *)&tmp, sizeof(CPACKET));
 	// HELLO 패킷을 보냄.

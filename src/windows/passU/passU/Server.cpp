@@ -32,7 +32,7 @@ IMPLEMENT_DYNAMIC(CServer, CDialogEx)
 	: CDialogEx(CServer::IDD, pParent)
 	, serverIPAddress(_T(""))
 {
-	
+
 }
 
 CServer::~CServer()
@@ -43,15 +43,15 @@ void CServer::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_IPADDRESS, serverIPAddress);
-	DDX_Control(pDX, IDC_BUTTON1, m_location_info[0]);
-	DDX_Control(pDX, IDC_BUTTON2, m_location_info[1]);
-	DDX_Control(pDX, IDC_BUTTON3, m_location_info[2]);
-	DDX_Control(pDX, IDC_BUTTON4, m_location_info[3]);
-	DDX_Control(pDX, IDC_BUTTON5, m_location_info[4]);
-	DDX_Control(pDX, IDC_BUTTON6, m_location_info[5]);
-	DDX_Control(pDX, IDC_BUTTON7, m_location_info[6]);
-	DDX_Control(pDX, IDC_BUTTON8, m_location_info[7]);
-	DDX_Control(pDX, IDC_BUTTON9, m_location_info[8]);
+	DDX_Control(pDX, IDC_BUTTON1, m_cBtn[0]);
+	DDX_Control(pDX, IDC_BUTTON2, m_cBtn[1]);
+	DDX_Control(pDX, IDC_BUTTON3, m_cBtn[2]);
+	DDX_Control(pDX, IDC_BUTTON4, m_cBtn[3]);
+	DDX_Control(pDX, IDC_BUTTON5, m_cBtn[4]);
+	DDX_Control(pDX, IDC_BUTTON6, m_cBtn[5]);
+	DDX_Control(pDX, IDC_BUTTON7, m_cBtn[6]);
+	DDX_Control(pDX, IDC_BUTTON8, m_cBtn[7]);
+	DDX_Control(pDX, IDC_BUTTON9, m_cBtn[8]);
 	DDX_Control(pDX, IDC_LIST1, m_waiting_client);
 	DDX_Control(pDX, IDC_BUTTON10, m_CBtn_ServerStart);
 }
@@ -72,18 +72,19 @@ BEGIN_MESSAGE_MAP(CServer, CDialogEx)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_COPYDATA()
 	ON_MESSAGE(WM_RECEIVEMSG, &CServer::OnABC)
+	ON_NOTIFY(LVN_BEGINDRAG, IDC_LIST1, &CServer::OnLvnBegindragList1)
+	ON_WM_MOUSEMOVE()
 END_MESSAGE_MAP()
 
 
 // CServer 메시지 처리기입니다.
-
 
 void CServer::OnStartServer()
 {
 	listen.m_hWnd = AfxGetMainWnd()->m_hWnd;
 	listen.Create(30000);
 	listen.Listen();
-	
+
 	TRACE("서버에서의 m_Wnd : %p, %p, %p\n", this->m_hWnd, AfxGetMainWnd()->m_hWnd, GetParent()->m_hWnd);
 	AfxMessageBox(_T("InitServer"));
 }
@@ -157,7 +158,7 @@ void CServer::OnBnClickedServerStop()
 void CServer::OnBnClickedButton1()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	
+
 }
 
 
@@ -205,11 +206,216 @@ void CServer::OnBnClickedButton9()
 
 void CServer::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	CPoint m_tmpPoint;
+	CBitmap m_tmpBitmap;
+	HBITMAP m_hBitmap;
 
+	LVITEM Item; 
+	btnControl[0] = this->GetDlgItem(IDC_BUTTON1);
+	btnControl[1] = this->GetDlgItem(IDC_BUTTON2);
+	btnControl[2] = this->GetDlgItem(IDC_BUTTON3);
+	btnControl[3] = this->GetDlgItem(IDC_BUTTON4);
+	btnControl[4] = this->GetDlgItem(IDC_BUTTON5);
+	btnControl[5] = this->GetDlgItem(IDC_BUTTON6);
+	btnControl[6] = this->GetDlgItem(IDC_BUTTON7);
+	btnControl[7] = this->GetDlgItem(IDC_BUTTON8);
+	btnControl[8] = this->GetDlgItem(IDC_BUTTON9);
+
+	for(int i = 0 ; i < 9 ; i ++)
+		btnControl[i]->GetWindowPlacement(&getCoord[i]);
+
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	if (m_bDrag)
+	{
+		if (NULL == m_pDragImage)
+			return ;
+
+		m_waiting_client.SetItemState(m_nOldTarget, 0, LVIS_DROPHILITED);
+
+		//드래그종료   
+		m_pDragImage->DragLeave(NULL);
+		ReleaseCapture();                
+		m_pDragImage->EndDrag();       
+
+		m_bDrag = false;
+		delete m_pDragImage;
+		m_pDragImage = NULL;       
+
+		// 아이템위치변경
+		INT nDest = GetHitIndex(point);       
+
+		TCHAR Name[256 + 1] = {0,}; 
+
+		Item.iItem = m_nSource;   
+		Item.mask = LVIF_IMAGE | LVIF_TEXT | LVIF_PARAM | LVIF_STATE;   
+		Item.stateMask = LVIS_FOCUSED | LVIS_SELECTED | LVIS_STATEIMAGEMASK | LVIS_OVERLAYMASK;    
+		Item.pszText = Name;   
+		Item.cchTextMax = 256;   
+		Item.iSubItem = 0;   
+		m_waiting_client.GetItem(&Item);   
+
+		Item.iItem = nDest;   
+		m_waiting_client.InsertItem(&Item);   
+
+		if(point.x >= getCoord[0].rcNormalPosition.left &&
+			point.x <= getCoord[0].rcNormalPosition.right &&
+			point.y <= getCoord[0].rcNormalPosition.bottom &&
+			point.y >= getCoord[0].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 1일 때
+
+				// 처음에 클릭한 그림이 스마트폰인지 컴퓨터인지 걸러내서
+				// 컴퓨터이면 버튼에 컴퓨터 삽입, 스마트폰이면 버튼에 스마트폰 삽입
+				if(Item.lParam == STATUS_PC){
+					m_hBitmap = (HBITMAP)m_bmp_monitor;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				} else{
+					m_hBitmap = (HBITMAP)m_bmp_phone;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				}
+
+				UpdateData();Invalidate();RedrawWindow();
+				// 
+		} else if(point.x >= getCoord[1].rcNormalPosition.left &&
+			point.x <= getCoord[1].rcNormalPosition.right &&
+			point.y <= getCoord[1].rcNormalPosition.bottom &&
+			point.y >= getCoord[1].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 2일 때
+				if(Item.lParam == STATUS_PC){
+					m_hBitmap = (HBITMAP)m_bmp_monitor;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				} else{
+					m_hBitmap = (HBITMAP)m_bmp_phone;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				}
+
+
+				UpdateData();Invalidate();RedrawWindow();
+		} else if(point.x >= getCoord[2].rcNormalPosition.left &&
+			point.x <= getCoord[2].rcNormalPosition.right &&
+			point.y <= getCoord[2].rcNormalPosition.bottom &&
+			point.y >= getCoord[2].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 3일 때
+				if(Item.lParam == STATUS_PC){
+					m_hBitmap = (HBITMAP)m_bmp_monitor;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				} else{
+					m_hBitmap = (HBITMAP)m_bmp_phone;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				}
+
+
+
+				UpdateData();Invalidate();RedrawWindow();
+		} else if(point.x >= getCoord[3].rcNormalPosition.left &&
+			point.x <= getCoord[3].rcNormalPosition.right &&
+			point.y <= getCoord[3].rcNormalPosition.bottom &&
+			point.y >= getCoord[3].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 4일 때
+				if(Item.lParam == STATUS_PC){
+					m_hBitmap = (HBITMAP)m_bmp_monitor;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				} else{
+					m_hBitmap = (HBITMAP)m_bmp_phone;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				}
+
+
+				UpdateData();Invalidate();RedrawWindow();
+		} else if(point.x >= getCoord[5].rcNormalPosition.left &&
+			point.x <= getCoord[5].rcNormalPosition.right &&
+			point.y <= getCoord[5].rcNormalPosition.bottom &&
+			point.y >= getCoord[5].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 6일 때
+				if(Item.lParam == STATUS_PC){
+					m_hBitmap = (HBITMAP)m_bmp_monitor;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				} else{
+					m_hBitmap = (HBITMAP)m_bmp_phone;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				}
+
+
+				UpdateData();Invalidate();RedrawWindow();
+		} else if(point.x >= getCoord[6].rcNormalPosition.left &&
+			point.x <= getCoord[6].rcNormalPosition.right &&
+			point.y <= getCoord[6].rcNormalPosition.bottom &&
+			point.y >= getCoord[6].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 7일 때
+				if(Item.lParam == STATUS_PC){
+					m_hBitmap = (HBITMAP)m_bmp_monitor;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				} else{
+					m_hBitmap = (HBITMAP)m_bmp_phone;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				}
+
+				UpdateData();Invalidate();RedrawWindow();
+		} else if(point.x >= getCoord[7].rcNormalPosition.left &&
+			point.x <= getCoord[7].rcNormalPosition.right &&
+			point.y <= getCoord[7].rcNormalPosition.bottom &&
+			point.y >= getCoord[7].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 8일 때
+
+				if(Item.lParam == STATUS_PC){
+					m_hBitmap = (HBITMAP)m_bmp_monitor;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				} else{
+					m_hBitmap = (HBITMAP)m_bmp_phone;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				}
+
+
+				UpdateData();
+				Invalidate();RedrawWindow();
+		} else if(point.x >= getCoord[8].rcNormalPosition.left &&
+			point.x <= getCoord[8].rcNormalPosition.right &&
+			point.y <= getCoord[8].rcNormalPosition.bottom &&
+			point.y >= getCoord[8].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 9일 때
+				if(Item.lParam == STATUS_PC){
+					m_hBitmap = (HBITMAP)m_bmp_monitor;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				} else{
+					m_hBitmap = (HBITMAP)m_bmp_phone;
+					m_cBtn[0].SetBitmap(m_hBitmap);
+				}
+
+				UpdateData();
+				Invalidate();RedrawWindow();
+		} else { // 사각형(버튼) 아래가 아니면 그냥 리턴
+
+			return ; 
+		}
+
+	}   
 	CDialogEx::OnLButtonUp(nFlags, point);
 }
 
+void CServer::MoveListItem(const INT _nSource, const INT _nDest)
+{
+	if ((_nSource == _nDest) || (0 > _nDest))
+		return ;
+
+	INT nSource = _nSource;   
+	INT nColumn = m_waiting_client.GetHeaderCtrl()->GetItemCount();   
+	TCHAR Name[256 + 1] = {0,};   
+
+	LVITEM Item;   
+	Item.iItem = nSource;   
+	Item.mask = LVIF_IMAGE | LVIF_TEXT | LVIF_PARAM | LVIF_STATE;   
+	Item.stateMask = LVIS_FOCUSED | LVIS_SELECTED | LVIS_STATEIMAGEMASK | LVIS_OVERLAYMASK;    
+	Item.pszText = Name;   
+	Item.cchTextMax = 256;   
+	Item.iSubItem = 0;   
+	m_waiting_client.GetItem(&Item);   
+
+	Item.iItem = _nDest;   
+	m_waiting_client.InsertItem(&Item);   
+
+
+
+	if (nSource > _nDest)
+		nSource ++;       
+
+	for (INT i= 1; i<nColumn; i++)
+	{   
+		CString sText = m_waiting_client.GetItemText(nSource, i);       
+		m_waiting_client.SetItemText(_nDest, i, sText);       
+	}   
+	m_waiting_client.DeleteItem(nSource);   
+}
 
 void CServer::OnLButtonDown(UINT nFlags, CPoint point)
 {
@@ -230,7 +436,7 @@ void CServer::ReceiveData(CPassUServerSocket * s)
 	CDS.dwData = 2; // receiveData
 	CDS.cbData = sizeof(PACKET);
 	CDS.lpData = &tmp;
-	
+
 
 	HWND hWnd = ::FindWindow(NULL, TEXT("PassU - Pass Your USB via Network"));
 	TRACE(_T("%p\n", GetParent()->m_hWnd));
@@ -246,7 +452,7 @@ LRESULT CServer::OnABC( WPARAM wParam, LPARAM lParam) {
 BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	
+
 	sockList = &listen.m_sockList;
 	POSITION pos = sockList->GetTailPosition();
 	AfxMessageBox(_T("OnCopyData"));
@@ -264,36 +470,86 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	case 2: // receiveData
 		p = (PACKET *) pCopyDataStruct->lpData; // 구조체 연결
 
-		switch(k->msgType){
+		switch(p->msgType){
 		case 1: // keyboard
 
 			break;
-			
+
 		case 2: // mouse
 			break;
 
 
 		case 3: // client
-			if(k->deviceType == 1){ // hello packet
-				// 헬로 패킷이면
+			if(p->deviceType == 1){ // hello packet
+				// 헬로 패킷이면 클라이언트 정보 설정
 				// 버튼에 클라이언트 연결해주고, 첫번째 클라이언트면 후킹 시작하고
 				// 클라이언트에 자신의 id 알려주고
 				// 리스트 컨트롤에 아이콘 하나 추가
-				CBitmap bitmap;
+				for(int i = 0 ; i < 9 ; i ++){
+					if(clientInfo[i].clientID == 0){
+						// client ID Setting
+						clientInfo[i].setID(i);
 
-				bitmap.LoadBitmapA(IDB_BITMAP2);
-				m_imgList.Create(15, 15, ILC_COLOR8, 1, 1);
-				m_imgList.Add(&bitmap, RGB(255, 0, 255));
-				m_waiting_client.SetImageList(&m_imgList, LVSIL_SMALL);
+						// Client IP Address Setting
+						clientInfo[i].m_address.Format(_T("%d.%d.%d.%d", p->keyCode, p->pad2, p->pad3, p->pad4));
 
-				m_waiting_client.InsertItem(0, "tmp", 0);
+
+						if(p->recvDev == STATUS_PC){ // PC 이면
+							// Status 세팅
+							clientInfo[i].setStatus(STATUS_PC);
+
+							// 아이콘 세팅
+							m_imgList.Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
+							m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
+							m_imgList.Add(&m_bmp_monitor, RGB(0, 0, 0));
+
+							// 정보 저장할 LVITEM 세팅
+							ZeroMemory(&lvitem[i], sizeof(lvitem));
+							lvitem[i].mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
+							lvitem[i].iItem = 0;
+							lvitem[i].pszText = _T("%s",clientInfo[i].m_address);
+							lvitem[i].lParam = (LPARAM)STATUS_PC;
+							lvitem[i].iImage = 0;
+
+							m_waiting_client.InsertItem(&lvitem[i]);
+						} else if(p->recvDev == STATUS_MOBILE){
+
+							// Status 세팅
+							clientInfo[i].setStatus(STATUS_MOBILE);
+							// 아이콘 세팅
+							m_imgList.Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
+							m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
+							m_imgList.Add(&m_bmp_phone, RGB(0, 0, 0));
+
+							//정보 저장할 LVITEM 세팅
+							ZeroMemory(&lvitem[i], sizeof(lvitem));
+							lvitem[i].mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
+							lvitem[i].iItem = 0;
+							lvitem[i].pszText = _T("%s",clientInfo[i].m_address);
+							lvitem[i].lParam = (LPARAM)STATUS_MOBILE;
+							lvitem[i].iImage = 0;
+							m_waiting_client.InsertItem(&lvitem[i]);
+						} else{
+							AfxMessageBox(_T("status nothing!!"));
+							m_imgList.DeleteImageList();
+							clientInfo[i].setID(0);
+							clientInfo[i].setStatus(STATUS_EMPTY);
+							return FALSE;
+						}
+
+					}
+					listen.m_sockList.GetNext(pos);
+				}
+
 
 				cThread = (CPassUServerThread *)listen.m_sockList.GetAt(pos);
+
 				if(listen.m_sockList.GetCount() == 1){
 					installKeyhook();
 					installMousehook();
 				}
-				PACKET pack = packMessage(3, cThread->getClientID() , 0 , 1, 0, 0, 0, 0, 0, 0);
+
+				PACKET pack = packMessage(3, cThread->getClientID() , 0 , 1, 0, 0, 0, 0, 0, 0, 0);
 				cThread->m_passUSocket->Send((LPCSTR *)&pack, sizeof(CPACKET)); // hello packet 답신 
 
 			} else if(k->relativeField == 1){ // bye packet
@@ -317,22 +573,87 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 }
 
 
-PACKET CServer::packMessage(int msgType, int sendDev, int recvDev, int deviceType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3)
+void CServer::OnLvnBegindragList1(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	PACKET tmp;
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	*pResult = 0;
 
-	tmp.msgType = msgType;
-	tmp.sendDev = sendDev;
-	tmp.recvDev = recvDev;
-	tmp.deviceType = deviceType;
-	tmp.relativeField = relativeField;
-	tmp.updownFlag = updownFlag;
-	tmp.pad1 = pad1;
-	tmp.keyCode = keyCode;
-	tmp.pad2 = pad2;
-	tmp.pad3 = pad3;
+	if (0 >= m_waiting_client.GetSelectedCount())
+		return ;
 
-	return tmp;
+	m_nSource = pNMLV->iItem;
+
+	//드래그이미지리스트생성
+	POINT ptImg;
+	m_pDragImage = m_waiting_client.CreateDragImage(m_nSource, &ptImg);
+	if (NULL == m_pDragImage)
+		return ;
+
+	//핫스팟
+	CPoint ptSpot;
+	ptSpot.x = pNMLV->ptAction.x - ptImg.x;
+	ptSpot.y = pNMLV->ptAction.y - ptImg.y;
+	m_pDragImage->BeginDrag(0, ptSpot);
+
+	//현재마우스커서위치에드래그이미지그림
+	ptImg.x = pNMLV->ptAction.x;
+	ptImg.y = pNMLV->ptAction.y;
+	ClientToScreen(&ptImg);
+	m_pDragImage->DragEnter(NULL, ptImg);
+
+	m_nOldTarget = m_nSource;
+	m_bDrag = true;
+	SetCapture();
+}
+
+
+void CServer::OnMouseMove(UINT nFlags, CPoint point)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	if (m_bDrag)
+	{
+		if (NULL == m_pDragImage)
+			return ;
+
+		// 드래그이미지이동
+		CPoint ptCursor(point);
+		ClientToScreen(&ptCursor);
+		m_pDragImage->DragMove(ptCursor);
+
+		// 커서위치의리스트아이템찾아서선택표시를해준다.
+		INT nTarget = GetHitIndex(point);
+		if (-1 != nTarget)
+		{
+			if (m_nOldTarget != nTarget)
+			{
+				m_pDragImage->DragLeave(NULL);
+				m_waiting_client.SetItemState(nTarget, 
+					LVIS_DROPHILITED, LVIS_DROPHILITED);
+
+				m_waiting_client.SetItemState(m_nOldTarget, 0, 
+					LVIS_DROPHILITED);
+				m_nOldTarget = nTarget;
+
+				m_pDragImage->DragEnter(NULL, ptCursor);
+				m_waiting_client.UpdateWindow();
+			}
+		}
+	}
+
+	CDialogEx::OnMouseMove(nFlags, point);
+}
+int CServer::GetHitIndex(CPoint point) // 커서 위치의 리스트아이템 인덱스를 찾는다.
+{
+
+	CRect rcList;
+	m_waiting_client.GetWindowRect(&rcList);
+	ScreenToClient(reinterpret_cast<LPPOINT>(&rcList));
+
+	LVHITTESTINFO HitInfo;
+	HitInfo.pt.x = point.x - rcList.left;
+	HitInfo.pt.y = point.y - rcList.top;
+
+	return m_waiting_client.HitTest(&HitInfo);
 }
 
 
@@ -379,16 +700,43 @@ BOOL CServer::OnInitDialog()
 		AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
 		return FALSE;
 	}
-
-	m_status = STATUS_PC;
-
 	m_bmp_monitor.LoadBitmapA(IDB_MONITOR);
 	m_bmp_phone.LoadBitmapA(IDB_PHONE);
-	m_imgList.Create(60, 60, ILC_COLOR24, 1, 1);
+
+
+	m_imgList.Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
 	m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
-	
+
 	m_imgList.Add(&m_bmp_monitor, RGB(0, 0, 0));
-	m_waiting_client.InsertItem(0, _T("127.0.0.1"));
+	LVITEM lvitem = {0};
+
+	lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
+	lvitem.iItem = 0;
+	lvitem.pszText = "127.0.0.1";
+	lvitem.lParam = (LPARAM)STATUS_PC;
+	lvitem.iImage = 0;
+
+	m_waiting_client.InsertItem(&lvitem);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}
+
+PACKET CServer::packMessage(int msgType, int sendDev, int recvDev, int deviceType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3, int pad4)
+{
+	PACKET tmp;
+
+	tmp.msgType = msgType;
+	tmp.sendDev = sendDev;
+	tmp.recvDev = recvDev;
+	tmp.deviceType = deviceType;
+	tmp.relativeField = relativeField;
+	tmp.updownFlag = updownFlag;
+	tmp.pad1 = pad1;
+	tmp.keyCode = keyCode;
+	tmp.pad2 = pad2;
+	tmp.pad3 = pad3;
+	tmp.pad4 = pad4;
+
+	return tmp;
 }

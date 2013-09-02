@@ -1,6 +1,12 @@
 #ifndef __PACKET_H__
 #define __PACKET_H__
 
+/*
+#define STATUS_EMPTY	0
+#define STATUS_PC		1
+#define STATUS_MOBILE	2
+*/
+
 typedef struct packet{
 	int msgType:32; // msgType : 1
 	int sendDev:32; // id
@@ -12,7 +18,7 @@ typedef struct packet{
 	int keyCode:32;
 	int pad2:32;
 	int pad3:32;
-	
+	int pad4:32;
 } PACKET;
 typedef struct keypacket{ // 키보드 키 값을 가지고 있는 패킷(TCP)
 	int msgType:32; // msgType : 1
@@ -25,6 +31,7 @@ typedef struct keypacket{ // 키보드 키 값을 가지고 있는 패킷(TCP)
 	int keyCode:32;
 	int pad2:32;
 	int pad3:32;
+	int pad4:32;
 } KPACKET;
 
 typedef struct mousepacket{ // 마우스 위치 정보를 가지고 있는 패킷(TCP)
@@ -38,12 +45,13 @@ typedef struct mousepacket{ // 마우스 위치 정보를 가지고 있는 패킷(TCP)
 	int wheelFlag:32; // 0 : wheel off, 1 : wheel on 2 : wheel move
 	int xCoord:32;
 	int yCoord:32;
+	int pad:32;
 } MPACKET;
 
 typedef struct c_packet{ // 클라이언트에서 쓸 패킷
 	int msgType:32; // msgType : 3
 	int c_id:32; // 클라이언트 ID
-	int pad3:32;
+	int pad3:32; // 어떤 device인지. Computer : 1 // Android : 2
 	int hello:8; // Hello 패킷
 	int bye:8; // bye 패킷
 	int pad4:8;
@@ -51,6 +59,7 @@ typedef struct c_packet{ // 클라이언트에서 쓸 패킷
 	int pad6:32;
 	int pad7:32;
 	int pad8:32;
+	int pad9:32;
 } CPACKET;
 
 typedef struct dataPacket{ // 데이터 전송 때 쓸 패킷

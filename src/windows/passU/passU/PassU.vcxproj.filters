@@ -51,7 +51,7 @@
     <ClInclude Include="PassUServerThread.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="PassULoactionInfo.h">
+    <ClInclude Include="ClientInfo.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -80,7 +80,7 @@
     <ClCompile Include="PassUServerThread.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="PassULoactionInfo.cpp">
+    <ClCompile Include="ClientInfo.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

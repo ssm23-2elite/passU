@@ -100,10 +100,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h" />
+    <ClInclude Include="ClientInfo.h" />
     <ClInclude Include="packet.h" />
     <ClInclude Include="PassU.h" />
     <ClInclude Include="PassUDlg.h" />
-    <ClInclude Include="PassULoactionInfo.h" />
     <ClInclude Include="PassUServerListen.h" />
     <ClInclude Include="PassUServerSocket.h" />
     <ClInclude Include="PassUServerThread.h" />
@@ -114,9 +114,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="ClientInfo.cpp" />
     <ClCompile Include="PassU.cpp" />
     <ClCompile Include="PassUDlg.cpp" />
-    <ClCompile Include="PassULoactionInfo.cpp" />
     <ClCompile Include="PassUServerListen.cpp" />
     <ClCompile Include="PassUServerSocket.cpp" />
     <ClCompile Include="PassUServerThread.cpp" />
