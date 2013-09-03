@@ -19,15 +19,15 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// 대화 상자 데이터입니다.
+	// 대화 상자 데이터입니다.
 	enum { IDD = IDD_ABOUTBOX };
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
 
-	
 
-// 구현입니다.
+
+	// 구현입니다.
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -205,7 +205,7 @@ void CPassUDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 		m_SorC = FALSE;
 		break;
 	}
-	
+
 
 	*pResult = 0;
 }
@@ -214,13 +214,14 @@ void CPassUDlg::ReceiveData(CPassUChildSocket * s)
 {
 	PACKET tmp;
 	s->Receive(&tmp, sizeof(PACKET));
+
 	COPYDATASTRUCT CDS;
-	
+
 	CDS.dwData = 2; // receiveData
 	CDS.cbData = sizeof(PACKET);
 	CDS.lpData = &tmp;
 
-	
+
 	::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
 }
@@ -295,7 +296,7 @@ void CPassUDlg::OnBnClickedButton1()
 void CPassUDlg::OnBnClickedButton2()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	
+
 	m_CBtn_Start.EnableWindow(TRUE);
 	CleanUp();
 	//CDialog::OnCancel();
@@ -322,14 +323,14 @@ void CPassUDlg::OnConnectStart(void)
 	tmp.bye = 0;
 	tmp.c_id = 0;
 	tmp.hello = 1;
-	
+
 	tmp.pad3 = STATUS_PC;
 
 	tmp.pad6 = m_tab2.ipFirst;
 	tmp.pad7 = m_tab2.ipSecond;
 	tmp.pad8 = m_tab2.ipThird;
 	tmp.pad9 = m_tab2.ipForth;
-	
+
 	m_pClient->Send((LPCSTR *)&tmp, sizeof(CPACKET)); // 헬로 패킷 보냄
 
 
@@ -345,17 +346,48 @@ void CPassUDlg::ClientCleanUp(void)
 void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 {
 	PACKET tmp;
-	
+
 	s->Receive(&tmp, sizeof(PACKET));
+
+	if(tmp.msgType == KEYBOARD_DATA){
+		if(tmp.updownFlag == 1) // up
+			keybd_event(tmp.keyCode, 0, KEYEVENTF_KEYUP, 0);
+
+		else if(tmp.updownFlag == 0) // down
+			keybd_event(tmp.keyCode, 0, 0, 0);
+
+		TRACE("Keybd_event success\n");
+		return ;
+	} else if(tmp.msgType == MOUSE_DATA){
+		SetCursorPos(tmp.pad2, tmp.pad3);
+
+		if(tmp.pad1 == 1 && tmp.updownFlag== 0){ // right up
+			mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
+		} else if(tmp.pad1 == 1 && tmp.updownFlag == 1){ // right down
+			mouse_event(MOUSEEVENTF_RIGHTDOWN,  0, 0, 0, 0);
+		} else if(tmp.pad1 == 0 && tmp.updownFlag == 0){ // left up
+			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+		} else if(tmp.pad1 == 0 && tmp.updownFlag == 1){ // left down
+			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+		}
+		if(tmp.keyCode == 2){ // wheel btn up
+			mouse_event(MOUSEEVENTF_MIDDLEUP,  0, 0, 0, 0);
+		} else if(tmp.keyCode == 2){ // wheel btn down
+			mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, 0);
+		} else if(tmp.keyCode == 3){ // wheel move
+			mouse_event(MOUSEEVENTF_WHEEL,  0, 0, 0, 5);
+		}
+		TRACE("mouse_event success\n");
+		return ;
+	}
+
 	COPYDATASTRUCT CDS;
-
-
 
 	CDS.dwData = 0; // Client receiveData
 	CDS.cbData = sizeof(PACKET);
 	CDS.lpData = &tmp;
 
-	
+
 	::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
 }
@@ -369,7 +401,7 @@ void CPassUDlg::CloseClient(CPassUClientSocket * s)
 	tmp.bye = 1;
 	tmp.hello = 0;
 
-	
+
 	s->Send((LPCSTR *)&tmp, sizeof(CPACKET)); // bye 패킷 전송
 
 	ClientCleanUp();
@@ -380,7 +412,13 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
 	HEVENT *hEVENT;
 	MPACKET *mEVENT;
+
+	// Client한테 전송할 구조체(K,M : 후킹자료)
+	KPACKET keyP;
+	MPACKET mouseP;
+
 	COPYDATASTRUCT CDS;
+	POSITION pos = m_pSockList.GetHeadPosition();
 
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	switch(pCopyDataStruct->dwData){
@@ -389,22 +427,36 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
 			TRACE("KEY CODE 도착, SERVER에게 SENDMESSAGE\n");
+			keyP.deviceType = 1;
+			keyP.msgType = 1;
+			keyP.keyCode = hEVENT->keyCode;
+			keyP.updownFlag = hEVENT->updown;
+			((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send((LPCSTR *)&keyP, sizeof(KPACKET));
 
-
-			CDS.dwData = KEYBOARD_DATA; // Client receiveData
-			CDS.cbData = sizeof(HEVENT);
-			CDS.lpData = hEVENT;
-			::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+			//CDS.dwData = KEYBOARD_DATA; // Client receiveData
+			//CDS.cbData = sizeof(HEVENT);
+			//CDS.lpData = hEVENT;
+			//::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 		}
 		break;
 
 	case MOUSE_DATA:
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
 		TRACE("MOUSE DATA 도착, SERVER에게 SENDMESSAGE\n");
-			CDS.dwData = MOUSE_DATA; // Client receiveData
-			CDS.cbData = sizeof(MPACKET);
-			CDS.lpData = mEVENT;
-			::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		mouseP.msgType = 2;
+		mouseP.deviceType = mEVENT->deviceType;
+		mouseP.leftRight = mEVENT->leftRight;
+		mouseP.wheelFlag = mEVENT->wheelFlag;
+		mouseP.updownFlag = mEVENT->updownFlag;
+		mouseP.xCoord = mEVENT->xCoord;
+		mouseP.yCoord = mEVENT->yCoord;
+
+		((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send((LPCSTR *)&mouseP, sizeof(MPACKET));
+
+		//CDS.dwData = MOUSE_DATA; // Client receiveData
+		//CDS.cbData = sizeof(MPACKET);
+		//CDS.lpData = mEVENT;
+		//::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
 		break;
 	}
