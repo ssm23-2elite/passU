@@ -16,5 +16,7 @@ public:
 	void setPosition(int _pos);
 	int getID(void);
 	void setID(int cID);
+	void setIP(CString ipAddress);
+	CString getIP(void);
 };
 

@@ -50,7 +50,6 @@ void CClient::OnConnectServer(void)
 	m_IpAddressCtrl.GetAddress(ipFirst, ipSecond, ipThird, ipForth);
 	m_address.Format(_T("%d.%d.%d.%d"), ipFirst, ipSecond, ipThird, ipForth);
 
-	m_clientSock.m_hWnd = this->m_hWnd;
 	m_clientSock.Create();
 	m_clientSock.Connect(m_address, 30000);
 
@@ -58,9 +57,13 @@ void CClient::OnConnectServer(void)
 	
 	tmp.msgType = 3;
 	tmp.c_id = 0; // 아직 모르니깐.
+	tmp.pad3 = STATUS_PC;
 	tmp.hello = 1; // hello 패킷
 	tmp.bye = 0;
-	tmp.pad3 = 
+	tmp.pad6 = ipFirst;
+	tmp.pad7 = ipSecond;
+	tmp.pad8 = ipThird;
+	tmp.pad9 = ipForth;
 
 	m_clientSock.Send((LPCSTR *)&tmp, sizeof(CPACKET));
 	// HELLO 패킷을 보냄.
@@ -70,7 +73,12 @@ void CClient::OnConnectServer(void)
 
 void CClient::OnDisconnect(void)
 {
+	CPACKET tmp;
 
+	tmp.msgType = 3;
+	tmp.c_id = client_ID;
+
+	m_clientSock.Send((LPCSTR *)&tmp, sizeof(CPACKET));
 	// BYE 패킷을 보냄
 	m_clientSock.Close();
 }

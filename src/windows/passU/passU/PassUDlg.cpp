@@ -59,6 +59,8 @@ void CPassUDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TAB1, m_Tab);
+	DDX_Control(pDX, IDC_BUTTON1, m_CBtn_Start);
+	DDX_Control(pDX, IDC_BUTTON2, m_CBtn_Stop);
 }
 
 BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
@@ -66,6 +68,7 @@ BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CPassUDlg::OnTcnSelchangeTab1)
+	ON_BN_CLICKED(IDC_BUTTON1, &CPassUDlg::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 
@@ -120,6 +123,7 @@ BOOL CPassUDlg::OnInitDialog()
 	m_pwndShow = &m_tab1;
 
 	UpdateData(FALSE);
+
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -189,15 +193,93 @@ void CPassUDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 	case 0:
 		m_tab1.ShowWindow(SW_SHOW);
 		m_pwndShow = &m_tab1;
+	//	m_SorC = TRUE;
 		break;
 
 	case 1:
 		m_tab2.ShowWindow(SW_SHOW);
 		m_pwndShow = &m_tab2;
-
+	//	m_SorC = FALSE;
 		break;
 	}
 	
 
 	*pResult = 0;
+}
+
+void CPassUDlg::ReceiveData(CPassUChildSocket * s)
+{
+	PACKET tmp;
+	s->Receive(&tmp, sizeof(PACKET));
+	COPYDATASTRUCT CDS;
+
+	CDS.dwData = 2; // receiveData
+	CDS.cbData = sizeof(PACKET);
+	CDS.lpData = &tmp;
+
+	
+	::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
+}
+
+void CPassUDlg::Accept(void)
+{
+	CPassUChildSocket *pChild = new CPassUChildSocket();
+
+	BOOL check = m_pServer->Accept(*pChild);
+
+	if(check == FALSE){
+		AfxMessageBox(_T("Accept Failed"));
+		return ;
+	}
+
+	m_pSockList.AddTail(pChild);
+
+	AfxMessageBox(_T("Accept COmplete!!"));
+}
+
+void CPassUDlg::CleanUp(void)
+{
+	if(m_pServer)	delete m_pServer;
+
+	CPassUChildSocket *pChild;
+
+	while(!m_pSockList.IsEmpty()){
+		pChild = (CPassUChildSocket *)m_pSockList.RemoveHead();
+		delete pChild;
+	}
+	AfxMessageBox(_T("Clean Up!"));
+}
+
+void CPassUDlg::CloseChild(CPassUChildSocket *s){
+
+	CPassUChildSocket *pChild;
+	POSITION pos = m_pSockList.GetHeadPosition();
+	while(pos != NULL){
+		pChild = (CPassUChildSocket *)m_pSockList.GetAt(pos);
+
+		if(pChild == s){
+			m_pSockList.RemoveAt(pos);
+			delete	pChild;
+			break;
+		}
+		m_pSockList.GetNext(pos);
+	}
+}
+
+void CPassUDlg::OnStartServer()
+{
+	m_pServer = new CPassUServerSocket();
+	m_pServer->Create(30000);
+	m_pServer->Listen();
+
+	AfxMessageBox(_T("InitServer"));
+}
+
+void CPassUDlg::OnBnClickedButton1()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if(m_SorC){
+		OnStartServer();
+	}
 }

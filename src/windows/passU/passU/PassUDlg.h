@@ -6,6 +6,7 @@
 #include "afxcmn.h"
 #include "Server.h"
 #include "Client.h"
+#include "afxwin.h"
 
 
 // CPassUDlg 대화 상자
@@ -42,4 +43,18 @@ public:
 	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);
 	CClient m_tab_client;
 	CServer m_tab_server;
+
+	
+	CPassUServerSocket *m_pServer;
+	CObList m_pSockList;
+	BOOL m_SorC;
+	void OnStartServer();
+	void Accept(void);
+	void ReceiveData(CPassUChildSocket * s);
+	void CloseChild(CPassUChildSocket *s);
+	void CleanUp(void);
+
+	CButton m_CBtn_Start;
+	CButton m_CBtn_Stop;
+	afx_msg void OnBnClickedButton1();
 };

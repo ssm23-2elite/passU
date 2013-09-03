@@ -46,3 +46,15 @@ void CClientInfo::setID(int _cID)
 {
 	clientID = _cID;
 }
+
+
+void CClientInfo::setIP(CString ipAddress)
+{
+	m_address = ipAddress;
+}
+
+
+CString CClientInfo::getIP(void)
+{
+	return m_address;
+}

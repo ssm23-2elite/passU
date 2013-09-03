@@ -2,7 +2,7 @@
 #include "afxwin.h"
 #include "afxcmn.h"
 #include "PassUServerSocket.h"
-#include "PassUServerListen.h"
+#include "PassUChildSocket.h"
 #include "packet.h"
 #include "ClientInfo.h"
 
@@ -32,19 +32,20 @@ public:
 	
 	CClientInfo clientInfo[9]; // 각각의 index는 client ID
 
-	CPassUServerListen listen; // Listen, Accep하는 클래스 변수
 
 	BOOL m_keyBoardHook;
 	BOOL m_mouseHook;
-	BOOL m_bDrag;            
+	BOOL m_bDrag;          
+
 	int m_nOldTarget;   
 	int m_nSource;      
 	// for listctrl
+
 	CImageList m_imgList;
 	CListCtrl m_waiting_client;
-	CPassUServerThread *cThread;
 	CImageList *m_pDragImage;
-	CObList * sockList;
+	CObList m_pSockList;
+
 	//LBUTTONDOWN 했을 때 무슨 Device인지 플래그
 	BOOL m_deviceFlag; // -1 : Nothing // 0 : Computer // 1 : Android
 	// LBUtton UP 했을 때 버튼에 그림 그려주기
@@ -70,8 +71,7 @@ public:
 	// bmp load
 	CBitmap m_bmp_monitor;
 	CBitmap m_bmp_phone;
-
-	void OnStartServer();
+	
 	void OnChangeLocationInfo(int index);
 	void bindWatingClient(int client_index);
 	void OnDisconnectedClient(int client_index);
@@ -89,7 +89,7 @@ public:
 	afx_msg void OnBnClickedButton9();
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	void ReceiveData(CPassUServerSocket * s);
+	
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 	afx_msg LRESULT OnABC( WPARAM wParam, LPARAM lParam) ;
 	PACKET packMessage(int msgType, int sendDev, int recvDev, int deviceType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3, int pad4);
@@ -98,4 +98,5 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	int GetHitIndex(CPoint);
 	void MoveListItem(const INT _nSource, const INT _nDest);
+
 };

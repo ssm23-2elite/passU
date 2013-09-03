@@ -79,15 +79,7 @@ END_MESSAGE_MAP()
 
 // CServer 메시지 처리기입니다.
 
-void CServer::OnStartServer()
-{
-	listen.m_hWnd = AfxGetMainWnd()->m_hWnd;
-	listen.Create(30000);
-	listen.Listen();
 
-	TRACE("서버에서의 m_Wnd : %p, %p, %p\n", this->m_hWnd, AfxGetMainWnd()->m_hWnd, GetParent()->m_hWnd);
-	AfxMessageBox(_T("InitServer"));
-}
 
 
 void CServer::OnChangeLocationInfo(int index)
@@ -100,38 +92,6 @@ void CServer::bindWatingClient(int client_index)
 	// 클라이언트 index를 넣어줘서 버튼하고 binding시키는 것
 }
 
-void CServer::OnDisconnectedClient(int client_index)
-{
-	POSITION pos = listen.m_sockList.GetHeadPosition();
-
-	CPACKET tmp;
-	tmp.msgType = 3;
-	tmp.c_id = client_index;
-	tmp.hello = 0;
-	tmp.bye = 1;
-
-	// 소켓 리스트에서 client_index만큼 가져와서 그 소켓한테 보냄
-	int cindex = client_index;
-
-	while(cindex != 0){
-		listen.m_sockList.GetNext(pos);
-		cindex -= 1;
-	}
-
-	cThread = (CPassUServerThread *)listen.m_sockList.GetAt(pos);
-
-	cThread->m_passUSocket->Send((LPCSTR *)&tmp, sizeof(CPACKET)); // BYE 패킷 전송
-
-	//socket list에서 제거
-	listen.m_sockList.RemoveAt(pos);
-	if(listen.m_sockList.GetCount() == 0){ // 클라이언트 다사라져버리면 uninstall 후킹
-		uninstallKeyhook();
-		uninstallMousehook();
-	}
-
-}
-
-
 void CServer::OnArrivedScreenEdge(int position)
 {
 
@@ -142,7 +102,7 @@ void CServer::OnBnClickedServerStart()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_CBtn_ServerStart.EnableWindow(FALSE);
-	OnStartServer();
+//	OnStartServer();
 }
 
 
@@ -151,6 +111,7 @@ void CServer::OnBnClickedServerStop()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	m_CBtn_ServerStart.EnableWindow(TRUE);
+//	CleanUp();
 
 }
 
@@ -273,7 +234,6 @@ void CServer::OnLButtonUp(UINT nFlags, CPoint point)
 				}
 
 				UpdateData();Invalidate();RedrawWindow();
-				// 
 		} else if(point.x >= getCoord[1].rcNormalPosition.left &&
 			point.x <= getCoord[1].rcNormalPosition.right &&
 			point.y <= getCoord[1].rcNormalPosition.bottom &&
@@ -424,25 +384,6 @@ void CServer::OnLButtonDown(UINT nFlags, CPoint point)
 	CDialogEx::OnLButtonDown(nFlags, point);
 }
 
-
-void CServer::ReceiveData(CPassUServerSocket * s)
-{
-	PACKET tmp;
-	s->Receive(&tmp, sizeof(PACKET));
-	COPYDATASTRUCT CDS;
-
-	m_status = STATUS_EMPTY;
-
-	CDS.dwData = 2; // receiveData
-	CDS.cbData = sizeof(PACKET);
-	CDS.lpData = &tmp;
-
-
-	HWND hWnd = ::FindWindow(NULL, TEXT("PassU - Pass Your USB via Network"));
-	TRACE(_T("%p\n", GetParent()->m_hWnd));
-	::SendMessage(hWnd, WM_RECEIVEMSG, 0, (LPARAM)(VOID *)&CDS);
-}
-
 LRESULT CServer::OnABC( WPARAM wParam, LPARAM lParam) {
 	AfxMessageBox("OnABC");
 	return 0;
@@ -453,9 +394,9 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 
-	sockList = &listen.m_sockList;
-	POSITION pos = sockList->GetTailPosition();
-	AfxMessageBox(_T("OnCopyData"));
+	POSITION pos = m_pSockList.GetTailPosition();
+	TRACE("OnCopyData\n");
+
 	switch(pCopyDataStruct->dwData){
 	case 0: // keyboard
 
@@ -485,19 +426,28 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				// 버튼에 클라이언트 연결해주고, 첫번째 클라이언트면 후킹 시작하고
 				// 클라이언트에 자신의 id 알려주고
 				// 리스트 컨트롤에 아이콘 하나 추가
+				TRACE("client\n");
 				for(int i = 0 ; i < 9 ; i ++){
 					if(clientInfo[i].clientID == 0){
 						// client ID Setting
 						clientInfo[i].setID(i);
+						
+						PACKET pack = packMessage(3, (i + 1) , 0 , 1, 0, 0, 0, 0, 0, 0, 0); // client id : 빈 곳의 index + 1 한 것
+
 
 						// Client IP Address Setting
-						clientInfo[i].m_address.Format(_T("%d.%d.%d.%d", p->keyCode, p->pad2, p->pad3, p->pad4));
+						CString m_add;
+						m_add.Format(_T("%d.%d.%d.%d", p->keyCode, p->pad2, p->pad3, p->pad4));
+					
+						//clientInfo[i].setIP(m_add);
+						//clientInfo[i].m_address.Format(_T("%d.%d.%d.%d", p->keyCode, p->pad2, p->pad3, p->pad4));
 
-
+						TRACE("?\n");
 						if(p->recvDev == STATUS_PC){ // PC 이면
 							// Status 세팅
 							clientInfo[i].setStatus(STATUS_PC);
-
+							
+						TRACE("Status Setting\n");
 							// 아이콘 세팅
 							m_imgList.Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
 							m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
@@ -538,26 +488,21 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 						}
 
 					}
-					listen.m_sockList.GetNext(pos);
+					m_pSockList.GetNext(pos);
 				}
 
 
-				cThread = (CPassUServerThread *)listen.m_sockList.GetAt(pos);
-
-				if(listen.m_sockList.GetCount() == 1){
+				if(m_pSockList.GetCount() == 1){
 					installKeyhook();
 					installMousehook();
 				}
 
-				PACKET pack = packMessage(3, cThread->getClientID() , 0 , 1, 0, 0, 0, 0, 0, 0, 0);
-				cThread->m_passUSocket->Send((LPCSTR *)&pack, sizeof(CPACKET)); // hello packet 답신 
+
 
 			} else if(k->relativeField == 1){ // bye packet
 				// 굿바이패킷이면
 				// 버튼에 클라이언트 해제
 
-
-				OnDisconnectedClient(k->sendDev); // 클라이언트 디스커넥트
 			}
 			break;
 
@@ -717,7 +662,9 @@ BOOL CServer::OnInitDialog()
 	lvitem.iImage = 0;
 
 	m_waiting_client.InsertItem(&lvitem);
-
+	for(int i = 0 ; i < 9 ; i ++){
+		ZeroMemory(&clientInfo[i], sizeof(clientInfo[i]));
+	}
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
