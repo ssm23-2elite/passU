@@ -45,7 +45,7 @@ public:
 	CServer m_tab_server;
 
 	
-	//CPassUServerSocket *m_pServer;
+	CPassUServerSocket *m_pServer;
 	CObList m_pSockList;
 	BOOL m_SorC;
 	void OnStartServer();
