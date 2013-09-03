@@ -41,7 +41,7 @@ public:
 	int m_nSource;      
 	// for listctrl
 
-	CImageList m_imgList[9];
+	CImageList m_imgList;
 	CListCtrl m_waiting_client;
 	CImageList *m_pDragImage;
 	CObList m_pSockList;
@@ -51,8 +51,6 @@ public:
 	// LBUtton UP 했을 때 버튼에 그림 그려주기
 	WINDOWPLACEMENT getCoord[9];
 	CWnd *btnControl[9];
-
-	LVITEM lvitem[9]; // CimageList에 등록할 정보를 배열로 관리, index + 1 = ClientID
 
 	static int STATUS_IDLE;
 	static int STATUS_ON_FOR_SERVER;
@@ -99,4 +97,5 @@ public:
 	int GetHitIndex(CPoint);
 	void MoveListItem(const INT _nSource, const INT _nDest);
 
+	afx_msg void OnDestroy();
 };

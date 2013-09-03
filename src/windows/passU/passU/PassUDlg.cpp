@@ -70,6 +70,7 @@ BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CPassUDlg::OnTcnSelchangeTab1)
 	ON_BN_CLICKED(IDC_BUTTON1, &CPassUDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CPassUDlg::OnBnClickedButton2)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 
@@ -295,4 +296,12 @@ void CPassUDlg::OnBnClickedButton2()
 	m_CBtn_Start.EnableWindow(TRUE);
 	CleanUp();
 	//CDialog::OnCancel();
+}
+
+
+void CPassUDlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }

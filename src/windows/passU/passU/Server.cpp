@@ -76,6 +76,7 @@ BEGIN_MESSAGE_MAP(CServer, CDialogEx)
 	ON_MESSAGE(WM_RECEIVEMSG, &CServer::OnABC)
 	ON_NOTIFY(LVN_BEGINDRAG, IDC_LIST1, &CServer::OnLvnBegindragList1)
 	ON_WM_MOUSEMOVE()
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 BOOL CServer::OnInitDialog()
@@ -120,12 +121,10 @@ BOOL CServer::OnInitDialog()
 		AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
 		return FALSE;
 	}
-	
+
 	for(int i = 0 ; i < 9 ; i ++){
 		ZeroMemory(&clientInfo[i], sizeof(clientInfo[i]));
 		ZeroMemory(&btnControl[i], sizeof(btnControl[i]));
-		ZeroMemory(&m_imgList[i], sizeof(m_imgList[i]));
-
 	}
 
 	m_keyBoardHook = FALSE;
@@ -146,22 +145,30 @@ BOOL CServer::OnInitDialog()
 	m_bmp_monitor.LoadBitmapA(IDB_MONITOR);
 	m_bmp_phone.LoadBitmapA(IDB_PHONE);
 
+	m_imgList.Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
+	m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
 
-	m_imgList[8].Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
-	m_waiting_client.SetImageList(&m_imgList[8], LVSIL_NORMAL);
-
-	m_imgList[8].Add(&m_bmp_monitor, RGB(0, 0, 0));
-	
+	m_imgList.Add(&m_bmp_monitor, RGB(0, 0, 0));
+	m_imgList.Add(&m_bmp_phone, RGB(0, 0, 0));
+/*
 	LVITEM lvitem = {0};
 
 	lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
 	lvitem.iItem = 0;
 	lvitem.pszText = "127.0.0.1";
 	lvitem.lParam = (LPARAM)STATUS_PC;
-	lvitem.iImage = 0;
+	lvitem.iImage = STATUS_PC - 1;
 
 	m_waiting_client.InsertItem(&lvitem);
 
+	lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
+	lvitem.iItem = 0;
+	lvitem.pszText = "127.0.0.1";
+	lvitem.lParam = (LPARAM)STATUS_MOBILE;
+	lvitem.iImage = STATUS_MOBILE - 1;
+
+	m_waiting_client.InsertItem(&lvitem);
+	*/
 
 	btnControl[0] = this->GetDlgItem(IDC_BUTTON1);
 	btnControl[1] = this->GetDlgItem(IDC_BUTTON2);
@@ -206,7 +213,7 @@ void CServer::OnBnClickedServerStart()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_CBtn_ServerStart.EnableWindow(FALSE);
-//	OnStartServer();
+	//	OnStartServer();
 }
 
 
@@ -215,7 +222,7 @@ void CServer::OnBnClickedServerStop()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	m_CBtn_ServerStart.EnableWindow(TRUE);
-//	CleanUp();
+	//	CleanUp();
 
 }
 
@@ -316,18 +323,18 @@ void CServer::OnLButtonUp(UINT nFlags, CPoint point)
 				point.y <= getCoord[i].rcNormalPosition.bottom &&
 				point.y >= getCoord[i].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 1일 때
 
-				// 처음에 클릭한 그림이 스마트폰인지 컴퓨터인지 걸러내서
-				// 컴퓨터이면 버튼에 컴퓨터 삽입, 스마트폰이면 버튼에 스마트폰 삽입
-				if(Item.lParam == STATUS_PC){
-					m_cBtn[i].SetBitmap(HBITMAP(m_bmp_monitor));
-				} else{
-					m_cBtn[i].SetBitmap(HBITMAP(m_bmp_phone));
-				}
+					// 처음에 클릭한 그림이 스마트폰인지 컴퓨터인지 걸러내서
+					// 컴퓨터이면 버튼에 컴퓨터 삽입, 스마트폰이면 버튼에 스마트폰 삽입
+					if(Item.lParam == STATUS_PC){
+						m_cBtn[i].SetBitmap(HBITMAP(m_bmp_monitor));
+					} else{
+						m_cBtn[i].SetBitmap(HBITMAP(m_bmp_phone));
+					}
 
-				UpdateData();
-				Invalidate();
-				RedrawWindow();
-				break;
+					UpdateData();
+					Invalidate();
+					RedrawWindow();
+					break;
 			}
 		}
 	}   
@@ -384,7 +391,7 @@ LRESULT CServer::OnABC( WPARAM wParam, LPARAM lParam) {
 BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	
+
 	CPassUDlg * pMainDlg = (CPassUDlg *)::AfxGetMainWnd();
 	POSITION pos = pMainDlg->m_pSockList.GetHeadPosition();
 	TRACE("OnCopyData\n");
@@ -423,14 +430,14 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					if(clientInfo[i].clientID == 0){
 						// client ID Setting
 						clientInfo[i].setID(i);
-						
+
 						pack = packMessage(3, (i + 1) , 0 , 1, 0, 0, 0, 0, 0, 0, 0); // client id : 빈 곳의 index + 1 한 것
 
 
 						// Client IP Address Setting
 						CString m_add;
 						m_add.Format(_T("%d.%d.%d.%d", p->keyCode, p->pad2, p->pad3, p->pad4));
-					
+
 						//clientInfo[i].setIP(m_add);
 						//clientInfo[i].m_address.Format(_T("%d.%d.%d.%d", p->keyCode, p->pad2, p->pad3, p->pad4));
 
@@ -438,51 +445,45 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 						if(p->recvDev == STATUS_PC){ // PC 이면
 							// Status 세팅
 							clientInfo[i].setStatus(STATUS_PC);
-							
-						TRACE("Status Setting\n");
-							// 아이콘 세팅
-							m_imgList[i].Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
-							m_waiting_client.SetImageList(&m_imgList[i], LVSIL_NORMAL);
-							m_imgList[i].Add(&m_bmp_monitor, RGB(0, 0, 0));
 
+							TRACE("Status Setting\n");
 							// 정보 저장할 LVITEM 세팅
-							ZeroMemory(&lvitem[i], sizeof(lvitem));
-							lvitem[i].mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
-							lvitem[i].iItem = 0;
-							lvitem[i].pszText = _T("%s",clientInfo[i].m_address);
-							lvitem[i].lParam = (LPARAM)STATUS_PC;
-							lvitem[i].iImage = 0;
+							LVITEM lvitem;
 
-							m_waiting_client.InsertItem(&lvitem[i]);
+							ZeroMemory(&lvitem, sizeof(lvitem));
+							lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
+							lvitem.iItem = 0;
+							lvitem.pszText = _T("%s",clientInfo[i].m_address);
+							lvitem.lParam = (LPARAM)STATUS_PC;
+							lvitem.iImage = STATUS_PC - 1;
+
+							m_waiting_client.InsertItem(&lvitem);
 							break;
 						} else if(p->recvDev == STATUS_MOBILE){
 
 							// Status 세팅
 							clientInfo[i].setStatus(STATUS_MOBILE);
-							// 아이콘 세팅
-							m_imgList[i].Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
-							m_waiting_client.SetImageList(&m_imgList[i], LVSIL_NORMAL);
-							m_imgList[i].Add(&m_bmp_phone, RGB(0, 0, 0));
 
 							//정보 저장할 LVITEM 세팅
-							ZeroMemory(&lvitem[i], sizeof(lvitem));
-							lvitem[i].mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
-							lvitem[i].iItem = 0;
-							lvitem[i].pszText = _T("%s",clientInfo[i].m_address);
-							lvitem[i].lParam = (LPARAM)STATUS_MOBILE;
-							lvitem[i].iImage = 0;
-							m_waiting_client.InsertItem(&lvitem[i]);
+							LVITEM lvitem;
+
+							ZeroMemory(&lvitem, sizeof(lvitem));
+							lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
+							lvitem.iItem = 0;
+							lvitem.pszText = _T("%s",clientInfo[i].m_address);
+							lvitem.lParam = (LPARAM)STATUS_MOBILE;
+							lvitem.iImage = STATUS_MOBILE - 1;
+
+							m_waiting_client.InsertItem(&lvitem);
 							break;
 						} else{
 							AfxMessageBox(_T("status nothing!!"));
-							m_imgList[i].DeleteImageList();
 							clientInfo[i].setID(0);
 							clientInfo[i].setStatus(STATUS_EMPTY);
 							return FALSE;
 						}
 
 					}
-
 					else
 						pMainDlg->m_pSockList.GetNext(pos);
 				}
@@ -614,4 +615,14 @@ PACKET CServer::packMessage(int msgType, int sendDev, int recvDev, int deviceTyp
 	tmp.pad4 = pad4;
 
 	return tmp;
+}
+
+
+void CServer::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	m_bmp_monitor.Detach();
+	m_bmp_phone.Detach();
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }
