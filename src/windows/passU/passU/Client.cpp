@@ -67,7 +67,7 @@ void CClient::OnConnectServer(void)
 
 	m_clientSock.Send((LPCSTR *)&tmp, sizeof(CPACKET));
 	// HELLO 패킷을 보냄.
-
+	m_connectFlag = true;
 	HandleClient();
 }
 
@@ -94,7 +94,6 @@ void CClient::OnBnClickedConnect() // Connect 버튼을 눌렀을 때
 
 	m_cBtn_connect.EnableWindow(FALSE);
 	OnConnectServer();
-	m_connectFlag = true;
 }
 
 
@@ -112,7 +111,7 @@ void CClient::HandleClient(void) // 메시지를 받고 바로 처리해주는 함수, unpackme
 	KPACKET tmp;
 	while(m_connectFlag != false){
 		m_clientSock.Receive((LPCSTR *)&tmp, sizeof(KPACKET));
-
+		AfxMessageBox(_T("Receive"));
 		switch(tmp.msgType){
 		case 1: // keyboard event를 받았을 때
 			keybd_event(tmp.keyCode, 0, 0, 0);

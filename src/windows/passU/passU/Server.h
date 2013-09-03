@@ -41,7 +41,7 @@ public:
 	int m_nSource;      
 	// for listctrl
 
-	CImageList m_imgList;
+	CImageList m_imgList[9];
 	CListCtrl m_waiting_client;
 	CImageList *m_pDragImage;
 	CObList m_pSockList;

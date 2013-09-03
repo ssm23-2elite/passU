@@ -5,6 +5,7 @@
 #include "PassU.h"
 #include "Server.h"
 #include "afxdialogex.h"
+#include "PassUDlg.h"
 
 
 #define WM_RECEIVEMSG	(WM_USER + 1000)
@@ -37,6 +38,7 @@ IMPLEMENT_DYNAMIC(CServer, CDialogEx)
 
 CServer::~CServer()
 {
+
 }
 
 void CServer::DoDataExchange(CDataExchange* pDX)
@@ -118,14 +120,38 @@ BOOL CServer::OnInitDialog()
 		AfxMessageBox(IDP_SOCKETS_INIT_FAILED);
 		return FALSE;
 	}
+	
+	for(int i = 0 ; i < 9 ; i ++){
+		ZeroMemory(&clientInfo[i], sizeof(clientInfo[i]));
+		ZeroMemory(&btnControl[i], sizeof(btnControl[i]));
+		ZeroMemory(&m_imgList[i], sizeof(m_imgList[i]));
+
+	}
+
+	m_keyBoardHook = FALSE;
+	m_mouseHook = FALSE;
+	m_bDrag = FALSE;
+
+	m_nOldTarget = 0;
+	m_nSource = 0;
+
+	m_status = STATUS_EMPTY;
+	m_x = 0;
+	m_y = 0;
+	p = NULL;
+	k = NULL;
+	m = NULL;
+	c = NULL;
+
 	m_bmp_monitor.LoadBitmapA(IDB_MONITOR);
 	m_bmp_phone.LoadBitmapA(IDB_PHONE);
 
 
-	m_imgList.Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
-	m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
+	m_imgList[8].Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
+	m_waiting_client.SetImageList(&m_imgList[8], LVSIL_NORMAL);
 
-	m_imgList.Add(&m_bmp_monitor, RGB(0, 0, 0));
+	m_imgList[8].Add(&m_bmp_monitor, RGB(0, 0, 0));
+	
 	LVITEM lvitem = {0};
 
 	lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
@@ -135,9 +161,7 @@ BOOL CServer::OnInitDialog()
 	lvitem.iImage = 0;
 
 	m_waiting_client.InsertItem(&lvitem);
-	for(int i = 0 ; i < 9 ; i ++){
-		ZeroMemory(&clientInfo[i], sizeof(clientInfo[i]));
-	}
+
 
 	btnControl[0] = this->GetDlgItem(IDC_BUTTON1);
 	btnControl[1] = this->GetDlgItem(IDC_BUTTON2);
@@ -151,6 +175,9 @@ BOOL CServer::OnInitDialog()
 
 	for(int i = 0 ; i < 9 ; i ++)
 		btnControl[i]->GetWindowPlacement(&getCoord[i]);
+
+	m_pDragImage = NULL;
+
 
 	return TRUE;
 }
@@ -267,7 +294,6 @@ void CServer::OnLButtonUp(UINT nFlags, CPoint point)
 		m_bDrag = false;
 		delete m_pDragImage;
 		m_pDragImage = NULL;       
-
 		// 아이템위치변경
 		INT nDest = GetHitIndex(point);       
 
@@ -358,10 +384,11 @@ LRESULT CServer::OnABC( WPARAM wParam, LPARAM lParam) {
 BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
-	POSITION pos = m_pSockList.GetTailPosition();
+	
+	CPassUDlg * pMainDlg = (CPassUDlg *)::AfxGetMainWnd();
+	POSITION pos = pMainDlg->m_pSockList.GetHeadPosition();
 	TRACE("OnCopyData\n");
-
+	PACKET pack;
 	switch(pCopyDataStruct->dwData){
 	case 0: // keyboard
 
@@ -397,7 +424,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 						// client ID Setting
 						clientInfo[i].setID(i);
 						
-						PACKET pack = packMessage(3, (i + 1) , 0 , 1, 0, 0, 0, 0, 0, 0, 0); // client id : 빈 곳의 index + 1 한 것
+						pack = packMessage(3, (i + 1) , 0 , 1, 0, 0, 0, 0, 0, 0, 0); // client id : 빈 곳의 index + 1 한 것
 
 
 						// Client IP Address Setting
@@ -414,9 +441,9 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 							
 						TRACE("Status Setting\n");
 							// 아이콘 세팅
-							m_imgList.Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
-							m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
-							m_imgList.Add(&m_bmp_monitor, RGB(0, 0, 0));
+							m_imgList[i].Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
+							m_waiting_client.SetImageList(&m_imgList[i], LVSIL_NORMAL);
+							m_imgList[i].Add(&m_bmp_monitor, RGB(0, 0, 0));
 
 							// 정보 저장할 LVITEM 세팅
 							ZeroMemory(&lvitem[i], sizeof(lvitem));
@@ -427,14 +454,15 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 							lvitem[i].iImage = 0;
 
 							m_waiting_client.InsertItem(&lvitem[i]);
+							break;
 						} else if(p->recvDev == STATUS_MOBILE){
 
 							// Status 세팅
 							clientInfo[i].setStatus(STATUS_MOBILE);
 							// 아이콘 세팅
-							m_imgList.Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
-							m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
-							m_imgList.Add(&m_bmp_phone, RGB(0, 0, 0));
+							m_imgList[i].Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
+							m_waiting_client.SetImageList(&m_imgList[i], LVSIL_NORMAL);
+							m_imgList[i].Add(&m_bmp_phone, RGB(0, 0, 0));
 
 							//정보 저장할 LVITEM 세팅
 							ZeroMemory(&lvitem[i], sizeof(lvitem));
@@ -444,25 +472,28 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 							lvitem[i].lParam = (LPARAM)STATUS_MOBILE;
 							lvitem[i].iImage = 0;
 							m_waiting_client.InsertItem(&lvitem[i]);
+							break;
 						} else{
 							AfxMessageBox(_T("status nothing!!"));
-							m_imgList.DeleteImageList();
+							m_imgList[i].DeleteImageList();
 							clientInfo[i].setID(0);
 							clientInfo[i].setStatus(STATUS_EMPTY);
 							return FALSE;
 						}
 
 					}
-					m_pSockList.GetNext(pos);
+
+					else
+						pMainDlg->m_pSockList.GetNext(pos);
 				}
 
 
-				if(m_pSockList.GetCount() == 1){
+				if(pMainDlg->m_pSockList.GetCount() == 1){
 					installKeyhook();
 					installMousehook();
 				}
 
-
+				((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send((LPCSTR *)&pack, sizeof(PACKET));
 
 			} else if(k->relativeField == 1){ // bye packet
 				// 굿바이패킷이면

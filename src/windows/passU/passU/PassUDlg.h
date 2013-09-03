@@ -57,4 +57,5 @@ public:
 	CButton m_CBtn_Start;
 	CButton m_CBtn_Stop;
 	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedButton2();
 };

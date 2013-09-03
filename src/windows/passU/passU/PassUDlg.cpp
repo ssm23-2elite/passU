@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CPassUDlg::OnTcnSelchangeTab1)
 	ON_BN_CLICKED(IDC_BUTTON1, &CPassUDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON2, &CPassUDlg::OnBnClickedButton2)
 END_MESSAGE_MAP()
 
 
@@ -282,4 +283,16 @@ void CPassUDlg::OnBnClickedButton1()
 	if(m_SorC){
 		OnStartServer();
 	}
+
+	m_CBtn_Start.EnableWindow(FALSE);
+}
+
+
+void CPassUDlg::OnBnClickedButton2()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	
+	m_CBtn_Start.EnableWindow(TRUE);
+	CleanUp();
+	//CDialog::OnCancel();
 }
