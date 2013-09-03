@@ -67,7 +67,9 @@ _______________________________________________________________________________ 
 extern "C" __declspec(dllexport)
 	LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 {				
-	HWND hwnd = FindWindow(NULL, TEXT("PassU - Pass Your USB via Network(Server)"));
+	HWND hwnd = FindWindow(NULL, TEXT("PassU - Pass Your USB via Network"));
+	//HWND hWnd = NULL;
+
 	KBDLLHOOKSTRUCT *pKey = (KBDLLHOOKSTRUCT *)lParam;
 
 	//MessageBox(g_hWnd, "keyboardHook", "vkCode : ", MB_OK);
@@ -91,10 +93,9 @@ extern "C" __declspec(dllexport)
 		Event.data = wParam;
 		Event.lParam = lParam;
 
-
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
-		TRACE("key Code : %d\n", pKey->vkCode);
+		//TRACE("key Code : %d\n", pKey->vkCode);
 		//	TRACE("SENDMESSAGE...과연 copyData에서 받을까?\n");
 		//	} else
 		//		return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
@@ -111,7 +112,7 @@ extern "C" __declspec(dllexport)
 		int nWidth = GetSystemMetrics(SM_CXSCREEN);
 		int nHeight = GetSystemMetrics(SM_CYSCREEN);
 
-		HWND hwnd = FindWindow(NULL, TEXT("PassU - Server"));
+		HWND hwnd = FindWindow(NULL, TEXT("PassU - Pass Your USB via Network"));
 
 		if(nCode < 0 )
 			return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);

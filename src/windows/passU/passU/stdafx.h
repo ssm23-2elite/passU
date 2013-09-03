@@ -57,3 +57,11 @@
 #define STATUS_EMPTY	0
 #define STATUS_PC		1
 #define STATUS_MOBILE	2
+
+#define KEYBOARD_DATA	0
+#define MOUSE_DATA	1
+#define RECEIVE_DATA	2
+
+#define MSG_KEYBOARD	1
+#define MSG_MOUSE	2
+#define	MSG_CLIENT	3

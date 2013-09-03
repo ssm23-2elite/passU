@@ -4,6 +4,10 @@
 
 CClientInfo::CClientInfo(void)
 {
+	status = STATUS_EMPTY;
+	position = 0;
+	clientID = 0;
+	m_address = "0.0.0.0";
 }
 
 

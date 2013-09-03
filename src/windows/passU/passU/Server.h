@@ -29,7 +29,7 @@ public:
 	HHOOK hHook; // HHOOK
 
 	CButton m_cBtn[9];
-	
+
 	CClientInfo clientInfo[9]; // 각각의 index는 client ID
 
 
@@ -66,12 +66,22 @@ public:
 	MPACKET *m;
 	CPACKET *c;
 
+	typedef struct tagHEVENT{
+		int type;
+		int keyCode;
+		WPARAM data;
+		LPARAM lParam;
+	}HEVENT;
+
+	//Button과 클라이언트를 Binding하는 배열
+	int btn_Bind[9]; // 각각의 index는 버튼 번호, 그 안의 값은 ClientID
+
 	// bmp load
 	CBitmap m_bmp_monitor;
 	CBitmap m_bmp_phone;
-	
+
 	void OnChangeLocationInfo(int index);
-	void bindWatingClient(int client_index);
+	void bindWatingClient(int btn_index, int client_index);
 	void OnDisconnectedClient(int client_index);
 	void OnArrivedScreenEdge(int position);
 	CButton m_CBtn_ServerStart;
@@ -87,7 +97,7 @@ public:
 	afx_msg void OnBnClickedButton9();
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	
+
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 	afx_msg LRESULT OnABC( WPARAM wParam, LPARAM lParam) ;
 	PACKET packMessage(int msgType, int sendDev, int recvDev, int deviceType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3, int pad4);

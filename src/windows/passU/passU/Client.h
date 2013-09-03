@@ -29,8 +29,11 @@ public:
 	afx_msg void OnBnClickedConnect();
 	CButton m_cBtn_connect;
 	afx_msg void OnBnClickedCancel();
-	void HandleClient(void);
 	bool m_connectFlag;
 	int client_ID;
-		CString m_address;
+
+	CString m_address;
+	BYTE ipFirst, ipSecond, ipThird, ipForth;
+	PACKET *p;
+	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 };

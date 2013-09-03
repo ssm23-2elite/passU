@@ -104,6 +104,7 @@
     <ClInclude Include="packet.h" />
     <ClInclude Include="PassU.h" />
     <ClInclude Include="PassUChildSocket.h" />
+    <ClInclude Include="PassUClientSocket.h" />
     <ClInclude Include="PassUDlg.h" />
     <ClInclude Include="PassUServerSocket.h" />
     <ClInclude Include="Resource.h" />
@@ -116,6 +117,7 @@
     <ClCompile Include="ClientInfo.cpp" />
     <ClCompile Include="PassU.cpp" />
     <ClCompile Include="PassUChildSocket.cpp" />
+    <ClCompile Include="PassUClientSocket.cpp" />
     <ClCompile Include="PassUDlg.cpp" />
     <ClCompile Include="PassUServerSocket.cpp" />
     <ClCompile Include="Server.cpp" />
