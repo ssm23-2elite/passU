@@ -384,7 +384,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	switch(pCopyDataStruct->dwData){
-	case MSG_KEYBOARD:
+	case KEYBOARD_DATA:
 		hEVENT = (tagHEVENT *) pCopyDataStruct->lpData; // hEvent 구조체 연결(후킹된 자료)
 
 		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
@@ -396,7 +396,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		}
 		break;
 
-	case MSG_MOUSE:
+	case MOUSE_DATA:
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
 		TRACE("MOUSE DATA 도착, SERVER에게 SENDMESSAGE\n");
 			CDS.dwData = MOUSE_DATA; // Client receiveData

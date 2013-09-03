@@ -69,6 +69,7 @@ public:
 	typedef struct tagHEVENT{
 		int type;
 		int keyCode;
+		int updown;
 		WPARAM data;
 		LPARAM lParam;
 	}HEVENT;

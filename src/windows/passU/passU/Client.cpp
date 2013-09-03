@@ -97,7 +97,12 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		p = (PACKET *) pCopyDataStruct->lpData; // 구조체 연결
 		switch(p->msgType){
 		case 1: // keyboard event를 받았을 때
-			keybd_event(p->keyCode, 0, 0, 0);
+			if(p->updownFlag == 1) // up
+				keybd_event(p->keyCode, 0, KEYEVENTF_KEYUP, 0);
+
+			else if(p->updownFlag == 0) // down
+				keybd_event(p->keyCode, 0, 0, 0);
+			
 			TRACE("Keybd_event success\n");
 			break;
 		case 2: // mouse event를 받았을 때

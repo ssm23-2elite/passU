@@ -168,7 +168,7 @@ BOOL CServer::OnInitDialog()
 	lvitem.iImage = STATUS_MOBILE - 1;
 
 	m_waiting_client.InsertItem(&lvitem);
-	
+
 
 	btnControl[0] = this->GetDlgItem(IDC_BUTTON1);
 	btnControl[1] = this->GetDlgItem(IDC_BUTTON2);
@@ -189,7 +189,6 @@ BOOL CServer::OnInitDialog()
 	//EXAMPLE HOOKING 
 	/*installKeyhook();
 	installMousehook();*/
-
 
 	return TRUE;
 }
@@ -406,7 +405,7 @@ LRESULT CServer::OnABC( WPARAM wParam, LPARAM lParam) {
 BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	
+
 	// 후킹 DLL API로부터 받아오는 구조체(포인터)
 	HEVENT *hEVENT;
 	MPACKET *mEVENT;
@@ -416,28 +415,28 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	MPACKET mouseP;
 	PACKET pack;
 	CPACKET clientP;
-	
+
 	CPassUChildSocket *s = NULL;
-			
+
 	// Main Dialog 포인터를 받아옴
 	CPassUDlg * pMainDlg = (CPassUDlg *)::AfxGetMainWnd();
 	POSITION pos = pMainDlg->m_pSockList.GetHeadPosition();
-	
+
 	TRACE("OnCopyData\n");
-	
-	
+
+
 	switch(pCopyDataStruct->dwData){
 	case KEYBOARD_DATA: // keyboard
 		hEVENT = (tagHEVENT *) pCopyDataStruct->lpData; // hEvent 구조체 연결(후킹된 자료)
 
-		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
+		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때 
 			TRACE("KEY CODE 도착, keyCode : %d\n", hEVENT->keyCode);
-			
+
 			keyP.deviceType = 1;
 			keyP.msgType = 1;
 			keyP.keyCode = hEVENT->keyCode;
-			keyP.updownFlag = (hEVENT->data == WM_KEYDOWN ? 1:0);
-			
+			keyP.updownFlag = hEVENT->updown;
+
 			// 1. 연결된 클라이언트 들 중에서
 			// 2. 지금 커서가 어디 있는지를 판별하고
 			// 3. 그 있는 쪽의 버튼에 연결된 클라이언트한테 이 정보를 보냄.
@@ -445,15 +444,27 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			//example : 커서가 4에 있다고 가정
 			m_status = 4;
 
+			m_status = 4;
 			s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
 
-			while( btn_Bind[m_status - 1] == s->c_id){
-				s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos);
+			while(btn_Bind[m_status-1] != s->c_id){
+				pMainDlg->m_pSockList.GetNext(pos);
+				s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
 			}
 
-			s->Send((LPCSTR *)&keyP, sizeof(KPACKET));
 
-			
+
+
+
+			/*s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
+
+			while( btn_Bind[m_status - 1] == s->c_id){
+			s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos);
+			}
+
+			s->Send((LPCSTR *)&keyP, sizeof(KPACKET));*/
+
+
 			//if(keyP.keyCode == VK_SCROLL)
 			//{
 			//	m_changeMaster = false;
@@ -476,7 +487,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			////	}
 			////}
 
-			
+
 		}
 		break;
 
@@ -485,27 +496,27 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
 		TRACE("MOUSE CODE 도착, x : %d y : %d\n wheelFlag : %d updownFlag : %d leftRight : %d\n", mEVENT->xCoord, mEVENT->yCoord,mEVENT->wheelFlag, mEVENT->updownFlag, mEVENT->leftRight);
 
-		
-			mouseP.msgType = 2;
-			mouseP.deviceType = mEVENT->deviceType;
-			mouseP.leftRight = mEVENT->leftRight;
-			mouseP.wheelFlag = mEVENT->wheelFlag;
-			mouseP.updownFlag = mEVENT->updownFlag;
-			mouseP.xCoord = mEVENT->xCoord;
-			mouseP.yCoord = mEVENT->yCoord;
 
-			// 1. 연결된 클라이언트 들 중에서
-			// 2. 지금 커서가 어디 있는지를 판별하고
-			// 3. 그 있는 쪽의 버튼에 연결된 클라이언트한테 이 정보를 보냄.
-			//example : 커서가 4에 있다고 가정
-			m_status = 4;
+		mouseP.msgType = 2;
+		mouseP.deviceType = mEVENT->deviceType;
+		mouseP.leftRight = mEVENT->leftRight;
+		mouseP.wheelFlag = mEVENT->wheelFlag;
+		mouseP.updownFlag = mEVENT->updownFlag;
+		mouseP.xCoord = mEVENT->xCoord;
+		mouseP.yCoord = mEVENT->yCoord;
+
+		// 1. 연결된 클라이언트 들 중에서
+		// 2. 지금 커서가 어디 있는지를 판별하고
+		// 3. 그 있는 쪽의 버튼에 연결된 클라이언트한테 이 정보를 보냄.
+		//example : 커서가 4에 있다고 가정
+		m_status = 4;
+
+		while(btn_Bind[m_status-1] != s->c_id){
+			pMainDlg->m_pSockList.GetNext(pos);
 			s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
+		}
 
-			while( btn_Bind[m_status - 1] == s->c_id){
-				s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos);
-			}
-
-			s->Send((LPCSTR *)&keyP, sizeof(KPACKET));
+		s->Send((LPCSTR *)&mouseP, sizeof(KPACKET));
 		break;
 
 
@@ -533,7 +544,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					if(clientInfo[i].clientID == 0){
 						// client ID Setting
 						clientInfo[i].setID(i + 1);
-						
+
 						((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->c_id = clientInfo[i].getID();
 						pack = packMessage(3, (i + 1) , 0 , 1, 0, 0, 0, 0, 0, 0, 0); // client id : 빈 곳의 index + 1 한 것
 
@@ -555,7 +566,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 							// 정보 저장할 LVITEM 세팅
 							LVITEM lvitem;
 							CString tmpStr;
-					//		TRACE("InstallHook 주석처리함\n");
+							//		TRACE("InstallHook 주석처리함\n");
 							tmpStr.Format(_T("%d , IP : "), clientP.c_id);
 							tmpStr += clientInfo[i].m_address;
 
@@ -602,7 +613,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					installKeyhook();
 					installMousehook();
 				}
-				
+
 				((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send((LPCSTR *)&clientP, sizeof(CPACKET));
 
 			} else if(k->relativeField == 1){ // bye packet
