@@ -457,60 +457,60 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 	switch(pCopyDataStruct->dwData){
 	case KEYBOARD_DATA: // keyboard
-		hEVENT = (tagHEVENT *) pCopyDataStruct->lpData; // hEvent 구조체 연결(후킹된 자료)
+		//hEVENT = (tagHEVENT *) pCopyDataStruct->lpData; // hEvent 구조체 연결(후킹된 자료)
 
-		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때 
-			//	TRACE("KEY CODE 도착, keyCode : %d\n", hEVENT->keyCode);
+		//if(hEVENT->lParam >= 0){ // 키가 눌렸을 때 
+		//	//	TRACE("KEY CODE 도착, keyCode : %d\n", hEVENT->keyCode);
 
-			keyP.deviceType = 1;
-			keyP.msgType = 1;
-			keyP.keyCode = hEVENT->keyCode;
-			keyP.updownFlag = hEVENT->updown;
+		//	keyP.deviceType = 1;
+		//	keyP.msgType = 1;
+		//	keyP.keyCode = hEVENT->keyCode;
+		//	keyP.updownFlag = hEVENT->updown;
 
-			// 1. 연결된 클라이언트 들 중에서 
-			// 2. 지금 커서가 어디 있는지를 판별하고
-			// 3. 그 있는 쪽의 버튼에 연결된 클라이언트한테 이 정보를 보냄.
+		//	// 1. 연결된 클라이언트 들 중에서 
+		//	// 2. 지금 커서가 어디 있는지를 판별하고
+		//	// 3. 그 있는 쪽의 버튼에 연결된 클라이언트한테 이 정보를 보냄.
 
-			//example : 커서가 4에 있다고 가정
-			m_status = 4;
+		//	//example : 커서가 4에 있다고 가정
+		//	m_status = 4;
 
-			s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
+		//	s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
 
-			/*while((btn_Bind[m_status-1] != s->c_id) && (btn_Bind[m_status - 1] != 0)){
-			pMainDlg->m_pSockList.GetNext(pos);
-			s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
-			}*/
+		//	/*while((btn_Bind[m_status-1] != s->c_id) && (btn_Bind[m_status - 1] != 0)){
+		//	pMainDlg->m_pSockList.GetNext(pos);
+		//	s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
+		//	}*/
 
-			s->Send((LPCSTR *)&mouseP, sizeof(KPACKET));
-		}
+		//	s->Send((LPCSTR *)&mouseP, sizeof(KPACKET));
+		//}
 		break;
 
 
 	case MOUSE_DATA: // mouse
-		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
-		//TRACE("MOUSE CODE 도착, x : %d y : %d\n wheelFlag : %d updownFlag : %d leftRight : %d\n", mEVENT->xCoord, mEVENT->yCoord,mEVENT->wheelFlag, mEVENT->updownFlag, mEVENT->leftRight);
+		//mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
+		////TRACE("MOUSE CODE 도착, x : %d y : %d\n wheelFlag : %d updownFlag : %d leftRight : %d\n", mEVENT->xCoord, mEVENT->yCoord,mEVENT->wheelFlag, mEVENT->updownFlag, mEVENT->leftRight);
 
 
-		mouseP.msgType = 2;
-		mouseP.deviceType = mEVENT->deviceType;
-		mouseP.leftRight = mEVENT->leftRight;
-		mouseP.wheelFlag = mEVENT->wheelFlag;
-		mouseP.updownFlag = mEVENT->updownFlag;
-		mouseP.xCoord = mEVENT->xCoord;
-		mouseP.yCoord = mEVENT->yCoord;
+		//mouseP.msgType = 2;
+		//mouseP.deviceType = mEVENT->deviceType;
+		//mouseP.leftRight = mEVENT->leftRight;
+		//mouseP.wheelFlag = mEVENT->wheelFlag;
+		//mouseP.updownFlag = mEVENT->updownFlag;
+		//mouseP.xCoord = mEVENT->xCoord;
+		//mouseP.yCoord = mEVENT->yCoord;
 
-		// 1. 연결된 클라이언트 들 중에서
-		// 2. 지금 커서가 어디 있는지를 판별하고
-		// 3. 그 있는 쪽의 버튼에 연결된 클라이언트한테 이 정보를 보냄.
-		//example : 커서가 4에 있다고 가정
-		m_status = 4;
-		s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
-		/*	while((btn_Bind[m_status-1] != s->c_id) && (btn_Bind[m_status - 1] != 0)){
-		pMainDlg->m_pSockList.GetNext(pos);
-		s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
-		}*/
+		//// 1. 연결된 클라이언트 들 중에서
+		//// 2. 지금 커서가 어디 있는지를 판별하고
+		//// 3. 그 있는 쪽의 버튼에 연결된 클라이언트한테 이 정보를 보냄.
+		////example : 커서가 4에 있다고 가정
+		//m_status = 4;
+		//s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
+		///*	while((btn_Bind[m_status-1] != s->c_id) && (btn_Bind[m_status - 1] != 0)){
+		//pMainDlg->m_pSockList.GetNext(pos);
+		//s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
+		//}*/
 
-		s->Send((LPCSTR *)&mouseP, sizeof(MPACKET));
+		//s->Send((LPCSTR *)&mouseP, sizeof(MPACKET));
 		break;
 
 

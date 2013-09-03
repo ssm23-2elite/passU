@@ -426,37 +426,43 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		hEVENT = (tagHEVENT *) pCopyDataStruct->lpData; // hEvent 구조체 연결(후킹된 자료)
 
 		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
-			TRACE("KEY CODE 도착, SERVER에게 SENDMESSAGE\n");
-			keyP.deviceType = 1;
-			keyP.msgType = 1;
-			keyP.keyCode = hEVENT->keyCode;
-			keyP.updownFlag = hEVENT->updown;
-			((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send((LPCSTR *)&keyP, sizeof(KPACKET));
+			TRACE("KEY CODE 도착\n");
+			
+			for(int i = 0 ; i < 9 ; i ++){
+				TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
+				if((m_tab1.btn_Bind[i]) != 0){
+					keyP.deviceType = 1;
+					keyP.msgType = 1;
+					keyP.keyCode = hEVENT->keyCode;
+					keyP.updownFlag = hEVENT->updown;
+					((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send((LPCSTR *)&keyP, sizeof(KPACKET));
+					break;
+				} 
+			}
 
-			//CDS.dwData = KEYBOARD_DATA; // Client receiveData
-			//CDS.cbData = sizeof(HEVENT);
-			//CDS.lpData = hEVENT;
-			//::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 		}
 		break;
 
 	case MOUSE_DATA:
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
-		TRACE("MOUSE DATA 도착, SERVER에게 SENDMESSAGE\n");
-		mouseP.msgType = 2;
-		mouseP.deviceType = mEVENT->deviceType;
-		mouseP.leftRight = mEVENT->leftRight;
-		mouseP.wheelFlag = mEVENT->wheelFlag;
-		mouseP.updownFlag = mEVENT->updownFlag;
-		mouseP.xCoord = mEVENT->xCoord;
-		mouseP.yCoord = mEVENT->yCoord;
+			TRACE("MOUSE DATA 도착\n");
+		for(int i = 0 ; i < 9 ; i ++){
+			
+				TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
+			if((m_tab1.btn_Bind[i]) != 0){
+				mouseP.msgType = 2;
+				mouseP.deviceType = mEVENT->deviceType;
+				mouseP.leftRight = mEVENT->leftRight;
+				mouseP.wheelFlag = mEVENT->wheelFlag;
+				mouseP.updownFlag = mEVENT->updownFlag;
+				mouseP.xCoord = mEVENT->xCoord;
+				mouseP.yCoord = mEVENT->yCoord;
 
-		((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send((LPCSTR *)&mouseP, sizeof(MPACKET));
+				((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send((LPCSTR *)&mouseP, sizeof(MPACKET));
+				break;
+			} 
 
-		//CDS.dwData = MOUSE_DATA; // Client receiveData
-		//CDS.cbData = sizeof(MPACKET);
-		//CDS.lpData = mEVENT;
-		//::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		}
 
 		break;
 	}

@@ -46,6 +46,7 @@ typedef struct mousepacket{ // 마우스 위치 정보를 가지고 있는 패킷(TCP)
 	int wheelFlag:32; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
 	int xCoord:32; // x좌표
 	int yCoord:32; // y좌표
+	int pad:32;
 	//mouse move 일때의 상태를 만들어야함?.......
 } MPACKET;
 /* _______________________________________________________________________________ 
