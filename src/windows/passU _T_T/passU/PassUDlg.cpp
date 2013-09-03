@@ -439,7 +439,6 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					break;
 				} 
 			}
-
 		}
 		break;
 

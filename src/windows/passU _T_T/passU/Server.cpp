@@ -102,9 +102,9 @@ BOOL CServer::OnInitDialog()
 	serverIPAddress.Append(strIpAddress);
 
 
-	hinstDLL = LoadLibrary(_T("KeyHook.dll"));
+	hinstDLL = LoadLibrary(_T("ServerHook.dll"));
 	if(!hinstDLL)
-		AfxMessageBox(_T("KeyHook.dll 로드 실패!"));
+		AfxMessageBox(_T("ServerHook.dll 로드 실패!"));
 
 	installKeyhook = (InstallKeyboardHook)GetProcAddress(hinstDLL, "InstallKeyboardHook");
 	installMousehook = (InstallMouseHook)GetProcAddress(hinstDLL, "InstallMouseHook");

@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6794E4D5-1211-4263-91D4-5A64E8890D4C}</ProjectGuid>
     <RootNamespace>keyHOoking</RootNamespace>
-    <ProjectName>KeyHook</ProjectName>
+    <ProjectName>ServerHook</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -54,7 +54,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>NotSet</SubSystem>
-      <OutputFile>.\Debug\KeyHook.dll</OutputFile>
+      <OutputFile>.\Debug\ServerHook.dll</OutputFile>
     </Link>
     <Bscmake>
       <OutputFile>.\Debug\KeyHook.bsc</OutputFile>
@@ -75,7 +75,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="KeyHook.cpp" />
+    <ClCompile Include="ServerHook.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
