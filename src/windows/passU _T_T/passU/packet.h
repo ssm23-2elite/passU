@@ -1,6 +1,7 @@
 #ifndef __PACKET_H__
 #define __PACKET_H__
 
+#pragma pack(1)
 /*
 #define STATUS_EMPTY	0
 #define STATUS_PC		1
@@ -14,8 +15,8 @@ typedef struct packet{
 	int deviceType:8;
 	int relativeField:8;
 	int updownFlag:8;
-	int pad1:8;
 	int keyCode:32;
+	int pad1:8;
 	int pad2:32;
 	int pad3:32;
 	int pad4:32;
@@ -27,8 +28,8 @@ typedef struct keypacket{ // 키보드 키 값을 가지고 있는 패킷(TCP)
 	int deviceType:8;
 	int relativeField:8;
 	int updownFlag:8;
-	int pad1:8;
 	int keyCode:32;
+	int pad1:8;
 	int pad2:32;
 	int pad3:32;
 	int pad4:32;
