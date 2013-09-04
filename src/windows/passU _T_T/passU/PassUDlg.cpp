@@ -231,6 +231,10 @@ void CPassUDlg::Accept(void)
 	CPassUChildSocket *pChild = new CPassUChildSocket();
 
 	BOOL check = m_pServer->Accept(*pChild);
+			/* Nagle 알고리즘을 해제하는 코드, 우리 프로그램에서는 Nagle 알고리즘 필요없엉 */
+	
+	const char opt_val = true;
+	setsockopt(*pChild, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
 
 	if(check == FALSE){
 		AfxMessageBox(_T("Accept Failed"));
@@ -276,7 +280,8 @@ void CPassUDlg::OnStartServer()
 	m_pServer = new CPassUServerSocket();
 	m_pServer->Create(30000);
 	m_pServer->Listen();
-
+	const char opt_val = true;
+	setsockopt(*m_pServer, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
 	AfxMessageBox(_T("InitServer"));
 }
 
