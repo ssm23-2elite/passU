@@ -124,7 +124,7 @@ BOOL CPassUDlg::OnInitDialog()
 
 
 	m_pwndShow = &m_tab1;
-
+	whereisPoint = 5;
 	UpdateData(FALSE);
 
 
@@ -349,7 +349,7 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 
 	s->Receive(&tmp, sizeof(PACKET));
 
-	if(tmp.msgType == KEYBOARD_DATA){
+	if(tmp.msgType == MSG_KEYBOARD){
 		if(tmp.updownFlag == 1) // up
 			keybd_event(tmp.keyCode, 0, KEYEVENTF_KEYUP, 0);
 
@@ -358,7 +358,7 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 
 		TRACE("Keybd_event success\n");
 		return ;
-	} else if(tmp.msgType == MOUSE_DATA){
+	} else if(tmp.msgType == MSG_MOUSE){
 		SetCursorPos(tmp.pad2, tmp.pad3);
 
 		if(tmp.pad1 == 1 && tmp.updownFlag== 0){ // right up
@@ -413,13 +413,16 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	HEVENT *hEVENT;
 	MPACKET *mEVENT;
 
+	int nWidth = GetSystemMetrics(SM_CXSCREEN);
+	int nHeight = GetSystemMetrics(SM_CYSCREEN);
+
 	// Client한테 전송할 구조체(K,M : 후킹자료)
 	KPACKET keyP;
 	MPACKET mouseP;
 
 	COPYDATASTRUCT CDS;
 	POSITION pos = m_pSockList.GetHeadPosition();
-
+	TRACE("WhereisPoint : %d\n", whereisPoint);
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	switch(pCopyDataStruct->dwData){
 	case KEYBOARD_DATA:
@@ -427,12 +430,12 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
 			TRACE("KEY CODE 도착\n");
-			
+
 			for(int i = 0 ; i < 9 ; i ++){
 				TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
 				if((m_tab1.btn_Bind[i]) != 0){
 					keyP.deviceType = 1;
-					keyP.msgType = 1;
+					keyP.msgType = MSG_KEYBOARD;
 					keyP.keyCode = hEVENT->keyCode;
 					keyP.updownFlag = hEVENT->updown;
 					((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send((LPCSTR *)&keyP, sizeof(KPACKET));
@@ -444,12 +447,81 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 	case MOUSE_DATA:
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
-			TRACE("MOUSE DATA 도착\n");
+		TRACE("MOUSE DATA 도착\n");
 		for(int i = 0 ; i < 9 ; i ++){
-			
-				TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
+			TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
 			if((m_tab1.btn_Bind[i]) != 0){
-				mouseP.msgType = 2;
+				if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
+					if(whereisPoint == 5){ // 바인딩이 3에 되어 있을 때(4번 버튼)
+						mEVENT->xCoord = nWidth - 15;
+						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						whereisPoint = 4;
+						//SetCursor(NULL);
+						ShowCursor(FALSE);
+
+						// m_tab1.btn_bind[4] = 1; -> 서버가 아닌 다른 곳에 커서가 있음.
+						// mouseevent 서버에서는 더이상 그냥 리턴해주고 그렇게 하도록
+						// 좌표값이랑 이벤트값 전송은 그대로 해주고.
+					} else if(whereisPoint == 6){//mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (nWidth - 15)* 65535 / nWidth, mEVENT->yCoord * 65535 / nHeight, 0, 0);
+						mEVENT->xCoord = nWidth - 15;
+						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						whereisPoint = 5;
+						//	SetCursor();
+						ShowCursor(TRUE);		
+					}
+				}
+
+				if(mEVENT->yCoord<= 2) { // 화면 위족에 붙을 때
+					if(whereisPoint == 5){ // 바인딩이 2번버튼에있을때
+						mEVENT->yCoord = nHeight - 15;
+						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						//			mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, (nHeight - 15) * 65535 / nHeight, 0, 0);
+						whereisPoint = 2;
+						ShowCursor(FALSE);
+					} else if(whereisPoint == 8){
+						mEVENT->yCoord = nHeight - 15;
+						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						//			mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, (nHeight - 15) * 65535 / nHeight, 0, 0);
+						whereisPoint = 5;
+						ShowCursor(TRUE);
+
+					}
+				} 
+
+				if(mEVENT->xCoord >= nWidth - 2){	 // 화면 오른 쪽에 붙을 때
+					//	m_whereisPoint = 6;
+					if(whereisPoint == 5){ // 바인딩이 6번버튼에 있을 때
+						mEVENT->xCoord = 15;
+						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						whereisPoint = 6;
+						ShowCursor(FALSE);
+					} else if(whereisPoint == 4){
+						mEVENT->xCoord = 15;
+						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						whereisPoint = 5;
+						ShowCursor(TRUE);
+
+					}
+				}
+
+				if(mEVENT->yCoord >= nHeight - 2){ // 화면 아래쪽에 붙을 때
+					if(whereisPoint == 5){ // 바인딩이 8번 버튼에 있을 때
+						mEVENT->yCoord = 15;
+						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						whereisPoint = 8;
+						ShowCursor(FALSE);
+					} else if(whereisPoint == 2){
+						mEVENT->yCoord = 15;
+						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						whereisPoint = 5;
+						ShowCursor(TRUE);
+
+					}
+				}
+
+				TRACE("%d %d\n", mEVENT->xCoord, mEVENT->yCoord);
+
+				mouseP.msgType = MSG_MOUSE;
 				mouseP.deviceType = mEVENT->deviceType;
 				mouseP.leftRight = mEVENT->leftRight;
 				mouseP.wheelFlag = mEVENT->wheelFlag;
@@ -460,9 +532,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send((LPCSTR *)&mouseP, sizeof(MPACKET));
 				break;
 			} 
-
 		}
-
 		break;
 	}
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);

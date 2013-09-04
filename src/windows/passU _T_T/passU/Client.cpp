@@ -118,6 +118,7 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			} else if(p->pad1 == 0 && p->updownFlag == 1){ // left down
 				mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 			}
+
 			if(p->keyCode == 2){ // wheel btn up
 				mouse_event(MOUSEEVENTF_MIDDLEUP,  0, 0, 0, 0);
 			} else if(p->keyCode == 2){ // wheel btn down

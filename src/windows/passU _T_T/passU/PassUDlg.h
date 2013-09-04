@@ -37,6 +37,7 @@ protected:
 public:
 	CTabCtrl m_Tab;
 
+	int whereisPoint;
 	CServer m_tab1;
 	CClient m_tab2;
 	CWnd *m_pwndShow;

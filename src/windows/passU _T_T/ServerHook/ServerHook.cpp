@@ -263,12 +263,7 @@ extern "C" __declspec(dllexport)
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 			//	TRACE("WHEELBUTTONUP\n");
 		} else if(wParam == WM_MOUSEMOVE){ // 마우스 이동
-
-			//	TRACE("%d, %d\n", nWidth, nHeight);
-			//	TRACE("%d, %d\n", pt.x, pt.y);
-			//if(m_overFlag == TRUE){
-
-			//	}
+			
 			CDS.dwData = 1;
 			CDS.cbData = sizeof(tmp);
 			CDS.lpData = &tmp;
@@ -277,10 +272,8 @@ extern "C" __declspec(dllexport)
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
 
-			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
-			//if(m_overFlag)
 
-		//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
+
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
 		}
