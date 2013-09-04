@@ -65,3 +65,4 @@
 #define MSG_KEYBOARD	1
 #define MSG_MOUSE	2
 #define	MSG_CLIENT	3
+#define	MSG_DATA	4

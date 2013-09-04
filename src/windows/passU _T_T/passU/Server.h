@@ -61,11 +61,6 @@ public:
 	int m_x;
 	int m_y;
 
-	PACKET *p;
-	KPACKET *k;
-	MPACKET *m;
-	CPACKET *c;
-
 	typedef struct tagHEVENT{
 		int type;
 		int keyCode;

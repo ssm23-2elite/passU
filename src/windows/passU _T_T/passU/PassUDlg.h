@@ -61,6 +61,12 @@ public:
 	void OnStartServer();
 	void Accept(void);
 	void ReceiveData(CPassUChildSocket * s);
+	int ParseData(char *buf, int len);
+	int ParseKeyboardData(char *buf, KPACKET *packet);
+	int ParseMouseData(char *buf, MPACKET *packet);
+	int ParseClientData(char *buf, CPACKET *packet);
+
+	int byteToint(char *data, int len);
 	void CloseChild(CPassUChildSocket *s);
 	void CleanUp(void);
 
@@ -74,4 +80,5 @@ public:
 	void ReceiveClientData(CPassUClientSocket * s);
 	void CloseClient(CPassUClientSocket * s);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

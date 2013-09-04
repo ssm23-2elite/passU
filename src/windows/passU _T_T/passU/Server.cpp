@@ -133,10 +133,6 @@ BOOL CServer::OnInitDialog()
 	m_status = STATUS_EMPTY;
 	m_x = 0;
 	m_y = 0;
-	p = NULL;
-	k = NULL;
-	m = NULL;
-	c = NULL;
 
 	m_bmp_monitor.LoadBitmapA(IDB_MONITOR);
 	m_bmp_phone.LoadBitmapA(IDB_PHONE);
@@ -440,12 +436,6 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	HEVENT *hEVENT;
 	MPACKET *mEVENT;
 
-	// Client한테 전송할 구조체(K,M : 후킹자료, C : 헬로패킷에 대한 ACK)
-	KPACKET keyP;
-	MPACKET mouseP;
-	PACKET pack;
-	CPACKET clientP;
-
 	CPassUChildSocket *s = NULL;
 
 	// Main Dialog 포인터를 받아옴
@@ -515,9 +505,9 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 
 	case RECEIVE_DATA: // receiveData
-		p = (PACKET *) pCopyDataStruct->lpData; // 구조체 연결
+		CPACKET* clientP = (CPACKET *) pCopyDataStruct->lpData; // 구조체 연결
 
-		if(p->deviceType == 1){ // hello packet
+		if(clientP->hello == 1){ // hello packet
 			// 헬로 패킷이면 클라이언트 정보 설정
 			// 버튼에 클라이언트 연결해주고, 첫번째 클라이언트면 후킹 시작하고
 			// 클라이언트에 자신의 id 알려주고
@@ -528,20 +518,13 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					// client ID Setting
 					clientInfo[i].setID(i + 1);
 
-					((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->c_id = clientInfo[i].getID();
-					pack = packMessage(3, (i + 1) , 0 , 1, 0, 0, 0, 0, 0, 0, 0); // client id : 빈 곳의 index + 1 한 것
-
-					memcpy(&clientP, &pack, sizeof(PACKET));
-
+					clientP->c_id = ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->c_id = clientInfo[i].getID();
+					
 					// Client IP Address Setting
-					//CString m_add;
-					//m_add.Format(_T("%d.%d.%d.%d"), p->keyCode, p->pad2, p->pad3, p->pad4);
-
-					//clientInfo[i].setIP(m_add);
-					clientInfo[i].m_address.Format(_T("%d.%d.%d.%d"), p->keyCode, p->pad2, p->pad3, p->pad4);
+					clientInfo[i].m_address.Format(_T("%d.%d.%d.%d"), clientP->ipFirst, clientP->ipSecond, clientP->ipThird, clientP->ipForth);
 
 					//	TRACE("?\n");
-					if(p->recvDev == STATUS_PC){ // PC 이면
+					if(clientP->pad3 == STATUS_PC){ // PC 이면
 						// Status 세팅
 						clientInfo[i].setStatus(STATUS_PC);
 
@@ -550,7 +533,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 						LVITEM lvitem;
 						CString tmpStr;
 						//		TRACE("InstallHook 주석처리함\n");
-						tmpStr.Format(_T("%d , IP : %s"), clientP.c_id, clientInfo[i].m_address);
+						tmpStr.Format(_T("%d , IP : %s"), clientP->c_id, clientInfo[i].m_address);
 
 						ZeroMemory(&lvitem, sizeof(lvitem));
 						lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
@@ -561,7 +544,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 						m_waiting_client.InsertItem(&lvitem);
 						break;
-					} else if(p->recvDev == STATUS_MOBILE){
+					} else if(clientP->pad3 == STATUS_MOBILE){
 
 						// Status 세팅
 						clientInfo[i].setStatus(STATUS_MOBILE);
@@ -569,7 +552,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 						//정보 저장할 LVITEM 세팅
 						LVITEM lvitem;
 						CString tmpStr;
-						tmpStr.Format(_T("%d , IP : %s"), clientP.c_id, clientInfo[i].m_address);
+						tmpStr.Format(_T("%d , IP : %s"), clientP->c_id, clientInfo[i].m_address);
 
 						ZeroMemory(&lvitem, sizeof(lvitem));
 						lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
@@ -596,20 +579,23 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				installMousehook();
 			}
 
-			((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send((LPCSTR *)&clientP, sizeof(CPACKET));
+			char buf[1024];
+			ZeroMemory(buf, sizeof(buf));
+			sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d",
+				MSG_CLIENT, clientP->c_id, clientP->pad3, clientP->hello,clientP->bye, clientP->ipFirst, clientP->ipSecond, clientP->ipThird, clientP->ipForth);
+			((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send(buf, strlen(buf));
 
-		} else if(p->relativeField == 1){ // bye packet
+		} else if(clientP->bye == 1){ // bye packet
 			// 굿바이패킷이면
 			// 버튼에 클라이언트 해제
 			s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
-			while(p->sendDev == s->c_id){
+			while(clientP->c_id == s->c_id){
 				((CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos));
 				s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
 			}
 			
 			uninstallKeyhook();
 			uninstallMousehook();
-
 		}
 		break;
 	}

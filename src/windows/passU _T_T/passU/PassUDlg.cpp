@@ -212,18 +212,212 @@ void CPassUDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CPassUDlg::ReceiveData(CPassUChildSocket * s)
 {
-	PACKET tmp;
-	s->Receive(&tmp, sizeof(PACKET));
+	char buf[4096];
+	ZeroMemory(buf, sizeof(buf));
 
-	COPYDATASTRUCT CDS;
+	int len = s->Receive(&buf, sizeof(buf));
 
-	CDS.dwData = 2; // receiveData
-	CDS.cbData = sizeof(PACKET);
-	CDS.lpData = &tmp;
+	if(ParseData(buf, len) < 0)
+		AfxMessageBox("Parsing Error\n");
+}
 
+int CPassUDlg::ParseData(char *buf, int len)
+{
+	int msgType;
+	char msgTypeBuf[4];
+	memcpy(msgTypeBuf, buf, sizeof(msgTypeBuf));
+	msgType = byteToint(msgTypeBuf, 4);
 
-	::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	if(msgType == MSG_KEYBOARD) {
+		KPACKET packet;
 
+		ParseKeyboardData(buf, &packet);
+
+		COPYDATASTRUCT CDS;
+
+		CDS.dwData = 2; // receiveData
+		CDS.cbData = sizeof(KPACKET);
+		CDS.lpData = &packet;
+		::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	} else if(msgType == MSG_MOUSE) {
+		MPACKET packet;
+
+		ParseMouseData(buf, &packet);
+
+		COPYDATASTRUCT CDS;
+
+		CDS.dwData = 2; // receiveData
+		CDS.cbData = sizeof(MPACKET);
+		CDS.lpData = &packet;
+		::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	} else if(msgType == MSG_CLIENT) {
+		CPACKET packet;
+
+		ParseClientData(buf, &packet);
+
+		COPYDATASTRUCT CDS;
+
+		CDS.dwData = 2; // receiveData
+		CDS.cbData = sizeof(CPACKET);
+		CDS.lpData = &packet;
+		::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	} else if(msgType == MSG_DATA) {
+		DPACKET packet;
+
+		memcpy(packet.data, buf + sizeof(packet.msgType), len - sizeof(packet.msgType));
+
+		COPYDATASTRUCT CDS;
+
+		CDS.dwData = 2; // receiveData
+		CDS.cbData = sizeof(DPACKET);
+		CDS.lpData = &packet;
+		::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	} else {
+		return -1;
+	}
+	return 0;
+}
+
+int CPassUDlg::ParseKeyboardData(char *buf, KPACKET *packet)
+{
+	char msgTypeBuf[4];
+
+	memcpy(msgTypeBuf, buf, sizeof(msgTypeBuf));
+	packet->msgType = byteToint(msgTypeBuf, 4);
+
+	char sendDevBuf[4];
+	memcpy(sendDevBuf, buf + sizeof(msgTypeBuf), sizeof(sendDevBuf));
+	packet->sendDev = byteToint(sendDevBuf, 4);
+
+	char recvDevBuf[4];
+	memcpy(recvDevBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf), sizeof(recvDevBuf));
+	packet->recvDev = byteToint(recvDevBuf, 4);
+
+	char deviceTypeBuf[1];
+	memcpy(deviceTypeBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf) + sizeof(recvDevBuf), sizeof(deviceTypeBuf));
+	packet->deviceType = byteToint(deviceTypeBuf, 1);
+
+	char relativeFieldBuf[1];
+	memcpy(relativeFieldBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf) + sizeof(recvDevBuf) + sizeof(deviceTypeBuf), sizeof(relativeFieldBuf));
+	packet->relativeField = byteToint(relativeFieldBuf, 1);
+
+	char updownFlagBuf[1];
+	memcpy(updownFlagBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf) + sizeof(recvDevBuf) + sizeof(deviceTypeBuf) + sizeof(relativeFieldBuf), sizeof(updownFlagBuf));
+	packet->updownFlag = byteToint(updownFlagBuf, 1);
+
+	char keyCodeBuf[4];
+	memcpy(keyCodeBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf) + sizeof(recvDevBuf) + sizeof(deviceTypeBuf) + sizeof(relativeFieldBuf) + sizeof(updownFlagBuf)
+		, sizeof(keyCodeBuf));
+	packet->keyCode = byteToint(keyCodeBuf, 4);
+
+	return 0;
+}
+
+int CPassUDlg::ParseMouseData(char *buf, MPACKET *packet)
+{
+	char msgTypeBuf[4];
+
+	memcpy(msgTypeBuf, buf, sizeof(msgTypeBuf));
+	packet->msgType = byteToint(msgTypeBuf, 4);
+
+	char sendDevBuf[4];
+	memcpy(sendDevBuf, buf + sizeof(msgTypeBuf), sizeof(sendDevBuf));
+	packet->sendDev = byteToint(sendDevBuf, 4);
+
+	char recvDevBuf[4];
+	memcpy(recvDevBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf), sizeof(recvDevBuf));
+	packet->recvDev = byteToint(recvDevBuf, 4);
+
+	char deviceTypeBuf[1];
+	memcpy(deviceTypeBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf) + sizeof(recvDevBuf), sizeof(deviceTypeBuf));
+	packet->deviceType = byteToint(deviceTypeBuf, 1);
+
+	char relativeFieldBuf[1];
+	memcpy(relativeFieldBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf) + sizeof(recvDevBuf) + sizeof(deviceTypeBuf), sizeof(relativeFieldBuf));
+	packet->relativeField = byteToint(relativeFieldBuf, 1);
+
+	char updownFlagBuf[1];
+	memcpy(updownFlagBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf) + sizeof(recvDevBuf) + sizeof(deviceTypeBuf) + sizeof(relativeFieldBuf), sizeof(updownFlagBuf));
+	packet->updownFlag = byteToint(updownFlagBuf, 1);
+
+	char leftRightBuf[1];
+	memcpy(leftRightBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf) + sizeof(recvDevBuf) + sizeof(deviceTypeBuf) + sizeof(relativeFieldBuf) + sizeof(updownFlagBuf)
+		, sizeof(leftRightBuf));
+	packet->leftRight = byteToint(leftRightBuf, 1);
+
+	char wheelFlagBuf[4];
+	memcpy(wheelFlagBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf) + sizeof(recvDevBuf) + sizeof(deviceTypeBuf) + sizeof(relativeFieldBuf) + sizeof(updownFlagBuf)
+		+ sizeof(leftRightBuf) , sizeof(wheelFlagBuf));
+	packet->wheelFlag = byteToint(wheelFlagBuf, 4);
+
+	char xCoordBuf[4];
+	memcpy(xCoordBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf) + sizeof(recvDevBuf) + sizeof(deviceTypeBuf) + sizeof(relativeFieldBuf) + sizeof(updownFlagBuf)
+		+ sizeof(leftRightBuf) + sizeof(wheelFlagBuf), sizeof(xCoordBuf));
+	packet->xCoord = byteToint(xCoordBuf, 4);
+
+	char yCoordBuf[4];
+	memcpy(yCoordBuf, buf + sizeof(msgTypeBuf) + sizeof(sendDevBuf) + sizeof(recvDevBuf) + sizeof(deviceTypeBuf) + sizeof(relativeFieldBuf) + sizeof(updownFlagBuf)
+		+ sizeof(leftRightBuf) + sizeof(wheelFlagBuf) + sizeof(xCoordBuf), sizeof(yCoordBuf));
+	packet->yCoord = byteToint(yCoordBuf, 4);
+
+	return 0;
+}
+
+int CPassUDlg::ParseClientData(char *buf, CPACKET *packet)
+{
+	char msgTypeBuf[4];
+
+	memcpy(msgTypeBuf, buf, sizeof(msgTypeBuf));
+	packet->msgType = byteToint(msgTypeBuf, 4);
+
+	char c_idBuf[4];
+	memcpy(c_idBuf, buf + sizeof(msgTypeBuf), sizeof(c_idBuf));
+	packet->c_id = byteToint(c_idBuf, 4);
+
+	char pad3Buf[4];
+	memcpy(pad3Buf, buf + sizeof(msgTypeBuf) + sizeof(c_idBuf), sizeof(pad3Buf));
+	packet->pad3 = byteToint(pad3Buf, 4);
+
+	char helloBuf[1];
+	memcpy(helloBuf, buf + sizeof(msgTypeBuf) + sizeof(c_idBuf) + sizeof(pad3Buf), sizeof(helloBuf));
+	packet->hello = byteToint(helloBuf, 1);
+
+	char byeBuf[1];
+	memcpy(byeBuf, buf + sizeof(msgTypeBuf) + sizeof(c_idBuf) + sizeof(pad3Buf) + sizeof(helloBuf), sizeof(byeBuf));
+	packet->bye = byteToint(byeBuf, 1);
+
+	char ipFirstBuf[4];
+	memcpy(ipFirstBuf, buf + sizeof(msgTypeBuf) + sizeof(c_idBuf) + sizeof(pad3Buf) + sizeof(helloBuf) + sizeof(byeBuf), 
+		sizeof(ipFirstBuf));
+	packet->ipFirst = byteToint(ipFirstBuf, 4);
+
+	char ipSecondBuf[4];
+	memcpy(ipSecondBuf, buf + sizeof(msgTypeBuf) + sizeof(c_idBuf) + sizeof(pad3Buf) + sizeof(helloBuf) + sizeof(byeBuf) 
+		+ sizeof(ipFirstBuf), sizeof(ipSecondBuf));
+	packet->ipSecond = byteToint(ipSecondBuf, 4);
+
+	char ipThirdBuf[4];
+	memcpy(ipThirdBuf, buf + sizeof(msgTypeBuf) + sizeof(c_idBuf) + sizeof(pad3Buf) + sizeof(helloBuf) + sizeof(byeBuf) 
+		+ sizeof(ipFirstBuf) + sizeof(ipSecondBuf), sizeof(ipThirdBuf));
+	packet->ipThird = byteToint(ipThirdBuf, 4);
+
+	char ipForthBuf[4];
+	memcpy(ipForthBuf, buf + sizeof(msgTypeBuf) + sizeof(c_idBuf) + sizeof(pad3Buf) + sizeof(helloBuf) + sizeof(byeBuf) 
+		+ sizeof(ipFirstBuf) + sizeof(ipSecondBuf) + sizeof(ipThirdBuf), sizeof(ipForthBuf));
+	packet->ipForth = byteToint(ipForthBuf, 4);
+
+	return 0;
+}
+
+int CPassUDlg::byteToint(char *data, int len) 
+{
+	int result = 0;
+	for(int i = 0; i < len; i++) {
+		if(data[i] == ' ')
+			continue;
+		result = result * 10 + (data[i] - '0');
+	}
+	return result;
 }
 
 void CPassUDlg::Accept(void)
@@ -231,8 +425,8 @@ void CPassUDlg::Accept(void)
 	CPassUChildSocket *pChild = new CPassUChildSocket();
 
 	BOOL check = m_pServer->Accept(*pChild);
-			/* Nagle 알고리즘을 해제하는 코드, 우리 프로그램에서는 Nagle 알고리즘 필요없엉 */
-	
+	/* Nagle 알고리즘을 해제하는 코드, 우리 프로그램에서는 Nagle 알고리즘 필요없엉 */
+
 	const char opt_val = true;
 	setsockopt(*pChild, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
 
@@ -324,21 +518,12 @@ void CPassUDlg::OnConnectStart(void)
 	m_pClient->Create();
 	m_pClient->Connect(m_tab2.m_address, 30000);
 
-	tmp.msgType = 3;
-	tmp.bye = 0;
-	tmp.c_id = 0;
-	tmp.hello = 1;
+	char buf[1024];
+	ZeroMemory(buf, sizeof(buf));
+	sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d",
+		MSG_CLIENT, 0, STATUS_PC, 1, 0, m_tab2.ipFirst, m_tab2.ipSecond, m_tab2.ipThird, m_tab2.ipForth);
 
-	tmp.pad3 = STATUS_PC;
-
-	tmp.pad6 = m_tab2.ipFirst;
-	tmp.pad7 = m_tab2.ipSecond;
-	tmp.pad8 = m_tab2.ipThird;
-	tmp.pad9 = m_tab2.ipForth;
-
-	m_pClient->Send((LPCSTR *)&tmp, sizeof(CPACKET)); // 헬로 패킷 보냄
-
-
+	m_pClient->Send((LPCSTR *)&buf, strlen(buf)); // 헬로 패킷 보냄
 }
 
 
@@ -350,64 +535,60 @@ void CPassUDlg::ClientCleanUp(void)
 
 void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 {
-	PACKET tmp;
+	char buf[1024];
+	ZeroMemory(buf, sizeof(buf));
+	s->Receive(&buf, sizeof(buf));
 
-	s->Receive(&tmp, sizeof(PACKET));
 
-	if(tmp.msgType == MSG_KEYBOARD){
-		if(tmp.updownFlag == 1) // up
-			keybd_event(tmp.keyCode, 0, KEYEVENTF_KEYUP, 0);
+	int msgType;
+	char msgTypeBuf[4];
+	memcpy(msgTypeBuf, buf, sizeof(msgTypeBuf));
+	msgType = byteToint(msgTypeBuf, 4);
 
-		else if(tmp.updownFlag == 0) // down
-			keybd_event(tmp.keyCode, 0, 0, 0);
+	if(msgType == MSG_KEYBOARD) {
+		KPACKET packet;
 
-		TRACE("Keybd_event success\n");
-		return ;
-	} else if(tmp.msgType == MSG_MOUSE){
-		SetCursorPos(tmp.pad2, tmp.pad3);
+		ParseKeyboardData(buf, &packet);
 
-		if(tmp.pad1 == 1 && tmp.updownFlag== 0){ // right up
+		if(packet.updownFlag == 1)
+			keybd_event(packet.keyCode, 0, KEYEVENTF_KEYUP, 0);
+		else if(packet.updownFlag == 0) // down
+			keybd_event(packet.keyCode, 0, 0, 0);
+	} else if(msgType == MSG_MOUSE) {
+		MPACKET packet;
+
+		ParseMouseData(buf, &packet);
+
+		SetCursorPos(packet.xCoord, packet.yCoord);
+
+		if(packet.leftRight == 1 && packet.updownFlag== 0){ // right up
 			mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-		} else if(tmp.pad1 == 1 && tmp.updownFlag == 1){ // right down
+		} else if(packet.leftRight == 1 && packet.updownFlag == 1){ // right down
 			mouse_event(MOUSEEVENTF_RIGHTDOWN,  0, 0, 0, 0);
-		} else if(tmp.pad1 == 0 && tmp.updownFlag == 0){ // left up
+		} else if(packet.leftRight == 0 && packet.updownFlag == 0){ // left up
 			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-		} else if(tmp.pad1 == 0 && tmp.updownFlag == 1){ // left down
+		} else if(packet.leftRight == 0 && packet.updownFlag == 1){ // left down
 			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
 		}
-		if(tmp.keyCode == 2){ // wheel btn up
+		if(packet.wheelFlag == 1){ // wheel btn up
 			mouse_event(MOUSEEVENTF_MIDDLEUP,  0, 0, 0, 0);
-		} else if(tmp.keyCode == 2){ // wheel btn down
+		} else if(packet.wheelFlag == 2){ // wheel btn down
 			mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, 0);
-		} else if(tmp.keyCode == 3){ // wheel move
+		} else if(packet.wheelFlag == 3){ // wheel move
 			mouse_event(MOUSEEVENTF_WHEEL,  0, 0, 0, 5);
 		}
-		TRACE("mouse_event success\n");
-		return ;
-	}
-
-	COPYDATASTRUCT CDS;
-
-	CDS.dwData = 0; // Client receiveData
-	CDS.cbData = sizeof(PACKET);
-	CDS.lpData = &tmp;
-
-
-	::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-
+	} 
 }
 
 
 void CPassUDlg::CloseClient(CPassUClientSocket * s)
 {
-	CPACKET tmp;
-	tmp.msgType = 3;
-	tmp.c_id = m_tab2.client_ID;
-	tmp.bye = 1;
-	tmp.hello = 0;
+	char buf[1024];
+	ZeroMemory(buf, sizeof(buf));
+	sprintf_s(buf, "%4d%4d%4d%1d%1d",
+		MSG_CLIENT, m_tab2.client_ID, STATUS_PC, 0, 1);
 
-
-	s->Send((LPCSTR *)&tmp, sizeof(CPACKET)); // bye 패킷 전송
+	s->Send(buf, strlen(buf)); // bye 패킷 전송
 
 	ClientCleanUp();
 }
@@ -439,11 +620,14 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			for(int i = 0 ; i < 9 ; i ++){
 				TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
 				if((m_tab1.btn_Bind[i]) != 0){
-					keyP.deviceType = 1;
-					keyP.msgType = MSG_KEYBOARD;
-					keyP.keyCode = hEVENT->keyCode;
-					keyP.updownFlag = hEVENT->updown;
-					((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send((LPCSTR *)&keyP, sizeof(KPACKET));
+
+					char buf[1024];
+					ZeroMemory(buf, 0, sizeof(buf));
+					sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%4d",
+						MSG_KEYBOARD, 0, 0, 0,
+						0, hEVENT->updown, hEVENT->keyCode);
+
+					((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, strlen(buf));
 					break;
 				} 
 			}
@@ -454,7 +638,6 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
 		TRACE("MOUSE DATA 도착\n");
 		for(int i = 0 ; i < 9 ; i ++){
-			TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
 			if((m_tab1.btn_Bind[i]) != 0){
 				if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
 					if(whereisPoint == 5){ // 바인딩이 3에 되어 있을 때(4번 버튼)
@@ -524,21 +707,31 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					}
 				}
 
-				TRACE("%d %d\n", mEVENT->xCoord, mEVENT->yCoord);
+				/*char buf[1024];
+				ZeroMemory(buf, 0, sizeof(buf));
+				sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%1d%4d%4d%4d",
+				MSG_MOUSE, mEVENT->sendDev, mEVENT->recvDev, mEVENT->deviceType,
+				mEVENT->relativeField, mEVENT->updownFlag, mEVENT->xCoord, mEVENT->yCoord);
 
-				mouseP.msgType = MSG_MOUSE;
-				mouseP.deviceType = mEVENT->deviceType;
-				mouseP.leftRight = mEVENT->leftRight;
-				mouseP.wheelFlag = mEVENT->wheelFlag;
-				mouseP.updownFlag = mEVENT->updownFlag;
-				mouseP.xCoord = mEVENT->xCoord;
-				mouseP.yCoord = mEVENT->yCoord;
-
-				((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send((LPCSTR *)&mouseP, sizeof(MPACKET));
+				((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, strlen(buf));*/
 				break;
 			} 
 		}
 		break;
 	}
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
+}
+
+
+BOOL CPassUDlg::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	// TODO: Add your specialized code here and/or call the base class
+	if(pMsg->message == WM_KEYDOWN)
+	{
+		if(pMsg->wParam == VK_ESCAPE) return TRUE;
+		if(pMsg->wParam == VK_RETURN) return TRUE;
+	}
+
+	return CDialogEx::PreTranslateMessage(pMsg);
 }
