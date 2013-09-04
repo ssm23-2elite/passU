@@ -6,7 +6,7 @@
 #include "PassU.h"
 #include "PassUDlg.h"
 #include "afxdialogex.h"
-
+#include "PassUClientSocket.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -59,6 +59,8 @@ void CPassUDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TAB1, m_Tab);
+	DDX_Control(pDX, IDC_BUTTON1, m_CBtn_Start);
+	DDX_Control(pDX, IDC_BUTTON2, m_CBtn_Stop);
 }
 
 BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
@@ -66,6 +68,10 @@ BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CPassUDlg::OnTcnSelchangeTab1)
+	ON_BN_CLICKED(IDC_BUTTON1, &CPassUDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON2, &CPassUDlg::OnBnClickedButton2)
+	ON_WM_DESTROY()
+	ON_WM_COPYDATA()
 END_MESSAGE_MAP()
 
 
@@ -120,6 +126,7 @@ BOOL CPassUDlg::OnInitDialog()
 	m_pwndShow = &m_tab1;
 
 	UpdateData(FALSE);
+
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -189,15 +196,217 @@ void CPassUDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 	case 0:
 		m_tab1.ShowWindow(SW_SHOW);
 		m_pwndShow = &m_tab1;
+		m_SorC = TRUE;
 		break;
 
 	case 1:
 		m_tab2.ShowWindow(SW_SHOW);
 		m_pwndShow = &m_tab2;
-
+		m_SorC = FALSE;
 		break;
 	}
 	
 
 	*pResult = 0;
+}
+
+void CPassUDlg::ReceiveData(CPassUChildSocket * s)
+{
+	PACKET tmp;
+	s->Receive(&tmp, sizeof(PACKET));
+	COPYDATASTRUCT CDS;
+	
+	CDS.dwData = 2; // receiveData
+	CDS.cbData = sizeof(PACKET);
+	CDS.lpData = &tmp;
+
+	
+	::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
+}
+
+void CPassUDlg::Accept(void)
+{
+	CPassUChildSocket *pChild = new CPassUChildSocket();
+
+	BOOL check = m_pServer->Accept(*pChild);
+
+	if(check == FALSE){
+		AfxMessageBox(_T("Accept Failed"));
+		return ;
+	}
+
+	m_pSockList.AddTail(pChild);
+
+	AfxMessageBox(_T("Accept COmplete!!"));
+}
+
+void CPassUDlg::CleanUp(void)
+{
+	if(m_pServer)	delete m_pServer;
+
+	CPassUChildSocket *pChild;
+
+	while(!m_pSockList.IsEmpty()){
+		pChild = (CPassUChildSocket *)m_pSockList.RemoveHead();
+		delete pChild;
+	}
+	AfxMessageBox(_T("Clean Up!"));
+}
+
+void CPassUDlg::CloseChild(CPassUChildSocket *s){
+
+	CPassUChildSocket *pChild;
+	POSITION pos = m_pSockList.GetHeadPosition();
+	while(pos != NULL){
+		pChild = (CPassUChildSocket *)m_pSockList.GetAt(pos);
+
+		if(pChild == s){
+			m_pSockList.RemoveAt(pos);
+			delete	pChild;
+			break;
+		}
+		m_pSockList.GetNext(pos);
+	}
+}
+
+void CPassUDlg::OnStartServer()
+{
+	m_pServer = new CPassUServerSocket();
+	m_pServer->Create(30000);
+	m_pServer->Listen();
+
+	AfxMessageBox(_T("InitServer"));
+}
+
+void CPassUDlg::OnBnClickedButton1()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if(m_SorC){
+		OnStartServer();
+	} else{
+		OnConnectStart();
+	}
+
+	m_CBtn_Start.EnableWindow(FALSE);
+}
+
+
+void CPassUDlg::OnBnClickedButton2()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	
+	m_CBtn_Start.EnableWindow(TRUE);
+	CleanUp();
+	//CDialog::OnCancel();
+}
+
+
+void CPassUDlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+}
+
+
+void CPassUDlg::OnConnectStart(void)
+{
+	CPACKET tmp;
+
+	m_pClient = new CPassUClientSocket();
+	m_pClient->Create();
+	m_pClient->Connect(m_tab2.m_address, 30000);
+
+	tmp.msgType = 3;
+	tmp.bye = 0;
+	tmp.c_id = 0;
+	tmp.hello = 1;
+	
+	tmp.pad3 = STATUS_PC;
+
+	tmp.pad6 = m_tab2.ipFirst;
+	tmp.pad7 = m_tab2.ipSecond;
+	tmp.pad8 = m_tab2.ipThird;
+	tmp.pad9 = m_tab2.ipForth;
+	
+	m_pClient->Send((LPCSTR *)&tmp, sizeof(CPACKET)); // 헬로 패킷 보냄
+
+
+}
+
+
+void CPassUDlg::ClientCleanUp(void)
+{
+	if(m_pClient)	delete m_pClient;
+}
+
+
+void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
+{
+	PACKET tmp;
+	
+	s->Receive(&tmp, sizeof(PACKET));
+	COPYDATASTRUCT CDS;
+
+
+
+	CDS.dwData = 0; // Client receiveData
+	CDS.cbData = sizeof(PACKET);
+	CDS.lpData = &tmp;
+
+	
+	::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
+}
+
+
+void CPassUDlg::CloseClient(CPassUClientSocket * s)
+{
+	CPACKET tmp;
+	tmp.msgType = 3;
+	tmp.c_id = m_tab2.client_ID;
+	tmp.bye = 1;
+	tmp.hello = 0;
+
+	
+	s->Send((LPCSTR *)&tmp, sizeof(CPACKET)); // bye 패킷 전송
+
+	ClientCleanUp();
+}
+
+
+BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
+{
+	HEVENT *hEVENT;
+	MPACKET *mEVENT;
+	COPYDATASTRUCT CDS;
+
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	switch(pCopyDataStruct->dwData){
+	case KEYBOARD_DATA:
+		hEVENT = (tagHEVENT *) pCopyDataStruct->lpData; // hEvent 구조체 연결(후킹된 자료)
+
+		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
+			TRACE("KEY CODE 도착, SERVER에게 SENDMESSAGE\n");
+
+
+			CDS.dwData = KEYBOARD_DATA; // Client receiveData
+			CDS.cbData = sizeof(HEVENT);
+			CDS.lpData = hEVENT;
+			::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		}
+		break;
+
+	case MOUSE_DATA:
+		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
+		TRACE("MOUSE DATA 도착, SERVER에게 SENDMESSAGE\n");
+			CDS.dwData = MOUSE_DATA; // Client receiveData
+			CDS.cbData = sizeof(MPACKET);
+			CDS.lpData = mEVENT;
+			::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
+		break;
+	}
+	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
 }

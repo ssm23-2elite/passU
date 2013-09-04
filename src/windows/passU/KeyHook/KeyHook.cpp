@@ -30,6 +30,7 @@ char *szMessageString(int ID);
 typedef struct tagHEVENT{
 	int type;
 	int keyCode;
+	int updown; // 0 : down, 1 : up
 	WPARAM data;
 	LPARAM lParam;
 }HEVENT;
@@ -67,8 +68,9 @@ _______________________________________________________________________________ 
 extern "C" __declspec(dllexport)
 	LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 {				
-	HWND chWnd = FindWindow(NULL, TEXT("PassU - Client"));
-	HWND hwnd = FindWindow(NULL, TEXT("PassU - Server"));
+	HWND hwnd = FindWindow(NULL, TEXT("PassU - Pass Your USB via Network"));
+	//HWND hWnd = NULL;
+
 	KBDLLHOOKSTRUCT *pKey = (KBDLLHOOKSTRUCT *)lParam;
 
 	//MessageBox(g_hWnd, "keyboardHook", "vkCode : ", MB_OK);
@@ -77,7 +79,7 @@ extern "C" __declspec(dllexport)
 	if(nCode<0)
 		return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 
-	if(wParam == WM_KEYDOWN || WM_KEYUP){
+	if(wParam == WM_KEYDOWN ){
 		//TRACE("" + m_keyboard);
 		//if(m_keyboard == TRUE){
 		COPYDATASTRUCT CDS;
@@ -89,16 +91,32 @@ extern "C" __declspec(dllexport)
 
 		Event.type = 1; // WM_KEY
 		Event.keyCode = pKey->vkCode;
+		Event.updown = 0;
 		Event.data = wParam;
 		Event.lParam = lParam;
 
-
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
-		TRACE("key Code : %d\n", pKey->vkCode);
+		//TRACE("key Code : %d\n", pKey->vkCode);
 		//	TRACE("SENDMESSAGE...과연 copyData에서 받을까?\n");
 		//	} else
 		//		return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
+	} else if(wParam == WM_KEYUP){
+
+		COPYDATASTRUCT CDS;
+		HEVENT Event;
+
+		CDS.dwData = 0; // keyboard
+		CDS.cbData = sizeof(Event);
+		CDS.lpData = &Event;
+
+		Event.type = 1; // WM_KEY
+		Event.keyCode = pKey->vkCode;
+		Event.updown = 1;
+		Event.data = wParam;
+		Event.lParam = lParam;
+
+		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 	}
 	return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 }
@@ -112,7 +130,7 @@ extern "C" __declspec(dllexport)
 		int nWidth = GetSystemMetrics(SM_CXSCREEN);
 		int nHeight = GetSystemMetrics(SM_CYSCREEN);
 
-		HWND hwnd = FindWindow(NULL, TEXT("PassU - Server"));
+		HWND hwnd = FindWindow(NULL, TEXT("PassU - Pass Your USB via Network"));
 
 		if(nCode < 0 )
 			return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
