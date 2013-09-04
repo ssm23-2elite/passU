@@ -58,6 +58,8 @@ typedef struct c_packet{ // 클라이언트에서 쓸 패킷
 	int ipSecond;
 	int ipThird;
 	int ipForth;
+	int nWidth;
+	int nHeight;
 } CPACKET;
 
 typedef struct dataPacket{ // 데이터 전송 때 쓸 패킷

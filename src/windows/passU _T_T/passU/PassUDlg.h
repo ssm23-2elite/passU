@@ -49,6 +49,13 @@ public:
 	// 전체 스크린 구함
 	int nWidth;
 	int nHeight;
+	
+
+
+
+	//dll의 handle
+	HWND dllWnd;
+
 
 	typedef struct tagHEVENT{
 		int type;

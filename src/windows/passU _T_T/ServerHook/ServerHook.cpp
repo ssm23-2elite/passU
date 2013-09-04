@@ -4,8 +4,8 @@
 
 #define WM_KEYBOARD_FALSE	WM_USER + 1001
 #define WM_MOUSE_FALSE	WM_USER + 1002
-#define WM_CLIENT_TRUE	WM_USER + 1003
-#define WM_SERVER_TRUE	WM_USER + 1004
+#define WM_KEYBOARD_TRUE	WM_USER + 1003
+#define WM_MOUSE_TRUE	WM_USER + 1004
 
 HINSTANCE g_hInstance;		// Instance Handle
 CRITICAL_SECTION cs;
@@ -95,7 +95,11 @@ extern "C" __declspec(dllexport)
 		Event.lParam = lParam;
 
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-
+		if(!m_keyboard){
+			TRACE("Before return\n");
+			return FALSE;
+			TRACE("After return\n");
+		}
 		//TRACE("key Code : %d\n", pKey->vkCode);
 		//	TRACE("SENDMESSAGE...과연 copyData에서 받을까?\n");
 		//	} else
@@ -116,6 +120,11 @@ extern "C" __declspec(dllexport)
 		Event.lParam = lParam;
 
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		if(!m_keyboard){
+			TRACE("Before return\n");
+			return FALSE;
+			TRACE("After return\n");
+		}
 	}
 	return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 }
@@ -133,8 +142,8 @@ extern "C" __declspec(dllexport)
 
 		if(nCode < 0 )
 			return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
-		//	TRACE("" + m_mouse);
-		//if(m_mouse == TRUE){
+
+
 		if(wParam == WM_LBUTTONDOWN){ // 왼쪽 버튼 DOWN
 
 
@@ -157,7 +166,6 @@ extern "C" __declspec(dllexport)
 			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
 
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-
 			//TRACE("LBUTTONDOWN\n");
 
 
@@ -180,7 +188,7 @@ extern "C" __declspec(dllexport)
 			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 			//TRACE("LBUTTONUP\n");
-
+			
 			//	MessageBox(g_hWnd, "LBUTTONUP", "WM_LBUTTONUP", MB_OK);
 
 		} else if (wParam == WM_RBUTTONDOWN){ // 오른쪽 버튼 DOWN
@@ -313,9 +321,17 @@ extern "C" __declspec(dllexport)
 		}
 		//	} else
 		//		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
+		
+		if(!m_mouse){
+			TRACE("Before return\n");
+			return FALSE;
+			TRACE("After return\n");
+		}
 
 		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
 }
+
+
 
 /* _______________________________________________________________________________ 
 
@@ -390,26 +406,27 @@ BOOL CreateMsgWnd(HINSTANCE hInst, HWND *phWnd){
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 {
+	TRACE("%p\n", hWnd);
 	switch(uiMsg){
 	case WM_KEYBOARD_FALSE: // 키보드 무시 이벤트 
 		// 여기서 메세지 처리
-
+		TRACE("WM_KEYBOARD_FALSE\n");
 		m_keyboard = FALSE;
 
 		break;
 	case WM_MOUSE_FALSE:
 		// 여기서 메세지 처리
-
+		TRACE("WM_MOUSE_FALSE\n");
 		m_mouse = FALSE;
 
 		break;
-	case WM_CLIENT_TRUE:
+	case WM_KEYBOARD_TRUE:
 		// 여기서 메세지 처리
-
+		TRACE("WM_KEYBOARD_TRUE\n");
 		m_keyboard = TRUE;
 		break;
-	case WM_SERVER_TRUE:
-
+	case WM_MOUSE_TRUE:
+		TRACE("WM_MOUSE_TRUE\n");
 		m_mouse = TRUE;
 		break;
 	}
