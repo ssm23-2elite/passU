@@ -46,6 +46,10 @@ public:
 	CClient m_tab_client;
 	CServer m_tab_server;
 
+	// 전체 스크린 구함
+	int nWidth;
+	int nHeight;
+
 	typedef struct tagHEVENT{
 		int type;
 		int keyCode;
