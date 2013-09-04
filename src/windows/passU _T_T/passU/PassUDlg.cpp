@@ -552,8 +552,11 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 
 		if(packet.updownFlag == 1)
 			keybd_event(packet.keyCode, 0, KEYEVENTF_KEYUP, 0);
-		else if(packet.updownFlag == 0) // down
+		else if(packet.updownFlag == 0){ // down
 			keybd_event(packet.keyCode, 0, 0, 0);
+			mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+			mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+	}
 	} else if(msgType == MSG_MOUSE) {
 		MPACKET packet;
 
@@ -616,9 +619,10 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
 			TRACE("KEY CODE 도착\n");
+			
 
 			for(int i = 0 ; i < 9 ; i ++){
-				TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
+		//		TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
 				if((m_tab1.btn_Bind[i]) != 0){
 
 					char buf[1024];
@@ -626,7 +630,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%4d",
 						MSG_KEYBOARD, 0, 0, 0,
 						0, hEVENT->updown, hEVENT->keyCode);
-
+					TRACE("Key Code : %d\n", hEVENT->keyCode);
 					((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, strlen(buf));
 					break;
 				} 
@@ -639,59 +643,75 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		TRACE("MOUSE DATA 도착\n");
 		for(int i = 0 ; i < 9 ; i ++){
 			if((m_tab1.btn_Bind[i]) != 0){
-				if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
+				if(mEVENT->xCoord == 0){ // 화면 왼쪽에 붙을 때
 					if(whereisPoint == 5){ // 바인딩이 3에 되어 있을 때(4번 버튼)
 						mEVENT->xCoord = nWidth - 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);
+						keybd_event(VK_SCROLL, 0, 0, 0);
 						//whereisPoint = 4;
 						
 
 						// m_tab1.btn_bind[4] = 1; -> 서버가 아닌 다른 곳에 커서가 있음.
 						// mouseevent 서버에서는 더이상 그냥 리턴해주고 그렇게 하도록
 						// 좌표값이랑 이벤트값 전송은 그대로 해주고.
-					} else if(whereisPoint == 6){//mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (nWidth - 15)* 65535 / nWidth, mEVENT->yCoord * 65535 / nHeight, 0, 0);
+					} else if(whereisPoint == 6){
 						mEVENT->xCoord = nWidth - 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);
+						keybd_event(VK_SCROLL, 0, 0, 0);
 						//whereisPoint = 5;
 							
 					}
 				}
 
-				if(mEVENT->yCoord<= 2) { // 화면 위족에 붙을 때
+				if(mEVENT->yCoord== 0) { // 화면 위족에 붙을 때
 					if(whereisPoint == 5){ // 바인딩이 2번버튼에있을때
 						mEVENT->yCoord = nHeight - 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);
+						keybd_event(VK_SCROLL, 0, 0, 0);
 					//	whereisPoint = 2;
 
 					} else if(whereisPoint == 8){
 						mEVENT->yCoord = nHeight - 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);
+						keybd_event(VK_SCROLL, 0, 0, 0);
 	//					whereisPoint = 5;
 
 					}
 				} 
 
-				if(mEVENT->xCoord >= nWidth - 2){	 // 화면 오른 쪽에 붙을 때
+				if(mEVENT->xCoord == nWidth){	 // 화면 오른 쪽에 붙을 때
 					if(whereisPoint == 5){ // 바인딩이 6번버튼에 있을 때
 						mEVENT->xCoord = 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);
+						keybd_event(VK_SCROLL, 0, 0, 0);
 				//		whereisPoint = 6;
 					} else if(whereisPoint == 4){
 						mEVENT->xCoord = 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);
+						keybd_event(VK_SCROLL, 0, 0, 0);
 			//			whereisPoint = 5;
 
 					}
 				}
 
-				if(mEVENT->yCoord >= nHeight - 2){ // 화면 아래쪽에 붙을 때
+				if(mEVENT->yCoord == nHeight){ // 화면 아래쪽에 붙을 때
 					if(whereisPoint == 5){ // 바인딩이 8번 버튼에 있을 때
 						mEVENT->yCoord = 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);
+						keybd_event(VK_SCROLL, 0, 0, 0);
 				//		whereisPoint = 8;
 					} else if(whereisPoint == 2){
 						mEVENT->yCoord = 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);
+						keybd_event(VK_SCROLL, 0, 0, 0);
 		    	//			whereisPoint = 5;
 		
 					}
