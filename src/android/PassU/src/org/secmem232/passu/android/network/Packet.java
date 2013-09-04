@@ -12,14 +12,13 @@ import android.util.Log;
  */
 public class Packet {
 
-	public static final int LENGTH = 28;
-	public static final int PAYLOAD_LENGTH = 24;
+	public static final int LENGTH = 32;
+	public static final int PAYLOAD_LENGTH = 28;
 	public static final int SEND_DEVICE_LENGTH = 4;
 	public static final int RECEIVE_DEVICE_LENGTH = 4;
 	public static final int DEVICE_TYPE_LENGTH = 1;
 	public static final int RELATIVE_FIELD_LENGTH = 1;
 	public static final int UPDOWN_FLAG_LENGTH = 1;
-	public static final int PAD_LENGTH = 1;
 	public static final int KEY_CODE_LENGTH = 4;
 	
 	public static final int LEFTRIGHT_LENGTH = 1;
@@ -104,7 +103,6 @@ public class Packet {
 	private int deviceType = Device_Type.INVALID;
 	private int relativeField = Relative_Field.INVALID;
 	private int updownFlag = Updown_Flag.INVALID;
-	private int pad;
 	private int keyCode;
 	private int leftright = LeftRight.INVALID;
 	private int wheelFlag = Wheel_Flag.INVALID;
@@ -123,7 +121,6 @@ public class Packet {
 	private static byte[] deviceTypeBuffer = new byte[DEVICE_TYPE_LENGTH];
 	private static byte[] relativeFieldBuffer = new byte[RELATIVE_FIELD_LENGTH];
 	private static byte[] updownFlagBuffer = new byte[UPDOWN_FLAG_LENGTH];
-	private static byte[] padBuffer = new byte[PAD_LENGTH];
 	private static byte[] keyCodeBuffer = new byte[KEY_CODE_LENGTH];
 	private static byte[] leftrightBuffer = new byte[LEFTRIGHT_LENGTH];
 	private static byte[] wheelFlagBuffer = new byte[WHEEL_FLAG_LENGTH];
@@ -147,7 +144,6 @@ public class Packet {
 		this.deviceType = deviceType;
 		this.relativeField = relativeField;
 		this.updownFlag = updownFlag;
-		this.pad = 0;
 		this.keyCode = keyCode;
 	}
 	
@@ -204,10 +200,6 @@ public class Packet {
 			
 			System.arraycopy(rawPacket, PacketHeader.LENGTH + SEND_DEVICE_LENGTH + RECEIVE_DEVICE_LENGTH + DEVICE_TYPE_LENGTH + RELATIVE_FIELD_LENGTH
 					+ UPDOWN_FLAG_LENGTH, 
-					padBuffer, 0, PAD_LENGTH);
-			
-			System.arraycopy(rawPacket, PacketHeader.LENGTH + SEND_DEVICE_LENGTH + RECEIVE_DEVICE_LENGTH + DEVICE_TYPE_LENGTH + RELATIVE_FIELD_LENGTH
-					+ UPDOWN_FLAG_LENGTH + PAD_LENGTH, 
 					keyCodeBuffer, 0, KEY_CODE_LENGTH);
 			packet.setKeyCode(Util.ByteToInt(keyCodeBuffer));
 
@@ -279,13 +271,14 @@ public class Packet {
 	
 	public String toString() {	
 		if(getHeader().getMessageType() == PacketHeader.Message_Type.KEYBOARD) {
-			return String.format("%s%4d%4d%1d%1d%1d%1d%4d", getHeader(), 
-					sendDevice, receiveDevice, deviceType, relativeField, updownFlag, pad, keyCode );
+			return String.format("%s%4d%4d%1d%1d%1d%4d", getHeader(), 
+					sendDevice, receiveDevice, deviceType, relativeField, updownFlag, keyCode );
 		} else if (getHeader().getMessageType() == PacketHeader.Message_Type.MOUSE) {
 			return String.format("%s%4d%4d%1d%1d%1d%1d%4d%4d%4d", getHeader(), 
 					sendDevice, receiveDevice, deviceType, relativeField, updownFlag, leftright, wheelFlag, xCoordinate, yCoordinate );
 		} else if (getHeader().getMessageType() == PacketHeader.Message_Type.CLIENT){
-			return String.format("%s%4d%4d%1d%1d", getHeader(), c_id, pad3, hello, bye);
+			return String.format("%s%4d%4d%1d%1d%4d%4d%4d%4d", getHeader(), c_id, pad3, hello, bye,
+					127,0,0,1);
 		} else {
 			return String.format("UNKNOWN");
 		}

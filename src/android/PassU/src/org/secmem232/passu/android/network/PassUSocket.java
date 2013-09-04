@@ -172,7 +172,6 @@ public class PassUSocket implements PacketListener {
 				if(keyCode != null)
 					mVirtEventListener.onKeyDown(keyCode);
 			}
-			sendEcho(packet.asByteArray());
 		} else if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.MOUSE ) {
 			
 			if( packet.getLeftRight() == Packet.LeftRight.LEFT ) {
@@ -189,12 +188,7 @@ public class PassUSocket implements PacketListener {
 					mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
 				}
 			}
-			sendEcho(packet.asByteArray());
 		} else if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.CLIENT ) {
-			client_id = packet.getCId();
-			packet.setHello(1);
-			packet.setBye(0);
-			sendEcho(packet.asByteArray());
 		}
 	}
 
