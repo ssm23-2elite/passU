@@ -47,6 +47,8 @@ typedef struct mousepacket{ // 마우스 위치 정보를 가지고 있는 패킷(TCP)
 	int xCoord:32; // x좌표
 	int yCoord:32; // y좌표
 	int pad:32;
+
+
 	//mouse move 일때의 상태를 만들어야함?.......
 } MPACKET;
 /* _______________________________________________________________________________ 
@@ -263,7 +265,7 @@ extern "C" __declspec(dllexport)
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 			//	TRACE("WHEELBUTTONUP\n");
 		} else if(wParam == WM_MOUSEMOVE){ // 마우스 이동
-			
+			//TRACE("MOUSE MOVE EVENT");
 			CDS.dwData = 1;
 			CDS.cbData = sizeof(tmp);
 			CDS.lpData = &tmp;

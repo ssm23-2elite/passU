@@ -121,7 +121,8 @@ BOOL CPassUDlg::OnInitDialog()
 	m_tab1.SetWindowPos(NULL, 5, 25, rect.Width() - 10 , rect.Height() - 30, SWP_SHOWWINDOW|SWP_NOZORDER);
 	m_tab2.Create(IDD_CLIENT, &m_Tab);
 	m_tab2.SetWindowPos(NULL, 5, 25, rect.Width() - 10, rect.Height() - 30, SWP_NOZORDER);
-
+	nWidth = GetSystemMetrics(SM_CXSCREEN);
+	nHeight = GetSystemMetrics(SM_CYSCREEN);
 
 	m_pwndShow = &m_tab1;
 	whereisPoint = 5;
@@ -364,7 +365,12 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		TRACE("Keybd_event success\n");
 		return ;
 	} else if(tmp.msgType == MSG_MOUSE){
-		SetCursorPos(tmp.pad2, tmp.pad3);
+		if(tmp.pad2 > nWidth)
+			tmp.pad2 = nWidth;
+		if(tmp.pad3 > nHeight)
+			tmp.pad3 = nHeight;
+
+		mouse_Move(tmp.pad2, tmp.pad3);
 
 		if(tmp.pad1 == 1 && tmp.updownFlag== 0){ // right up
 			mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
@@ -380,7 +386,7 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		} else if(tmp.keyCode == 2){ // wheel btn down
 			mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, 0);
 		} else if(tmp.keyCode == 3){ // wheel move
-			mouse_event(MOUSEEVENTF_WHEEL,  0, 0, 0, 5);
+			mouse_event(MOUSEEVENTF_WHEEL,  0, 0, 120, 0);
 		}
 		TRACE("mouse_event success\n");
 		return ;
@@ -418,8 +424,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	HEVENT *hEVENT;
 	MPACKET *mEVENT;
 
-	int nWidth = GetSystemMetrics(SM_CXSCREEN);
-	int nHeight = GetSystemMetrics(SM_CYSCREEN);
+	
 
 	// Client한테 전송할 구조체(K,M : 후킹자료)
 	KPACKET keyP;
@@ -437,7 +442,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			TRACE("KEY CODE 도착\n");
 
 			for(int i = 0 ; i < 9 ; i ++){
-				TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
+				//TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
 				if((m_tab1.btn_Bind[i]) != 0){
 					keyP.deviceType = 1;
 					keyP.msgType = MSG_KEYBOARD;
@@ -454,41 +459,41 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
 		TRACE("MOUSE DATA 도착\n");
 		for(int i = 0 ; i < 9 ; i ++){
-			TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
+			//TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
 			if((m_tab1.btn_Bind[i]) != 0){
 				if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
 					if(whereisPoint == 5){ // 바인딩이 3에 되어 있을 때(4번 버튼)
 						mEVENT->xCoord = nWidth - 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 4;
+						mouse_Move(mEVENT->xCoord, mEVENT->yCoord);
+				//		whereisPoint = 4;
 						//SetCursor(NULL);
-						ShowCursor(FALSE);
+					//	ShowCursor(FALSE);
 
 						// m_tab1.btn_bind[4] = 1; -> 서버가 아닌 다른 곳에 커서가 있음.
 						// mouseevent 서버에서는 더이상 그냥 리턴해주고 그렇게 하도록
 						// 좌표값이랑 이벤트값 전송은 그대로 해주고.
 					} else if(whereisPoint == 6){//mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (nWidth - 15)* 65535 / nWidth, mEVENT->yCoord * 65535 / nHeight, 0, 0);
 						mEVENT->xCoord = nWidth - 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 5;
+						mouse_Move(mEVENT->xCoord, mEVENT->yCoord);
+				//		whereisPoint = 5;
 						//	SetCursor();
-						ShowCursor(TRUE);		
+					//	ShowCursor(TRUE);		
 					}
 				}
 
 				if(mEVENT->yCoord<= 2) { // 화면 위족에 붙을 때
 					if(whereisPoint == 5){ // 바인딩이 2번버튼에있을때
 						mEVENT->yCoord = nHeight - 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						mouse_Move(mEVENT->xCoord, mEVENT->yCoord);
 						//			mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, (nHeight - 15) * 65535 / nHeight, 0, 0);
-						whereisPoint = 2;
-						ShowCursor(FALSE);
+					//	whereisPoint = 2;
+					//	ShowCursor(FALSE);
 					} else if(whereisPoint == 8){
 						mEVENT->yCoord = nHeight - 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+						mouse_Move(mEVENT->xCoord, mEVENT->yCoord);
 						//			mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, (nHeight - 15) * 65535 / nHeight, 0, 0);
-						whereisPoint = 5;
-						ShowCursor(TRUE);
+				//		whereisPoint = 5;
+				//		ShowCursor(TRUE);
 
 					}
 				} 
@@ -497,14 +502,14 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					//	m_whereisPoint = 6;
 					if(whereisPoint == 5){ // 바인딩이 6번버튼에 있을 때
 						mEVENT->xCoord = 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 6;
-						ShowCursor(FALSE);
+						mouse_Move(mEVENT->xCoord, mEVENT->yCoord);
+					//	whereisPoint = 6;
+						//ShowCursor(FALSE);
 					} else if(whereisPoint == 4){
 						mEVENT->xCoord = 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 5;
-						ShowCursor(TRUE);
+						mouse_Move(mEVENT->xCoord, mEVENT->yCoord);
+					//	whereisPoint = 5;
+						//ShowCursor(TRUE);
 
 					}
 				}
@@ -512,19 +517,20 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				if(mEVENT->yCoord >= nHeight - 2){ // 화면 아래쪽에 붙을 때
 					if(whereisPoint == 5){ // 바인딩이 8번 버튼에 있을 때
 						mEVENT->yCoord = 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 8;
-						ShowCursor(FALSE);
+						mouse_Move(mEVENT->xCoord, mEVENT->yCoord);
+					//	whereisPoint = 8;
+					//	ShowCursor(FALSE);
 					} else if(whereisPoint == 2){
 						mEVENT->yCoord = 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 5;
-						ShowCursor(TRUE);
+						mouse_Move(mEVENT->xCoord, mEVENT->yCoord);
+					//	whereisPoint = 5;
+					//	ShowCursor(TRUE);
 
 					}
 				}
 
 				TRACE("%d %d\n", mEVENT->xCoord, mEVENT->yCoord);
+
 
 				mouseP.msgType = MSG_MOUSE;
 				mouseP.deviceType = mEVENT->deviceType;
@@ -541,4 +547,29 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		break;
 	}
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
+}
+
+
+BOOL CPassUDlg::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	if(pMsg->message  == WM_KEYDOWN)
+		return TRUE;
+
+
+
+	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+void CPassUDlg::mouse_Move(int x, int y)
+{
+   x = (65535 * x / GetSystemMetrics(SM_CXSCREEN));
+
+   y = (65535 * y / GetSystemMetrics(SM_CYSCREEN));
+
+   
+
+   mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE,x,y,0,NULL);
+
 }
