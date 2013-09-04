@@ -643,9 +643,8 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					if(whereisPoint == 5){ // 바인딩이 3에 되어 있을 때(4번 버튼)
 						mEVENT->xCoord = nWidth - 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 4;
-						//SetCursor(NULL);
-						ShowCursor(FALSE);
+						//whereisPoint = 4;
+						
 
 						// m_tab1.btn_bind[4] = 1; -> 서버가 아닌 다른 곳에 커서가 있음.
 						// mouseevent 서버에서는 더이상 그냥 리턴해주고 그렇게 하도록
@@ -653,9 +652,8 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					} else if(whereisPoint == 6){//mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (nWidth - 15)* 65535 / nWidth, mEVENT->yCoord * 65535 / nHeight, 0, 0);
 						mEVENT->xCoord = nWidth - 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 5;
-						//	SetCursor();
-						ShowCursor(TRUE);		
+						//whereisPoint = 5;
+							
 					}
 				}
 
@@ -663,31 +661,25 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					if(whereisPoint == 5){ // 바인딩이 2번버튼에있을때
 						mEVENT->yCoord = nHeight - 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						//			mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, (nHeight - 15) * 65535 / nHeight, 0, 0);
-						whereisPoint = 2;
-						ShowCursor(FALSE);
+					//	whereisPoint = 2;
+
 					} else if(whereisPoint == 8){
 						mEVENT->yCoord = nHeight - 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						//			mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, (nHeight - 15) * 65535 / nHeight, 0, 0);
-						whereisPoint = 5;
-						ShowCursor(TRUE);
+	//					whereisPoint = 5;
 
 					}
 				} 
 
 				if(mEVENT->xCoord >= nWidth - 2){	 // 화면 오른 쪽에 붙을 때
-					//	m_whereisPoint = 6;
 					if(whereisPoint == 5){ // 바인딩이 6번버튼에 있을 때
 						mEVENT->xCoord = 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 6;
-						ShowCursor(FALSE);
+				//		whereisPoint = 6;
 					} else if(whereisPoint == 4){
 						mEVENT->xCoord = 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 5;
-						ShowCursor(TRUE);
+			//			whereisPoint = 5;
 
 					}
 				}
@@ -696,24 +688,24 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					if(whereisPoint == 5){ // 바인딩이 8번 버튼에 있을 때
 						mEVENT->yCoord = 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 8;
-						ShowCursor(FALSE);
+				//		whereisPoint = 8;
 					} else if(whereisPoint == 2){
 						mEVENT->yCoord = 15;
 						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 5;
-						ShowCursor(TRUE);
-
+		    	//			whereisPoint = 5;
+		
 					}
 				}
 
-				/*char buf[1024];
+				char buf[1024];
 				ZeroMemory(buf, 0, sizeof(buf));
 				sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%1d%4d%4d%4d",
 				MSG_MOUSE, mEVENT->sendDev, mEVENT->recvDev, mEVENT->deviceType,
-				mEVENT->relativeField, mEVENT->updownFlag, mEVENT->xCoord, mEVENT->yCoord);
+				mEVENT->relativeField, mEVENT->updownFlag, mEVENT->leftRight, mEVENT->wheelFlag, mEVENT->xCoord, mEVENT->yCoord);
+				TRACE("x : %d, y : %d\n", mEVENT->xCoord, mEVENT->yCoord);
+				((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, strlen(buf));
 
-				((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, strlen(buf));*/
+
 				break;
 			} 
 		}

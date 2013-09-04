@@ -36,20 +36,16 @@ typedef struct tagHEVENT{
 }HEVENT;
 
 typedef struct mousepacket{ // 마우스 위치 정보를 가지고 있는 패킷(TCP)
-	int msgType:32; // msgType : 2
-	int sendDev:32; // server : 5, client : clnt_id
-	int recvDev:32; // server : 5, client : clnt_id
-	int deviceType:8; // mouse or keyboard
-	int relativeField:8; // 상대적인 필드................
-	int updownFlag:8; // 0 : up, 1 : down
-	int leftRight:8; // 0 : left , 1 : right
-	int wheelFlag:32; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
-	int xCoord:32; // x좌표
-	int yCoord:32; // y좌표
-	int pad:32;
-
-
-	//mouse move 일때의 상태를 만들어야함?.......
+	int msgType; // msgType : 2
+	int sendDev; // server : 5, client : clnt_id
+	int recvDev; // server : 5, client : clnt_id
+	int deviceType; // mouse or keyboard
+	int relativeField; // 
+	int updownFlag; // 0 : up, 1 : down
+	int leftRight; // 0 : left , 1 : right
+	int wheelFlag; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
+	int xCoord; // x좌표
+	int yCoord; // y좌표
 } MPACKET;
 /* _______________________________________________________________________________ 
 
@@ -153,6 +149,11 @@ extern "C" __declspec(dllexport)
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
 
+			tmp.deviceType = 0;
+			tmp.recvDev = 0;
+			tmp.relativeField = 0;
+			tmp.sendDev = 0;
+
 			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
 
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
@@ -172,6 +173,10 @@ extern "C" __declspec(dllexport)
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
 
+			tmp.deviceType = 0;
+			tmp.recvDev = 0;
+			tmp.relativeField = 0;
+			tmp.sendDev = 0;
 			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 			//TRACE("LBUTTONUP\n");
@@ -190,6 +195,10 @@ extern "C" __declspec(dllexport)
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
 
+			tmp.deviceType = 0;
+			tmp.recvDev = 0;
+			tmp.relativeField = 0;
+			tmp.sendDev = 0;
 			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 			//	TRACE("RBUTTONDOWN\n");
@@ -207,6 +216,11 @@ extern "C" __declspec(dllexport)
 			tmp.wheelFlag = 0;
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
+
+			tmp.deviceType = 0;
+			tmp.recvDev = 0;
+			tmp.relativeField = 0;
+			tmp.sendDev = 0;
 			//	TRACE("RBUTTONUP\n");
 
 			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
@@ -220,12 +234,16 @@ extern "C" __declspec(dllexport)
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			//tmp.updownFlag = 0; // up
-			//tmp.leftRight = 1; // right
+			tmp.updownFlag = 0; // up
+			tmp.leftRight = 2; // right
 			tmp.wheelFlag = 3;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
 
+			tmp.deviceType = 0;
+			tmp.recvDev = 0;
+			tmp.relativeField = 0;
+			tmp.sendDev = 0;
 			//	TRACE("MOUSEWHEEL\n");
 
 		//	TRACE("x : %d, y : %d\n", pt.x, pt.y); 
@@ -237,12 +255,15 @@ extern "C" __declspec(dllexport)
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			//tmp.updownFlag = 0; // up
-			//tmp.leftRight = 1; // right
+			tmp.updownFlag = 0; // up
+			tmp.leftRight = 3; // right
 			tmp.wheelFlag = 1; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
-
+			tmp.deviceType = 0;
+			tmp.recvDev = 0;
+			tmp.relativeField = 0;
+			tmp.sendDev = 0;
 
 		//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
@@ -255,12 +276,15 @@ extern "C" __declspec(dllexport)
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			//tmp.updownFlag = 0; // up
-			//tmp.leftRight = 1; // right
+			tmp.updownFlag = 0; // up
+			tmp.leftRight = 3; // right
 			tmp.wheelFlag = 2;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
-
+			tmp.deviceType = 0;
+			tmp.recvDev = 0;
+			tmp.relativeField = 0;
+			tmp.sendDev = 0;
 		//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 			//	TRACE("WHEELBUTTONUP\n");
@@ -273,6 +297,14 @@ extern "C" __declspec(dllexport)
 			tmp.msgType = 2; // mouse
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
+
+			tmp.leftRight = 0;
+			tmp.wheelFlag = 0;
+			tmp.deviceType = 0;
+			tmp.recvDev = 0;
+			tmp.relativeField = 0;
+			tmp.sendDev = 0;
+			tmp.updownFlag = 0;
 
 
 
