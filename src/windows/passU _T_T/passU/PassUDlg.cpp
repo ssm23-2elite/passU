@@ -631,22 +631,17 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
 			TRACE("KEY CODE 도착\n");
-
-
-			for(int i = 0 ; i < 9 ; i ++){
-				//		TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
-				if((m_tab1.btn_Bind[i]) != 0){
-
-					char buf[1024];
-					ZeroMemory(buf, 0, sizeof(buf));
-					sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%4d%8d",
-						MSG_KEYBOARD, 0, 0, 0,
-						0, hEVENT->updown, hEVENT->keyCode, 0);
-					TRACE("Key Code : %d\n", hEVENT->keyCode);
-					((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
-					break;
-				} 
+			if(m_allowSend == TRUE){
+				char buf[1024];
+				ZeroMemory(buf, 0, sizeof(buf));
+				sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%4d%8d",
+					MSG_KEYBOARD, 0, 0, 0,
+					0, hEVENT->updown, hEVENT->keyCode, 0);
+				TRACE("Key Code : %d\n", hEVENT->keyCode);
+				((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
+				break;
 			}
+
 		}
 		break;
 
@@ -657,11 +652,11 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 3에 되어 있을 때(4번 버튼)
 				mEVENT->xCoord = nWidth - 15;
-				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
 
-				//::SendMessage(dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
-				//::SendMessage(dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
-				// DLL 핸들을 얻어와야하는데... "MsgWnd"로 안얻어와짐...
+				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+				whereisPoint = 4;
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
 
 				m_allowSend = TRUE;
 				TRACE("서버쪽에 있다가 왼쪽으로 붙음, 바인딩이 4번 버튼에 되어있음\n");
@@ -670,9 +665,9 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			} else if((whereisPoint == 6) && (m_tab1.btn_Bind[5] != 0)){ // 6번버튼에 바인딩되어있을 때
 				mEVENT->xCoord = nWidth - 15;
 				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				//whereisPoint = 5;
-				//::SendMessage(dllWnd, WM_KEYBOARD_TRUE, 0, 0);
-				//::SendMessage(dllWnd, WM_MOUSE_TRUE, 0, 0);
+				whereisPoint = 5;
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
 
 				m_allowSend = FALSE;
 				TRACE("6번 버튼에 있다가 왼쪽으로 붙어서 서버로 돌아옴, 바인딩이 6번버튼에 되어 있음\n");
@@ -683,19 +678,18 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[1] != 0)){ // 바인딩이 2번버튼에있을때
 				mEVENT->yCoord = nHeight - 15;
 				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				//::SendMessage(dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
-				//::SendMessage(dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
-				// DLL 핸들을 얻어와야하는데... "MsgWnd"로 안얻어와짐...
-
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+				whereisPoint = 2;
 				m_allowSend = TRUE;
 				TRACE("서버쪽에 있다가 위쪽으로 붙음, 바인딩이 2번 버튼에 되어 있음\n");
 
 			} else if((whereisPoint == 8) && (m_tab1.btn_Bind[7] != 0)){ // 8번 버튼에 바인딩되어있을 때
 				mEVENT->yCoord = nHeight - 15;
 				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				//::SendMessage(dllWnd, WM_KEYBOARD_TRUE, 0, 0);
-				//::SendMessage(dllWnd, WM_MOUSE_TRUE, 0, 0);
-
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+				whereisPoint = 5;
 				m_allowSend = FALSE;
 				TRACE("8번 버튼에 있다가 위쪽으로 붙어서 서버로 돌아옴, 바인딩이 8번버튼에 되어 있음\n");
 
@@ -706,19 +700,18 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[5] != 0)){ // 바인딩이 6번버튼에 있을 때
 				mEVENT->xCoord = 15;
 				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				//::SendMessage(dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
-				//::SendMessage(dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
-				// DLL 핸들을 얻어와야하는데... "MsgWnd"로 안얻어와짐...
-
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+				whereisPoint = 6;
 				m_allowSend = TRUE;
 				TRACE("서버쪽에 있다가 오른쪽으로 붙음, 바인딩이 6번 버튼에 되어 있음\n");
 
 			} else if((whereisPoint == 4) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 4번 버튼에 있을 때
 				mEVENT->xCoord = 15;
 				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				//::SendMessage(dllWnd, WM_KEYBOARD_TRUE, 0, 0);
-				//::SendMessage(dllWnd, WM_MOUSE_TRUE, 0, 0);
-
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+				whereisPoint = 5;
 				m_allowSend = FALSE;
 				TRACE("4번 버튼에 있다가 서버쪽으로 돌아옴, 바인딩이 4번버튼에 되어 있음\n");
 			}
@@ -728,16 +721,17 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[7] != 0)){ // 바인딩이 8번 버튼에 있을 때
 				mEVENT->yCoord = 15;
 				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				//::SendMessage(dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
-				//::SendMessage(dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
-				// DLL 핸들을 얻어와야하는데... "MsgWnd"로 안얻어와짐...
+				whereisPoint = 8;
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
 				m_allowSend = TRUE;
 				TRACE("서버쪽에 있다가 아래쪽으로 붙음, 바인딩이 8번 버튼에 되어 있음\n");
 			} else if((whereisPoint == 2) && (m_tab1.btn_Bind[1] != 0)){ // 바인딩이 2번 버튼에 되어 있을 때
 				mEVENT->yCoord = 15;
 				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				//::SendMessage(dllWnd, WM_KEYBOARD_TRUE, 0, 0);
-				//::SendMessage(dllWnd, WM_MOUSE_TRUE, 0, 0);
+				whereisPoint = 5;
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
 
 				m_allowSend = FALSE;
 				TRACE("2번에 있다가 아래쪽으로 붙음, 바인딩이 2번 버튼에 되어 있음\n");
@@ -759,6 +753,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				MSG_MOUSE, mEVENT->sendDev, mEVENT->recvDev, mEVENT->deviceType,
 				mEVENT->relativeField, mEVENT->updownFlag, mEVENT->leftRight, mEVENT->wheelFlag, mEVENT->xCoord, mEVENT->yCoord, 0);
 			TRACE("x : %d, y : %d\n", mEVENT->xCoord, mEVENT->yCoord);
+
 			((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
 		}
 

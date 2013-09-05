@@ -36,6 +36,7 @@ public:
 	int client_nWidth[9];
 	int client_nHeight[9];
 
+	HWND dllWnd;
 
 	BOOL m_keyBoardHook;
 	BOOL m_mouseHook;

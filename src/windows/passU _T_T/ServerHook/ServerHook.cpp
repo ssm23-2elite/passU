@@ -77,7 +77,6 @@ extern "C" __declspec(dllexport)
 
 	//MessageBox(g_hWnd, "keyboardHook", "vkCode : ", MB_OK);
 
-
 	if(nCode<0)
 		return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 
@@ -86,7 +85,7 @@ extern "C" __declspec(dllexport)
 		//if(m_keyboard == TRUE){
 		COPYDATASTRUCT CDS;
 		HEVENT Event;
-		
+
 		CDS.dwData = 0; // keyboard
 		CDS.cbData = sizeof(Event);
 		CDS.lpData = &Event;
@@ -100,13 +99,10 @@ extern "C" __declspec(dllexport)
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 		if(!m_keyboard){
 			TRACE("Before return\n");
-			return FALSE;
+			return 1;
 			TRACE("After return\n");
 		}
-		//TRACE("key Code : %d\n", pKey->vkCode);
-		//	TRACE("SENDMESSAGE...과연 copyData에서 받을까?\n");
-		//	} else
-		//		return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
+
 	} else if(wParam == WM_KEYUP){
 
 		COPYDATASTRUCT CDS;
@@ -125,7 +121,7 @@ extern "C" __declspec(dllexport)
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 		if(!m_keyboard){
 			TRACE("Before return\n");
-			return FALSE;
+			return 1;
 			TRACE("After return\n");
 		}
 	}
@@ -145,7 +141,6 @@ extern "C" __declspec(dllexport)
 
 		if(nCode < 0 )
 			return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
-
 
 		if(wParam == WM_LBUTTONDOWN){ // 왼쪽 버튼 DOWN
 
@@ -171,6 +166,11 @@ extern "C" __declspec(dllexport)
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 			//TRACE("LBUTTONDOWN\n");
 
+			if(!m_mouse){
+				TRACE("Before return\n");
+				return 1;
+				TRACE("After return\n");
+			}
 
 		} else if (wParam == WM_LBUTTONUP){ // 왼쪽 버튼 UP
 			bLMouseDown = FALSE;
@@ -192,9 +192,14 @@ extern "C" __declspec(dllexport)
 			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 			//TRACE("LBUTTONUP\n");
-			
+
 			//	MessageBox(g_hWnd, "LBUTTONUP", "WM_LBUTTONUP", MB_OK);
 
+			if(!m_mouse){
+				TRACE("Before return\n");
+				return 1;
+				TRACE("After return\n");
+			}
 		} else if (wParam == WM_RBUTTONDOWN){ // 오른쪽 버튼 DOWN
 			bRMouseDown = TRUE;
 			CDS.dwData = 1;
@@ -218,6 +223,11 @@ extern "C" __declspec(dllexport)
 
 			//	MessageBox(g_hWnd, "RBUTTONDOWN", "WM_RBUTTONDOWN", MB_OK);
 
+			if(!m_mouse){
+				TRACE("Before return\n");
+				return 1;
+				TRACE("After return\n");
+			}
 		} else if(wParam == WM_RBUTTONUP){ // 오른쪽 버튼 UP
 			bRMouseDown = FALSE;
 			CDS.dwData = 1;
@@ -242,13 +252,18 @@ extern "C" __declspec(dllexport)
 
 			//	MessageBox(g_hWnd, "RBUTTONUP", "WM_RBUTTONUP", MB_OK);
 
+			if(!m_mouse){
+				TRACE("Before return\n");
+				return 1;
+				TRACE("After return\n");
+			}
 		} else if(wParam == WM_MOUSEWHEEL){ // 휠 움직일 때
 			CDS.dwData = 1;
 			CDS.cbData = sizeof(tmp);
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			tmp.updownFlag = (bMMouseDown == TRUE)?1:0; // up
+			tmp.updownFlag = 2; // up
 			tmp.leftRight = 2; // right
 			tmp.wheelFlag = 3;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
 			tmp.xCoord = pt.x;
@@ -260,9 +275,14 @@ extern "C" __declspec(dllexport)
 			tmp.sendDev = 0;
 			//	TRACE("MOUSEWHEEL\n");
 
-		//	TRACE("x : %d, y : %d\n", pt.x, pt.y); 
+			//	TRACE("x : %d, y : %d\n", pt.x, pt.y); 
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
+			if(!m_mouse){
+				TRACE("Before return\n");
+				return 1;
+				TRACE("After return\n");
+			}
 		} else if(wParam == WM_MBUTTONDOWN){ // 휠 버튼 DOWN
 			bMMouseDown = TRUE;
 			CDS.dwData = 1;
@@ -270,7 +290,7 @@ extern "C" __declspec(dllexport)
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			tmp.updownFlag = (bMMouseDown == TRUE)?1:0; // up
+			tmp.updownFlag = 2; // up
 			tmp.leftRight = 3; // right
 			tmp.wheelFlag = 1; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
 			tmp.xCoord = pt.x;
@@ -280,9 +300,14 @@ extern "C" __declspec(dllexport)
 			tmp.relativeField = 0;
 			tmp.sendDev = 0;
 
-		//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
+			//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
+			if(!m_mouse){
+				TRACE("Before return\n");
+				return 1;
+				TRACE("After return\n");
+			}
 			//	TRACE("WHEELBUTTONDOWN\n");
 
 		} else if(wParam == WM_MBUTTONUP){ // 휠 버튼 UP
@@ -292,17 +317,25 @@ extern "C" __declspec(dllexport)
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			tmp.updownFlag = (bMMouseDown == TRUE)?1:0; // up
 			tmp.leftRight = 3; // right
 			tmp.wheelFlag = 2;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
+
+			
+			tmp.updownFlag = 4; // up
 			tmp.deviceType = 0;
 			tmp.recvDev = 0;
 			tmp.relativeField = 0;
 			tmp.sendDev = 0;
-		//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
-		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+			//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
+			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
+			if(!m_mouse){
+				TRACE("Before return\n");
+				return 1;
+				TRACE("After return\n");
+			}
 			//	TRACE("WHEELBUTTONUP\n");
 		} else if(wParam == WM_MOUSEMOVE){ // 마우스 이동
 			//TRACE("MOUSE MOVE EVENT");
@@ -314,25 +347,20 @@ extern "C" __declspec(dllexport)
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
 
-			tmp.updownFlag = (bLMouseDown == TRUE)?1:0;
-			tmp.leftRight = 0;
+			tmp.updownFlag = 2;
+			tmp.leftRight = 2;
 			tmp.wheelFlag = 0;
 			tmp.deviceType = 0;
 			tmp.recvDev = 0;
 			tmp.relativeField = 0;
 			tmp.sendDev = 0;
-			
+
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
 		}
 		//	} else
 		//		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
-		
-		if(!m_mouse){
-			TRACE("Before return\n");
-			return FALSE;
-			TRACE("After return\n");
-		}
+
 
 		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
 }

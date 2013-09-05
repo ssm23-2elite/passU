@@ -112,6 +112,7 @@ BOOL CServer::OnInitDialog()
 	uninstallKeyhook = (UnInstallKeyboardHook)GetProcAddress(hinstDLL, "UnInstallKeyboardHook");
 	uninstallMousehook = (UnInstallMouseHook)GetProcAddress(hinstDLL, "UnInstallMouseHook");
 
+	dllWnd = ::FindWindow("MsgWnd", NULL);
 
 	if (!AfxSocketInit())
 	{
@@ -144,24 +145,6 @@ BOOL CServer::OnInitDialog()
 
 	m_imgList.Add(&m_bmp_monitor, RGB(0, 0, 0));
 	m_imgList.Add(&m_bmp_phone, RGB(0, 0, 0));
-
-	/*LVITEM lvitem = {0};
-
-	lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
-	lvitem.iItem = 0;
-	lvitem.pszText = "127.0.0.1";
-	lvitem.lParam = (LPARAM)STATUS_PC;
-	lvitem.iImage = STATUS_PC - 1;
-
-	m_waiting_client.InsertItem(&lvitem);
-
-	lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
-	lvitem.iItem = 0;
-	lvitem.pszText = "127.0.0.1";
-	lvitem.lParam = (LPARAM)STATUS_MOBILE;
-	lvitem.iImage = STATUS_MOBILE - 1;
-
-	m_waiting_client.InsertItem(&lvitem);*/
 
 	btnControl[0] = this->GetDlgItem(IDC_BUTTON1);
 	btnControl[1] = this->GetDlgItem(IDC_BUTTON2);
