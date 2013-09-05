@@ -567,7 +567,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			
 			if(clientP->pad3 == STATUS_PC) {
 				GetPassUSBDesc();
-
+				
 				DPACKET packet;
 				packet.msgType = MSG_DATA;
 				packet.len = sizeof(USBSENDDEVICEDESC);
@@ -716,7 +716,7 @@ int GetPassUSBDesc()
 	ULONG                            requiredLength = 0;
 	BOOL                             success;
 
-	memset(&sendToDeviceDescData, 0, sizeof(USBSENDDEVICEDESC));
+	ZeroMemory(&sendToDeviceDescData, sizeof(USBSENDDEVICEDESC));
 	gHubList.DeviceInfo = INVALID_HANDLE_VALUE;
 	InitializeListHead(&gHubList.ListHead);
 	gDeviceList.DeviceInfo = INVALID_HANDLE_VALUE;
@@ -2469,14 +2469,15 @@ VOID
 
 			//°á°ú°ª
 
+			
 			PUSB_DESCRIPTOR_REQUEST ConfigReqDesc = ((PUSBEXTERNALHUBINFO)info)->ConfigDesc;
 			PUSB_COMMON_DESCRIPTOR  commonDesc = (PUSB_COMMON_DESCRIPTOR)(ConfigReqDesc + 1);
 			PUSB_CONFIGURATION_DESCRIPTOR   ConfigDesc = (PUSB_CONFIGURATION_DESCRIPTOR)commonDesc;
 			PUSB_INTERFACE_DESCRIPTOR   InterfaceDesc;
 
-			memcpy(&sendToDeviceDescData.DeviceDescriptor, &info->ConnectionInfo->DeviceDescriptor, sizeof(sendToDeviceDescData.DeviceDescriptor) );
-
-			memcpy(&sendToDeviceDescData.ConfigDesc, ConfigDesc, sizeof(sendToDeviceDescData.ConfigDesc) );
+			if(ConfigReqDesc != NULL)
+			{memcpy(&sendToDeviceDescData.DeviceDescriptor, &info->ConnectionInfo->DeviceDescriptor, sizeof(sendToDeviceDescData.DeviceDescriptor) );
+			memcpy(&sendToDeviceDescData.ConfigDesc, ConfigDesc, ConfigDesc->bLength );
 
 			commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)commonDesc + commonDesc->bLength);
 			InterfaceDesc = (PUSB_INTERFACE_DESCRIPTOR)commonDesc;
@@ -2491,6 +2492,7 @@ VOID
 			strcpy_s(sendToDeviceDescData.HwId, info->UsbDeviceProperties->HwId);
 			strcpy_s(sendToDeviceDescData.Service, info->UsbDeviceProperties->Service);
 			strcpy_s(sendToDeviceDescData.DeviceClass, info->UsbDeviceProperties->DeviceClass);
+			}
 
 			// Add error description if ConnectionStatus is other than NoDeviceConnected / DeviceConnected
 			StringCchCat(leafName, 
