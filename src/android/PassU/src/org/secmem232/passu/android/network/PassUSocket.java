@@ -175,23 +175,22 @@ public class PassUSocket implements PacketListener {
 					mVirtEventListener.onKeyUp(keyCode);
 			} else if( packet.getUpdownFlag() == Packet.Updown_Flag.DOWN ) {
 				Integer keyCode = KeyCodeMap.M.get(packet.getKeyCode());
-				if(keyCode != null) 
+				if(keyCode != null) { 
 					mVirtEventListener.onKeyDown(keyCode);
+					mVirtEventListener.onKeyUp(keyCode);
+				}
 			}
 		} else if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.MOUSE ) {
+			mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
+			AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
 			
 			if( packet.getLeftRight() == Packet.LeftRight.LEFT ) {
 				if( packet.getUpdownFlag() == Packet.Updown_Flag.UP ) {
-					AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
-					mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
 					mVirtEventListener.onTouchUp();
 				} else if( packet.getUpdownFlag() == Packet.Updown_Flag.DOWN ) {
-					AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
-					mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
 					mVirtEventListener.onTouchDown();
 				} else {
-					AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
-					mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
+					
 				}
 			}
 		} else if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.CLIENT ) {
