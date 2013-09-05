@@ -186,7 +186,7 @@ typedef struct
 	USB_INTERFACE_DESCRIPTOR	     InterfaceDesc;
 	USB_ENDPOINT_DESCRIPTOR	         EndpointDescriptor[2];
 	CHAR DeviceId[50];
-	CHAR DeviceDesc[20];
+	CHAR DeviceDesc[40];
 	CHAR HwId[80];
 	CHAR Service[20];
 	CHAR DeviceClass[20];
