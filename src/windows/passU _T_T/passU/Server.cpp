@@ -543,8 +543,9 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 			char buf[1024];
 			ZeroMemory(buf, sizeof(buf));
-			sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d",
-				MSG_CLIENT, clientP->c_id, clientP->pad3, clientP->hello,clientP->bye, clientP->ipFirst, clientP->ipSecond, clientP->ipThird, clientP->ipForth);
+			sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
+				MSG_CLIENT, clientP->c_id, clientP->pad3, clientP->hello,clientP->bye, clientP->ipFirst, clientP->ipSecond, clientP->ipThird, clientP->ipForth,
+				0, 0);
 			((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send(buf, strlen(buf));
 
 		} else if(clientP->bye == 1){ // bye packet
