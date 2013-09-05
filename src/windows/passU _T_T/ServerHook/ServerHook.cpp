@@ -22,6 +22,9 @@ HWND g_hMsgWnd = NULL;
 
 BOOL m_overFlag = FALSE; // 커서가 클라이언트 쪽으로 넘어간 것을 확인하는 변수 /TRUE : 넘어감
 
+BOOL bLMouseDown = FALSE;
+BOOL bRMouseDown = FALSE;
+BOOL bMMouseDown = FALSE;
 BOOL m_mouse = TRUE;
 BOOL m_keyboard = TRUE;
 
@@ -83,7 +86,7 @@ extern "C" __declspec(dllexport)
 		//if(m_keyboard == TRUE){
 		COPYDATASTRUCT CDS;
 		HEVENT Event;
-
+		
 		CDS.dwData = 0; // keyboard
 		CDS.cbData = sizeof(Event);
 		CDS.lpData = &Event;
@@ -146,13 +149,13 @@ extern "C" __declspec(dllexport)
 
 		if(wParam == WM_LBUTTONDOWN){ // 왼쪽 버튼 DOWN
 
-
+			bLMouseDown = TRUE;
 			CDS.dwData = 1; // mouse;
 			CDS.cbData = sizeof(tmp);
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			tmp.updownFlag = 1; // down
+			tmp.updownFlag = (bLMouseDown == TRUE)?1:0; // down
 			tmp.leftRight = 0; // left
 			tmp.wheelFlag = 0;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
 			tmp.xCoord = pt.x;
@@ -170,12 +173,13 @@ extern "C" __declspec(dllexport)
 
 
 		} else if (wParam == WM_LBUTTONUP){ // 왼쪽 버튼 UP
+			bLMouseDown = FALSE;
 			CDS.dwData = 1;
 			CDS.cbData = sizeof(tmp);
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			tmp.updownFlag = 0; // up
+			tmp.updownFlag = (bLMouseDown == TRUE)?1:0; // up
 			tmp.leftRight = 0; // left
 			tmp.wheelFlag = 0; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
 			tmp.xCoord = pt.x;
@@ -192,12 +196,13 @@ extern "C" __declspec(dllexport)
 			//	MessageBox(g_hWnd, "LBUTTONUP", "WM_LBUTTONUP", MB_OK);
 
 		} else if (wParam == WM_RBUTTONDOWN){ // 오른쪽 버튼 DOWN
+			bRMouseDown = TRUE;
 			CDS.dwData = 1;
 			CDS.cbData = sizeof(tmp);
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			tmp.updownFlag = 1; // down
+			tmp.updownFlag = (bRMouseDown == TRUE)?1:0; // down
 			tmp.leftRight = 1; // right
 			tmp.wheelFlag = 0;
 			tmp.xCoord = pt.x;
@@ -214,12 +219,13 @@ extern "C" __declspec(dllexport)
 			//	MessageBox(g_hWnd, "RBUTTONDOWN", "WM_RBUTTONDOWN", MB_OK);
 
 		} else if(wParam == WM_RBUTTONUP){ // 오른쪽 버튼 UP
+			bRMouseDown = FALSE;
 			CDS.dwData = 1;
 			CDS.cbData = sizeof(tmp);
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			tmp.updownFlag = 0; // up
+			tmp.updownFlag = (bRMouseDown == TRUE)?1:0; // up
 			tmp.leftRight = 1; // right
 			tmp.wheelFlag = 0;
 			tmp.xCoord = pt.x;
@@ -242,7 +248,7 @@ extern "C" __declspec(dllexport)
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			tmp.updownFlag = 0; // up
+			tmp.updownFlag = (bMMouseDown == TRUE)?1:0; // up
 			tmp.leftRight = 2; // right
 			tmp.wheelFlag = 3;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
 			tmp.xCoord = pt.x;
@@ -258,12 +264,13 @@ extern "C" __declspec(dllexport)
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
 		} else if(wParam == WM_MBUTTONDOWN){ // 휠 버튼 DOWN
+			bMMouseDown = TRUE;
 			CDS.dwData = 1;
 			CDS.cbData = sizeof(tmp);
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			tmp.updownFlag = 0; // up
+			tmp.updownFlag = (bMMouseDown == TRUE)?1:0; // up
 			tmp.leftRight = 3; // right
 			tmp.wheelFlag = 1; // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
 			tmp.xCoord = pt.x;
@@ -279,12 +286,13 @@ extern "C" __declspec(dllexport)
 			//	TRACE("WHEELBUTTONDOWN\n");
 
 		} else if(wParam == WM_MBUTTONUP){ // 휠 버튼 UP
+			bMMouseDown = FALSE;
 			CDS.dwData = 1;
 			CDS.cbData = sizeof(tmp);
 			CDS.lpData = &tmp;
 
 			tmp.msgType = 2; // mouse
-			tmp.updownFlag = 0; // up
+			tmp.updownFlag = (bMMouseDown == TRUE)?1:0; // up
 			tmp.leftRight = 3; // right
 			tmp.wheelFlag = 2;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
 			tmp.xCoord = pt.x;
@@ -306,16 +314,14 @@ extern "C" __declspec(dllexport)
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
 
+			tmp.updownFlag = (bLMouseDown == TRUE)?1:0;
 			tmp.leftRight = 0;
 			tmp.wheelFlag = 0;
 			tmp.deviceType = 0;
 			tmp.recvDev = 0;
 			tmp.relativeField = 0;
 			tmp.sendDev = 0;
-			tmp.updownFlag = 0;
-
-
-
+			
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
 		}

@@ -537,7 +537,7 @@ void CPassUDlg::OnConnectStart(void)
 	sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
 		MSG_CLIENT, 0, STATUS_PC, 1, 0, m_tab2.ipFirst, m_tab2.ipSecond, m_tab2.ipThird, m_tab2.ipForth, nWidth, nHeight);
 	
-	m_pClient->Send((LPCSTR *)&buf, strlen(buf)); // Çï·Î ÆÐÅ¶ º¸³¿
+	m_pClient->Send((LPCSTR *)&buf, SIZEOFPACKET); // Çï·Î ÆÐÅ¶ º¸³¿
 }
 
 
@@ -606,7 +606,7 @@ void CPassUDlg::CloseClient(CPassUClientSocket * s)
 	sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
 		MSG_CLIENT, m_tab2.client_ID, STATUS_PC, 0, 1, 0, 0, 0, 0, 0, 0);
 
-	s->Send(buf, strlen(buf)); // bye ÆÐÅ¶ Àü¼Û
+	s->Send(buf, SIZEOFPACKET); // bye ÆÐÅ¶ Àü¼Û
 
 	ClientCleanUp();
 }
@@ -639,11 +639,11 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 					char buf[1024];
 					ZeroMemory(buf, 0, sizeof(buf));
-					sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%4d",
+					sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%4d%8d",
 						MSG_KEYBOARD, 0, 0, 0,
-						0, hEVENT->updown, hEVENT->keyCode);
+						0, hEVENT->updown, hEVENT->keyCode, 0);
 					TRACE("Key Code : %d\n", hEVENT->keyCode);
-					((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, strlen(buf));
+					((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
 					break;
 				} 
 			}
@@ -755,11 +755,11 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 			char buf[1024];
 			ZeroMemory(buf, 0, sizeof(buf));
-			sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%1d%4d%4d%4d",
+			sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%1d%4d%4d%4d%8d",
 				MSG_MOUSE, mEVENT->sendDev, mEVENT->recvDev, mEVENT->deviceType,
-				mEVENT->relativeField, mEVENT->updownFlag, mEVENT->leftRight, mEVENT->wheelFlag, mEVENT->xCoord, mEVENT->yCoord);
+				mEVENT->relativeField, mEVENT->updownFlag, mEVENT->leftRight, mEVENT->wheelFlag, mEVENT->xCoord, mEVENT->yCoord, 0);
 			TRACE("x : %d, y : %d\n", mEVENT->xCoord, mEVENT->yCoord);
-			//((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, strlen(buf));
+			((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
 		}
 
 		break;
