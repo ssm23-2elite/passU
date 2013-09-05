@@ -44,6 +44,8 @@ PCHAR ConnectionStatuses[] =
 
 ULONG TotalDevicesConnected;
 
+USBSENDDEVICEDESC sendToDeviceDescData;
+
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
 class CAboutDlg : public CDialogEx
@@ -1954,7 +1956,28 @@ EnumerateHubPorts (
 
 			//결과값
 	
-            StringCchPrintf(leafName, sizeof(leafName), "[Port%d] ", index);
+			PUSB_DESCRIPTOR_REQUEST ConfigReqDesc = ((PUSBEXTERNALHUBINFO)info)->ConfigDesc;
+			PUSB_COMMON_DESCRIPTOR  commonDesc = (PUSB_COMMON_DESCRIPTOR)(ConfigReqDesc + 1);
+			PUSB_CONFIGURATION_DESCRIPTOR   ConfigDesc = (PUSB_CONFIGURATION_DESCRIPTOR)commonDesc;
+			PUSB_INTERFACE_DESCRIPTOR   InterfaceDesc;
+
+			memcpy(&sendToDeviceDescData.DeviceDescriptor, &info->ConnectionInfo->DeviceDescriptor, sizeof(sendToDeviceDescData.DeviceDescriptor) );
+
+			memcpy(&sendToDeviceDescData.ConfigDesc, ConfigDesc, sizeof(sendToDeviceDescData.ConfigDesc) );
+			
+			commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)commonDesc + commonDesc->bLength);
+			InterfaceDesc = (PUSB_INTERFACE_DESCRIPTOR)commonDesc;
+
+			memcpy(&sendToDeviceDescData.InterfaceDesc, InterfaceDesc, sizeof(sendToDeviceDescData.InterfaceDesc) );
+
+			memcpy(&sendToDeviceDescData.EndpointDescriptor[0], &((PUSB_PIPE_INFO)info->ConnectionInfo->PipeList)[0], sizeof(sendToDeviceDescData.EndpointDescriptor[0]) );
+			memcpy(&sendToDeviceDescData.EndpointDescriptor[1], &((PUSB_PIPE_INFO)info->ConnectionInfo->PipeList)[1], sizeof(sendToDeviceDescData.EndpointDescriptor[0]) );
+
+			strcpy_s(sendToDeviceDescData.DeviceId, info->UsbDeviceProperties->DeviceId);
+			strcpy_s(sendToDeviceDescData.DeviceDesc, info->UsbDeviceProperties->DeviceDesc);
+			strcpy_s(sendToDeviceDescData.HwId, info->UsbDeviceProperties->HwId);
+			strcpy_s(sendToDeviceDescData.Service, info->UsbDeviceProperties->Service);
+			strcpy_s(sendToDeviceDescData.DeviceClass, info->UsbDeviceProperties->DeviceClass);
 
             // Add error description if ConnectionStatus is other than NoDeviceConnected / DeviceConnected
             StringCchCat(leafName, 
