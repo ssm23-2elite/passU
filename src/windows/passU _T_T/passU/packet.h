@@ -65,10 +65,10 @@ typedef struct c_packet{ // 클라이언트에서 쓸 패킷
 	int nHeight;
 } CPACKET;
 
-typedef struct dataPacket{ // 데이터 전송 때 쓸 패킷
+typedef struct usbdataPacket{ // USB 데이터 전송 때 쓸 패킷
 	int msgType; // msgtype : 4
 	int len; // data length
-	unsigned char data[1024]; // data
+	char usbdesc[1024]; // data
 } DPACKET;
 
 #endif 
