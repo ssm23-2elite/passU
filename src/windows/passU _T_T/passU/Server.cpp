@@ -565,7 +565,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				0, 0);
 			((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send(buf, sizeof(CPACKET));
 			
-			if(clientP->pad3 == STATUS_PC) {
+			/*if(clientP->pad3 == STATUS_PC) {
 				GetPassUSBDesc();
 				
 				DPACKET packet;
@@ -574,7 +574,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				memcpy(&packet.usbdesc, &sendToDeviceDescData, sizeof(USBSENDDEVICEDESC));
 
 				((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send((char*)&packet, sizeof(DPACKET));
-			}
+			}*/
 		} else if(clientP->bye == 1){ // bye packet
 			// 굿바이패킷이면
 			// 버튼에 클라이언트 해제
