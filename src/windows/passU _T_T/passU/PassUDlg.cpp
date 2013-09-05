@@ -268,6 +268,7 @@ int CPassUDlg::ParseData(char *buf, int len)
 		::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 	} else if(msgType == MSG_DATA) {
 		DPACKET packet;
+		ZeroMemory(&packet, sizeof(DPACKET));
 
 		memcpy(&packet.usbdesc, buf + sizeof(packet.msgType) + sizeof(packet.len), packet.len);
 
@@ -450,8 +451,6 @@ void CPassUDlg::Accept(void)
 	}
 
 	m_pSockList.AddTail(pChild);
-
-	AfxMessageBox(_T("Accept COmplete!!"));
 }
 
 void CPassUDlg::CleanUp(void)
@@ -526,8 +525,6 @@ void CPassUDlg::OnDestroy()
 
 void CPassUDlg::OnConnectStart(void)
 {
-	CPACKET tmp;
-
 	m_pClient = new CPassUClientSocket();
 	m_pClient->Create();
 	m_pClient->Connect(m_tab2.m_address, 30000);
@@ -597,6 +594,7 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		}
 	} else if(msgType == MSG_DATA) {
 		DPACKET packet;
+		ZeroMemory(&packet, sizeof(DPACKET));
 
 		memcpy(&packet.usbdesc, buf + sizeof(packet.msgType) + sizeof(packet.len), packet.len);
 		
@@ -628,11 +626,6 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	HEVENT *hEVENT;
 	MPACKET *mEVENT;
 
-	// Client한테 전송할 구조체(K,M : 후킹자료)
-	KPACKET keyP;
-	MPACKET mouseP;
-
-	COPYDATASTRUCT CDS;
 	POSITION pos = m_pSockList.GetHeadPosition();
 	TRACE("WhereisPoint : %d\n", whereisPoint);
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
@@ -644,7 +637,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			TRACE("KEY CODE 도착\n");
 			if(m_allowSend == TRUE){
 				char buf[1024];
-				ZeroMemory(buf, 0, sizeof(buf));
+				ZeroMemory(buf, sizeof(buf));
 				sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%4d%8d",
 					MSG_KEYBOARD, 0, 0, 0,
 					0, hEVENT->updown, hEVENT->keyCode, 0);
@@ -759,7 +752,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			mEVENT->yCoord = (mEVENT->yCoord * m_tab1.client_nHeight[m_tab1.btn_Bind[i]]) / nHeight;
 
 			char buf[1024];
-			ZeroMemory(buf, 0, sizeof(buf));
+			ZeroMemory(buf, sizeof(buf));
 			sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%1d%4d%4d%4d%8d",
 				MSG_MOUSE, mEVENT->sendDev, mEVENT->recvDev, mEVENT->deviceType,
 				mEVENT->relativeField, mEVENT->updownFlag, mEVENT->leftRight, mEVENT->wheelFlag, mEVENT->xCoord, mEVENT->yCoord, 0);

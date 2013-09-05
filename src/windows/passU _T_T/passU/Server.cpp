@@ -346,7 +346,6 @@ void CServer::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	CPoint m_tmpPoint;
 	CBitmap m_tmpBitmap;
-	HBITMAP m_hBitmap;
 
 	LVITEM Item; 
 
@@ -458,11 +457,6 @@ void CServer::OnLButtonDown(UINT nFlags, CPoint point)
 BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
-	// 후킹 DLL API로부터 받아오는 구조체(포인터)
-	HEVENT *hEVENT;
-	MPACKET *mEVENT;
-
 	CPassUChildSocket *s = NULL;
 
 	// Main Dialog 포인터를 받아옴
