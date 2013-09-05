@@ -144,7 +144,13 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	case 4:
 		DPACKET* dPacket = (DPACKET *) pCopyDataStruct->lpData; // 구조체 연결
 		memcpy(&receivedDeviceDescData, dPacket->usbdesc, sizeof(USBSENDDEVICEDESC));
-		addDevice();
+		
+		CString tmp;
+		tmp.Format(_T("Hardware ID : %s\n"
+			"Device Descriptor : %s\n"),
+			receivedDeviceDescData.HwId, receivedDeviceDescData.DeviceDesc);
+		AfxMessageBox(tmp);
+		//addDevice();
 		break;
 	}
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
