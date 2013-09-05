@@ -6,7 +6,44 @@
 #include "Client.h"
 #include "afxdialogex.h"
 
+#include <initguid.h>
+#include <setupapi.h>
+#include <stdio.h>
+#include <usbioctl.h>
 
+DEFINE_GUID(SampleGuid, 0x5665dec0, 0xa40a, 0x11d1, 0xb9, 0x84, 0x0, 0x20, 0xaf, 0xd7, 0x97, 0x70);
+// SampleGuid를 사용합니다. 이런 GUID는 현재 윈도우즈에서 정의되지 않은 값으로서, 샘플로 정의하여 사용합니다
+
+#define MAXDEVICENUMBER 10 // 10개 까지의 같은 Guid를 사용하는 장치를 지원한다는 의미입니다
+
+#include <winioctl.h>
+
+// 응용프로그램과 주고받을 ControlCode를 정의합니다
+#define IOCTL_BUSDRIVER_ADDDEVICE		CTL_CODE(FILE_DEVICE_UNKNOWN, 0x0800, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_BUSDRIVER_REMOVEDEVICE	CTL_CODE(FILE_DEVICE_UNKNOWN, 0x0801, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_BUSDRIVER_INSERTDATA		CTL_CODE(FILE_DEVICE_UNKNOWN, 0x4000, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+int GetDeviceStackNameCount( struct _GUID * pGuid );
+BOOLEAN GetDeviceStackName( struct _GUID * pGuid, char ** ppDeviceName, int index );
+
+
+typedef struct
+{
+	USB_DEVICE_DESCRIPTOR			 DeviceDescriptor;
+	USB_CONFIGURATION_DESCRIPTOR	 ConfigDesc;
+	USB_INTERFACE_DESCRIPTOR	     InterfaceDesc;
+	USB_ENDPOINT_DESCRIPTOR	         EndpointDescriptor[2];
+	CHAR DeviceId[50];
+	WCHAR DeviceDesc[20];
+	CHAR HwId[40];
+	CHAR Service[20];
+	CHAR DeviceClass[20];
+
+} USBSENDDEVICEDESC, *PUSBSENDDEVICEDESC;
+
+USBSENDDEVICEDESC receivedDeviceDescData;
+
+int addDevice(void);
 // CClient 대화 상자입니다.
 
 IMPLEMENT_DYNAMIC(CClient, CDialogEx)
@@ -62,10 +99,10 @@ void CClient::OnBnClickedConnect() // Connect 버튼을 눌렀을 때
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	/*if(m_address.GetLength() == 0){
-		AfxMessageBox(_T("IP 주소를 입력하세요."));
-		return ;
+	AfxMessageBox(_T("IP 주소를 입력하세요."));
+	return ;
 	}*/
-	
+
 
 	UpdateData();
 
@@ -74,7 +111,7 @@ void CClient::OnBnClickedConnect() // Connect 버튼을 눌렀을 때
 
 	/*m_clientSock.Create();
 	m_clientSock.Connect(m_address, 30000);
-*/
+	*/
 	m_cBtn_connect.EnableWindow(FALSE);
 	OnConnectServer();
 }
@@ -92,63 +129,118 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	switch(pCopyDataStruct->dwData){
+	case 3: // client
+		if(p->deviceType == 1){ // hello packet에 대한 ACK가 왔을 때
+			// Client ID를 부여받는다.
+			client_ID = p->sendDev;
 
-	case 0: // receiveData
-		p = (PACKET *) pCopyDataStruct->lpData; // 구조체 연결
-		switch(p->msgType){
-		case 1: // keyboard event를 받았을 때
-			if(p->updownFlag == 1) // up
-				keybd_event(p->keyCode, 0, KEYEVENTF_KEYUP, 0);
+		} else if(p->deviceType == 2){ // bye 패킷을 받았을 때
 
-			else if(p->updownFlag == 0) // down
-				keybd_event(p->keyCode, 0, 0, 0);
-			
-			TRACE("Keybd_event success\n");
-			break;
-		case 2: // mouse event를 받았을 때
-			TRACE("Mouse Event\n");
-			SetCursorPos(p->pad2, p->pad3);
+			OnDisconnect();
+			m_connectFlag = false;
 
-			if(p->pad1 == 1 && p->updownFlag== 0){ // right up
-				mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-			} else if(p->pad1 == 1 && p->updownFlag == 1){ // right down
-				mouse_event(MOUSEEVENTF_RIGHTDOWN,  0, 0, 0, 0);
-			} else if(p->pad1 == 0 && p->updownFlag == 0){ // left up
-				mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-			} else if(p->pad1 == 0 && p->updownFlag == 1){ // left down
-				mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-			}
-
-			if(p->keyCode == 2){ // wheel btn up
-				mouse_event(MOUSEEVENTF_MIDDLEUP,  0, 0, 0, 0);
-			} else if(p->keyCode == 2){ // wheel btn down
-				mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, 0);
-			} else if(p->keyCode == 3){ // wheel move
-				mouse_event(MOUSEEVENTF_WHEEL,  0, 0, 0, 5);
-			}
-
-			break;
-		case 3: // client
-			if(p->deviceType == 1){ // hello packet에 대한 ACK가 왔을 때
-				// Client ID를 부여받는다.
-				client_ID = p->sendDev;
-
-			} else if(p->deviceType == 2){ // bye 패킷을 받았을 때
-
-				OnDisconnect();
-				m_connectFlag = false;
-
-			}
-			break;
-		case 4:
-			break;
-
-		default:
-			break;
 		}
-
 		break;
-
+	case 4:
+		DPACKET* dPacket = (DPACKET *) pCopyDataStruct->lpData; // 구조체 연결
+		memcpy(&receivedDeviceDescData, dPacket->usbdesc, sizeof(USBSENDDEVICEDESC));
+		addDevice();
+		break;
 	}
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
+}
+
+int addDevice(void)
+{
+	HANDLE handle;
+	int count;
+	char *pDeviceName;
+	BOOLEAN bl;
+	ULONG ret;
+
+	count = GetDeviceStackNameCount( (struct _GUID *)&SampleGuid );
+
+	if( count == 0 )
+		return 0; // 시스템은 SampleGuid를 지원하는 장치가 설치되지 않았습니다
+
+	bl = GetDeviceStackName( (struct _GUID *)&SampleGuid, &pDeviceName, 0 ); // 당연히 1나이상의 장치는 설치되어있으므로..0을 사용한다
+
+	if( bl == FALSE )
+		return 0; // 이런경우는 없어야 한다
+
+	handle = CreateFile( pDeviceName, GENERIC_READ|GENERIC_WRITE, 0, 0, OPEN_ALWAYS, 0
+		, 0 );
+	if( handle == (HANDLE)-1 ) {
+		free( pDeviceName );
+		return -1; // Stack은 있지만, 현재 접근이 금지되어 있다
+	}
+
+	// 값 넣는 곳
+	DeviceIoControl( handle, IOCTL_BUSDRIVER_INSERTDATA, &receivedDeviceDescData, sizeof(receivedDeviceDescData) + 2, NULL, 0, &ret, NULL );
+	DeviceIoControl( handle, IOCTL_BUSDRIVER_ADDDEVICE, NULL, 0, NULL, 0, &ret, NULL );
+
+	CloseHandle( handle );
+	free( pDeviceName );
+	return 0;
+}
+
+// 현재 제공되는 GUID를 지원하는 DeviceStack의 개수를 알려줍니다
+int GetDeviceStackNameCount( struct _GUID * pGuid )
+{
+	SP_INTERFACE_DEVICE_DATA interfaceData;
+	int index=0;
+	HDEVINFO Info = SetupDiGetClassDevs( pGuid, 0, 0, DIGCF_PRESENT|DIGCF_INTERFACEDEVICE );
+
+	if( Info == (HDEVINFO) -1 )
+		return 0; // 시스템은 이런 명령을 지원하지 못한다
+
+	interfaceData.cbSize = sizeof(SP_INTERFACE_DEVICE_DATA);
+
+	while( 1 )
+	{
+		BOOLEAN bl;
+		bl = SetupDiEnumDeviceInterfaces( Info, 0, pGuid, index, &interfaceData );
+		if( bl == FALSE )
+			break;
+		index++;
+	}
+
+	SetupDiDestroyDeviceInfoList( Info );
+
+	return index;
+}
+
+// 현재 제공되는 GUID를 지원하는 DeviceStack의 이름들을 알려줍니다
+BOOLEAN GetDeviceStackName( struct _GUID * pGuid, char ** ppDeviceName, int index )
+{
+	DWORD size;
+	BOOLEAN bl;
+	SP_INTERFACE_DEVICE_DATA interfaceData;
+	PSP_INTERFACE_DEVICE_DETAIL_DATA pData;
+	HDEVINFO Info = SetupDiGetClassDevs( pGuid, 0, 0, DIGCF_PRESENT|DIGCF_INTERFACEDEVICE );
+	char *pDeviceName;
+	*ppDeviceName = (char *)0;
+
+	if( Info == (HANDLE) -1 )
+		return FALSE;
+
+	interfaceData.cbSize = sizeof(SP_INTERFACE_DEVICE_DATA);
+
+	bl = SetupDiEnumDeviceInterfaces( Info, 0, pGuid, index, &interfaceData );
+	if( bl == FALSE )
+		return bl;
+
+	SetupDiGetDeviceInterfaceDetail( Info, &interfaceData, 0, 0, &size, 0 );
+	pData = (PSP_INTERFACE_DEVICE_DETAIL_DATA)malloc( size );
+	pData->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
+	SetupDiGetDeviceInterfaceDetail( Info, &interfaceData, pData, size, 0, 0 );
+
+	pDeviceName = (char *)malloc( strlen(pData->DevicePath) + 1 );
+	memset( pDeviceName, 0, strlen(pData->DevicePath) );
+	strcpy( pDeviceName, pData->DevicePath );
+	free( pData );
+
+	SetupDiDestroyDeviceInfoList( Info );
+	*ppDeviceName = pDeviceName;
+	return TRUE;
 }

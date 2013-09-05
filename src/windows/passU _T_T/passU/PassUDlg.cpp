@@ -269,7 +269,7 @@ int CPassUDlg::ParseData(char *buf, int len)
 	} else if(msgType == MSG_DATA) {
 		DPACKET packet;
 
-		memcpy(packet.data, buf + sizeof(packet.msgType), len - sizeof(packet.msgType));
+		memcpy(&packet.usbdesc, buf + sizeof(packet.msgType) + sizeof(packet.len), packet.len);
 
 		COPYDATASTRUCT CDS;
 
@@ -490,7 +490,7 @@ void CPassUDlg::OnStartServer()
 	m_pServer->Listen();
 	const char opt_val = true;
 	setsockopt(*m_pServer, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
-	AfxMessageBox(_T("InitServer"));
+	//AfxMessageBox(_T("InitServer"));
 }
 
 void CPassUDlg::OnBnClickedButton1()
@@ -595,7 +595,18 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		} else if(packet.wheelFlag == 3){ // wheel move
 			mouse_event(MOUSEEVENTF_WHEEL,  0, 0, 0, 5);
 		}
-	} 
+	} else if(msgType == MSG_DATA) {
+		DPACKET packet;
+
+		memcpy(&packet.usbdesc, buf + sizeof(packet.msgType) + sizeof(packet.len), packet.len);
+		
+		COPYDATASTRUCT CDS;
+
+		CDS.dwData = 4; // receiveData
+		CDS.cbData = sizeof(DPACKET);
+		CDS.lpData = &packet;
+		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	}
 }
 
 
