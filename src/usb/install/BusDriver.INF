@@ -1,0 +1,49 @@
+[Version]
+Signature="$WINDOWS NT$"
+Class=KimChan
+ClassGuid = {cfb15040-5bc7-11d3-b194-0060b0efd334}
+Provider="KimChan, Inc."
+
+[SourceDisksNames]
+1=%DiskId%
+
+[SourceDisksFiles]
+BusDriver.sys=1
+
+[ClassInstall32]
+Addreg=AddHwClass
+
+[AddHwClass]
+HKR,,,,%ClassName%
+HKR,,Icon,,"-5"
+
+[DestinationDirs]
+DefaultDestDir=12
+
+[Manufacturer]
+%Mfg%=MfgDeviceSection
+
+[MfgDeviceSection]
+%DeviceDesc% = BUSDRIVERSAMPLE, KIMCHAN_BUSDRIVER
+
+[BUSDRIVERSAMPLE]
+CopyFiles=@BUSDRIVER.sys
+
+[BUSDRIVERSAMPLE.Services]
+AddService = BUSDRIVER,%SPSVCINST_ASSOCSERVICE%,Haje_Service_Inst
+
+[Haje_Service_Inst]
+ServiceType    = %SERVICE_KERNEL_DRIVER%
+StartType      = %SERVICE_MANUAL_START%
+ErrorControl   = %SERVICE_ERROR_NORMAL%
+ServiceBinary  = %12%\BUSDRIVER.sys 
+
+[Strings]
+ClassName 	= "KimChan"
+DeviceDesc 	= "KimChan Virtual USB BUSDRIVER Device"
+DiskId 		= "Sample Install Disk 1"
+Mfg = "KimChan, Inc."
+SPSVCINST_ASSOCSERVICE = 0x00000002
+SERVICE_KERNEL_DRIVER  = 1
+SERVICE_MANUAL_START    = 3
+SERVICE_ERROR_NORMAL  = 1
