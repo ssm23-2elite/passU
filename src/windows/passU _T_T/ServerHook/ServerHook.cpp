@@ -472,7 +472,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 Dll Main
 _______________________________________________________________________________  */
 
-BOOL WINAPI DllMain(HINSTANCE hInst,DWORD fdwReason,LPVOID lpRes)
+BOOL WINAPI DllMain(HINSTANCE hInst,
+					DWORD fdwReason,
+					LPVOID lpRes)
 {
 	switch(fdwReason){
 	case DLL_PROCESS_ATTACH:
