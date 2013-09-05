@@ -179,6 +179,20 @@ InitializeListHead(
  T Y P E D E F S
 *****************************************************************************/
 
+typedef struct
+{
+	USB_DEVICE_DESCRIPTOR			 DeviceDescriptor;
+    USB_CONFIGURATION_DESCRIPTOR	 ConfigDesc;
+	USB_INTERFACE_DESCRIPTOR	     InterfaceDesc;
+	USB_ENDPOINT_DESCRIPTOR	         EndpointDescriptor[2];
+	CHAR DeviceId[50];
+	CHAR DeviceDesc[20];
+	CHAR HwId[80];
+	CHAR Service[20];
+	CHAR DeviceClass[20];
+	
+} USBSENDDEVICEDESC, *PUSBSENDDEVICEDESC;
+
 typedef enum _TREEICON
 {
     ComputerIcon,
