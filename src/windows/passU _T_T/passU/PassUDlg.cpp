@@ -127,7 +127,12 @@ BOOL CPassUDlg::OnInitDialog()
 	whereisPoint = 5;
 	UpdateData(FALSE);
 
+	// 자신의 화면 구하기
+	nWidth = GetSystemMetrics(SM_CXSCREEN);
+	nHeight = GetSystemMetrics(SM_CYSCREEN);
 
+	// 처음에는 클라이언트에 정보를 보내지 않는다.
+	m_allowSend = FALSE;
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -253,7 +258,7 @@ int CPassUDlg::ParseData(char *buf, int len)
 	} else if(msgType == MSG_CLIENT) {
 		CPACKET packet;
 
-		ParseClientData(buf, &packet);
+ 		ParseClientData(buf, &packet);
 
 		COPYDATASTRUCT CDS;
 
@@ -406,6 +411,15 @@ int CPassUDlg::ParseClientData(char *buf, CPACKET *packet)
 		+ sizeof(ipFirstBuf) + sizeof(ipSecondBuf) + sizeof(ipThirdBuf), sizeof(ipForthBuf));
 	packet->ipForth = byteToint(ipForthBuf, 4);
 
+	char nWidth[5];
+	memcpy(nWidth, buf + sizeof(msgTypeBuf) + sizeof(c_idBuf) + sizeof(pad3Buf) + sizeof(helloBuf) + sizeof(byeBuf) 
+		+ sizeof(ipFirstBuf) + sizeof(ipSecondBuf) + sizeof(ipThirdBuf) + sizeof(ipForthBuf), sizeof(nWidth));
+	packet->nWidth = byteToint(nWidth, 5);
+
+	char nHeight[5];
+	memcpy(nHeight, buf + sizeof(msgTypeBuf) + sizeof(c_idBuf) + sizeof(pad3Buf) + sizeof(helloBuf) + sizeof(byeBuf) 
+		+ sizeof(ipFirstBuf) + sizeof(ipSecondBuf) + sizeof(ipThirdBuf) + sizeof(ipForthBuf) + sizeof(nWidth), sizeof(nHeight));
+	packet->nHeight = byteToint(nHeight, 5);
 	return 0;
 }
 
@@ -520,10 +534,10 @@ void CPassUDlg::OnConnectStart(void)
 
 	char buf[1024];
 	ZeroMemory(buf, sizeof(buf));
-	sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d",
-		MSG_CLIENT, 0, STATUS_PC, 1, 0, m_tab2.ipFirst, m_tab2.ipSecond, m_tab2.ipThird, m_tab2.ipForth);
-
-	m_pClient->Send((LPCSTR *)&buf, strlen(buf)); // 헬로 패킷 보냄
+	sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
+		MSG_CLIENT, 0, STATUS_PC, 1, 0, m_tab2.ipFirst, m_tab2.ipSecond, m_tab2.ipThird, m_tab2.ipForth, nWidth, nHeight);
+	
+	m_pClient->Send((LPCSTR *)&buf, SIZEOFPACKET); // 헬로 패킷 보냄
 }
 
 
@@ -552,8 +566,12 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 
 		if(packet.updownFlag == 1)
 			keybd_event(packet.keyCode, 0, KEYEVENTF_KEYUP, 0);
-		else if(packet.updownFlag == 0) // down
+		else if(packet.updownFlag == 0){ // down
 			keybd_event(packet.keyCode, 0, 0, 0);
+			if(packet.keyCode == VK_SCROLL){
+				mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+			}
+		}
 	} else if(msgType == MSG_MOUSE) {
 		MPACKET packet;
 
@@ -585,10 +603,10 @@ void CPassUDlg::CloseClient(CPassUClientSocket * s)
 {
 	char buf[1024];
 	ZeroMemory(buf, sizeof(buf));
-	sprintf_s(buf, "%4d%4d%4d%1d%1d",
-		MSG_CLIENT, m_tab2.client_ID, STATUS_PC, 0, 1);
+	sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
+		MSG_CLIENT, m_tab2.client_ID, STATUS_PC, 0, 1, 0, 0, 0, 0, 0, 0);
 
-	s->Send(buf, strlen(buf)); // bye 패킷 전송
+	s->Send(buf, SIZEOFPACKET); // bye 패킷 전송
 
 	ClientCleanUp();
 }
@@ -598,9 +616,6 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
 	HEVENT *hEVENT;
 	MPACKET *mEVENT;
-
-	int nWidth = GetSystemMetrics(SM_CXSCREEN);
-	int nHeight = GetSystemMetrics(SM_CYSCREEN);
 
 	// Client한테 전송할 구조체(K,M : 후킹자료)
 	KPACKET keyP;
@@ -616,107 +631,132 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
 			TRACE("KEY CODE 도착\n");
-
-			for(int i = 0 ; i < 9 ; i ++){
-				TRACE("m_tab1.btn_Bind[i] : %d\n", m_tab1.btn_Bind[i]);
-				if((m_tab1.btn_Bind[i]) != 0){
-
-					char buf[1024];
-					ZeroMemory(buf, 0, sizeof(buf));
-					sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%4d",
-						MSG_KEYBOARD, 0, 0, 0,
-						0, hEVENT->updown, hEVENT->keyCode);
-
-					((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, strlen(buf));
-					break;
-				} 
+			if(m_allowSend == TRUE){
+				char buf[1024];
+				ZeroMemory(buf, 0, sizeof(buf));
+				sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%4d%8d",
+					MSG_KEYBOARD, 0, 0, 0,
+					0, hEVENT->updown, hEVENT->keyCode, 0);
+				TRACE("Key Code : %d\n", hEVENT->keyCode);
+				((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
+				break;
 			}
+
 		}
 		break;
 
 	case MOUSE_DATA:
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
 		TRACE("MOUSE DATA 도착\n");
-		for(int i = 0 ; i < 9 ; i ++){
-			if((m_tab1.btn_Bind[i]) != 0){
-				if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
-					if(whereisPoint == 5){ // 바인딩이 3에 되어 있을 때(4번 버튼)
-						mEVENT->xCoord = nWidth - 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 4;
-						//SetCursor(NULL);
-						ShowCursor(FALSE);
+		int i = 0;
+		if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
+			if((whereisPoint == 5) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 3에 되어 있을 때(4번 버튼)
+				mEVENT->xCoord = nWidth - 15;
 
-						// m_tab1.btn_bind[4] = 1; -> 서버가 아닌 다른 곳에 커서가 있음.
-						// mouseevent 서버에서는 더이상 그냥 리턴해주고 그렇게 하도록
-						// 좌표값이랑 이벤트값 전송은 그대로 해주고.
-					} else if(whereisPoint == 6){//mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (nWidth - 15)* 65535 / nWidth, mEVENT->yCoord * 65535 / nHeight, 0, 0);
-						mEVENT->xCoord = nWidth - 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 5;
-						//	SetCursor();
-						ShowCursor(TRUE);		
-					}
-				}
+				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+				whereisPoint = 4;
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
 
-				if(mEVENT->yCoord<= 2) { // 화면 위족에 붙을 때
-					if(whereisPoint == 5){ // 바인딩이 2번버튼에있을때
-						mEVENT->yCoord = nHeight - 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						//			mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, (nHeight - 15) * 65535 / nHeight, 0, 0);
-						whereisPoint = 2;
-						ShowCursor(FALSE);
-					} else if(whereisPoint == 8){
-						mEVENT->yCoord = nHeight - 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						//			mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, mEVENT->xCoord * 65535 / nWidth, (nHeight - 15) * 65535 / nHeight, 0, 0);
-						whereisPoint = 5;
-						ShowCursor(TRUE);
+				m_allowSend = TRUE;
+				TRACE("서버쪽에 있다가 왼쪽으로 붙음, 바인딩이 4번 버튼에 되어있음\n");
 
-					}
-				} 
 
-				if(mEVENT->xCoord >= nWidth - 2){	 // 화면 오른 쪽에 붙을 때
-					//	m_whereisPoint = 6;
-					if(whereisPoint == 5){ // 바인딩이 6번버튼에 있을 때
-						mEVENT->xCoord = 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 6;
-						ShowCursor(FALSE);
-					} else if(whereisPoint == 4){
-						mEVENT->xCoord = 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 5;
-						ShowCursor(TRUE);
+			} else if((whereisPoint == 6) && (m_tab1.btn_Bind[5] != 0)){ // 6번버튼에 바인딩되어있을 때
+				mEVENT->xCoord = nWidth - 15;
+				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+				whereisPoint = 5;
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
 
-					}
-				}
-
-				if(mEVENT->yCoord >= nHeight - 2){ // 화면 아래쪽에 붙을 때
-					if(whereisPoint == 5){ // 바인딩이 8번 버튼에 있을 때
-						mEVENT->yCoord = 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 8;
-						ShowCursor(FALSE);
-					} else if(whereisPoint == 2){
-						mEVENT->yCoord = 15;
-						SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-						whereisPoint = 5;
-						ShowCursor(TRUE);
-
-					}
-				}
-
-				/*char buf[1024];
-				ZeroMemory(buf, 0, sizeof(buf));
-				sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%1d%4d%4d%4d",
-				MSG_MOUSE, mEVENT->sendDev, mEVENT->recvDev, mEVENT->deviceType,
-				mEVENT->relativeField, mEVENT->updownFlag, mEVENT->xCoord, mEVENT->yCoord);
-
-				((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, strlen(buf));*/
-				break;
-			} 
+				m_allowSend = FALSE;
+				TRACE("6번 버튼에 있다가 왼쪽으로 붙어서 서버로 돌아옴, 바인딩이 6번버튼에 되어 있음\n");
+			}
 		}
+
+		if(mEVENT->yCoord <= 2) { // 화면 위쪽에 붙을 때
+			if((whereisPoint == 5) && (m_tab1.btn_Bind[1] != 0)){ // 바인딩이 2번버튼에있을때
+				mEVENT->yCoord = nHeight - 15;
+				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+				whereisPoint = 2;
+				m_allowSend = TRUE;
+				TRACE("서버쪽에 있다가 위쪽으로 붙음, 바인딩이 2번 버튼에 되어 있음\n");
+
+			} else if((whereisPoint == 8) && (m_tab1.btn_Bind[7] != 0)){ // 8번 버튼에 바인딩되어있을 때
+				mEVENT->yCoord = nHeight - 15;
+				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+				whereisPoint = 5;
+				m_allowSend = FALSE;
+				TRACE("8번 버튼에 있다가 위쪽으로 붙어서 서버로 돌아옴, 바인딩이 8번버튼에 되어 있음\n");
+
+			}
+		} 
+
+		if(mEVENT->xCoord >= nWidth - 10){	 // 화면 오른 쪽에 붙을 때
+			if((whereisPoint == 5) && (m_tab1.btn_Bind[5] != 0)){ // 바인딩이 6번버튼에 있을 때
+				mEVENT->xCoord = 15;
+				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+				whereisPoint = 6;
+				m_allowSend = TRUE;
+				TRACE("서버쪽에 있다가 오른쪽으로 붙음, 바인딩이 6번 버튼에 되어 있음\n");
+
+			} else if((whereisPoint == 4) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 4번 버튼에 있을 때
+				mEVENT->xCoord = 15;
+				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+				whereisPoint = 5;
+				m_allowSend = FALSE;
+				TRACE("4번 버튼에 있다가 서버쪽으로 돌아옴, 바인딩이 4번버튼에 되어 있음\n");
+			}
+		}
+
+		if(mEVENT->yCoord >= nHeight - 10){ // 화면 아래쪽에 붙을 때
+			if((whereisPoint == 5) && (m_tab1.btn_Bind[7] != 0)){ // 바인딩이 8번 버튼에 있을 때
+				mEVENT->yCoord = 15;
+				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+				whereisPoint = 8;
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+				m_allowSend = TRUE;
+				TRACE("서버쪽에 있다가 아래쪽으로 붙음, 바인딩이 8번 버튼에 되어 있음\n");
+			} else if((whereisPoint == 2) && (m_tab1.btn_Bind[1] != 0)){ // 바인딩이 2번 버튼에 되어 있을 때
+				mEVENT->yCoord = 15;
+				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+				whereisPoint = 5;
+				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+				::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+
+				m_allowSend = FALSE;
+				TRACE("2번에 있다가 아래쪽으로 붙음, 바인딩이 2번 버튼에 되어 있음\n");
+			}
+		}
+
+		if(m_allowSend == TRUE){ // 평소에는 클라이언트에 전송을 안하다가 서버가 아닌 다른곳으로 갔을때만 한다.
+			// 클라이언트 좌표 전환. 
+			// 서버 해상도 : 클라이언트 해상도 = 서버좌표 : 클라이언트 좌표 형식으로 변환
+			// Client 좌표 = (서버좌표 * 클라이언트 해상도[ Client ID ]) / 서버해상도
+			//											   Client ID = btn_Bind[ 버튼인덱스 ]
+
+			mEVENT->xCoord = (mEVENT->xCoord * m_tab1.client_nWidth[m_tab1.btn_Bind[i]]) / nWidth;
+			mEVENT->yCoord = (mEVENT->yCoord * m_tab1.client_nHeight[m_tab1.btn_Bind[i]]) / nHeight;
+
+			char buf[1024];
+			ZeroMemory(buf, 0, sizeof(buf));
+			sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%1d%4d%4d%4d%8d",
+				MSG_MOUSE, mEVENT->sendDev, mEVENT->recvDev, mEVENT->deviceType,
+				mEVENT->relativeField, mEVENT->updownFlag, mEVENT->leftRight, mEVENT->wheelFlag, mEVENT->xCoord, mEVENT->yCoord, 0);
+			TRACE("x : %d, y : %d\n", mEVENT->xCoord, mEVENT->yCoord);
+
+			((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
+		}
+
 		break;
 	}
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);

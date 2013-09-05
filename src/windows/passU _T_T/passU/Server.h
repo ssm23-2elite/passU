@@ -31,7 +31,12 @@ public:
 	CButton m_cBtn[9];
 
 	CClientInfo clientInfo[9]; // 각각의 index는 client ID
+	
+	// 클라이언트의 스크린 크기구함, 각각의 index는 client ID
+	int client_nWidth[9];
+	int client_nHeight[9];
 
+	HWND dllWnd;
 
 	BOOL m_keyBoardHook;
 	BOOL m_mouseHook;

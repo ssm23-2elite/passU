@@ -43,13 +43,13 @@ public class PacketReceiver extends Thread {
 	}
 	
 	private boolean tryReadPacketData(){
-		if(D.D) Log.w(LOG, "tryReadPacketData");
 		if(bufferOffset < PacketHeader.LENGTH)
 			return false; // try fetching more data from stream
 		
 		packet = Packet.parse(buffer);
 		// Decrease current offset by last packet's length
-		bufferOffset -= Packet.LENGTH;
+		
+		bufferOffset -= Packet.LENGTH;		
 		// Return packet object
 		return true;
 	}	

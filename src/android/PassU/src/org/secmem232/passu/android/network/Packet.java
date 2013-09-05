@@ -12,8 +12,9 @@ import android.util.Log;
  */
 public class Packet {
 
-	public static final int LENGTH = 32;
-	public static final int PAYLOAD_LENGTH = 28;
+	public static final int LENGTH = 40;
+	
+	public static final int PAYLOAD_LENGTH = 36;
 	public static final int SEND_DEVICE_LENGTH = 4;
 	public static final int RECEIVE_DEVICE_LENGTH = 4;
 	public static final int DEVICE_TYPE_LENGTH = 1;
@@ -29,7 +30,14 @@ public class Packet {
 	public static final int C_ID_LENGTH = 4;
 	public static final int PAD3_LENGTH = 4;
 	public static final int HELLO_LENGTH = 1;
-	public static final int BYE_LENGTH = 1;
+	public static final int BYE_LENGTH = 4;
+	public static final int IP_FIRST_LENGTH = 4;
+	public static final int IP_SECOND_LENGTH = 4;
+	public static final int IP_THIRD_LENGTH = 4;
+	public static final int IP_FORTH_LENGTH = 4;
+	public static final int WIDTH_LENGTH = 5;
+	public static final int HEIGHT_LENGTH = 5;
+	
 	
 	public static final int LEN_LENGTH = 4;
 		
@@ -112,6 +120,12 @@ public class Packet {
 	private int pad3;
 	private int hello;
 	private int bye;
+	private int ip_first;
+	private int ip_second;
+	private int ip_third;
+	private int ip_forth;
+	private int width;
+	private int height;
 	private int len;
 	
 	private static byte[] packetBuffer = new byte[LENGTH];
@@ -130,6 +144,12 @@ public class Packet {
 	private static byte[] pad3Buffer = new byte[PAD3_LENGTH];
 	private static byte[] helloBuffer = new byte[HELLO_LENGTH];
 	private static byte[] byeBuffer = new byte[BYE_LENGTH];
+	private static byte[] ip_firstBuffer = new byte[IP_FIRST_LENGTH];
+	private static byte[] ip_secondBuffer = new byte[IP_SECOND_LENGTH];
+	private static byte[] ip_thirdBuffer = new byte[IP_THIRD_LENGTH];
+	private static byte[] ip_forthBuffer = new byte[IP_FORTH_LENGTH];
+	private static byte[] widthBuffer = new byte[WIDTH_LENGTH];
+	private static byte[] heightBuffer = new byte[HEIGHT_LENGTH];
 	
 	protected Packet(){
 		// Do nothing on here
@@ -163,13 +183,20 @@ public class Packet {
 	}
 	
 	
-	public Packet(int messageType, int c_id, int hello, int bye){
+	public Packet(int messageType, int c_id, int pad3, int hello, int bye
+			, int ip_first, int ip_second, int ip_third, int ip_forth, int width, int height){
 		header = new PacketHeader(messageType);
 		
 		this.c_id = c_id;
-		this.pad3 = 0;
+		this.pad3 = pad3;
 		this.hello = hello;
 		this.bye = bye;
+		this.ip_first = ip_first;
+		this.ip_second = ip_second;
+		this.ip_third = ip_third;
+		this.ip_forth = ip_forth;
+		this.width = width;
+		this.height = height;
 	}
 	
 	public static Packet parse(byte[] rawPacket){
@@ -263,6 +290,26 @@ public class Packet {
 					byeBuffer, 0, BYE_LENGTH);
 			packet.setBye(Util.ByteToInt(byeBuffer));
 			
+			System.arraycopy(rawPacket, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH + BYE_LENGTH, 
+					ip_firstBuffer, 0, IP_FIRST_LENGTH);
+			packet.setIpFirst(Util.ByteToInt(ip_firstBuffer));
+			
+			System.arraycopy(rawPacket, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH + BYE_LENGTH
+					+ IP_FIRST_LENGTH, 
+					ip_secondBuffer, 0, IP_SECOND_LENGTH);
+			packet.setIpSecond(Util.ByteToInt(ip_secondBuffer));
+			
+			System.arraycopy(rawPacket, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH + BYE_LENGTH
+					+ IP_FIRST_LENGTH + IP_SECOND_LENGTH, 
+					ip_thirdBuffer, 0, IP_THIRD_LENGTH);
+			packet.setIpThird(Util.ByteToInt(ip_thirdBuffer));
+			
+			System.arraycopy(rawPacket, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH + BYE_LENGTH
+					+ IP_FIRST_LENGTH + IP_SECOND_LENGTH + IP_THIRD_LENGTH, 
+					ip_forthBuffer, 0, IP_FORTH_LENGTH);
+			packet.setIpForth(Util.ByteToInt(ip_forthBuffer));
+			
+			
 		}
 		// Packet parsing has done.
 		return packet;
@@ -277,8 +324,8 @@ public class Packet {
 			return String.format("%s%4d%4d%1d%1d%1d%1d%4d%4d%4d", getHeader(), 
 					sendDevice, receiveDevice, deviceType, relativeField, updownFlag, leftright, wheelFlag, xCoordinate, yCoordinate );
 		} else if (getHeader().getMessageType() == PacketHeader.Message_Type.CLIENT){
-			return String.format("%s%4d%4d%1d%1d%4d%4d%4d%4d", getHeader(), c_id, pad3, hello, bye,
-					127,0,0,1);
+			return String.format("%s%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d", getHeader(), c_id, pad3, hello, bye,
+					ip_first, ip_second, ip_third, ip_forth, width, height);
 		} else {
 			return String.format("UNKNOWN");
 		}
@@ -304,10 +351,8 @@ public class Packet {
 					DEVICE_TYPE_LENGTH, relativeFieldBuffer.length);
 			System.arraycopy(updownFlagBuffer, 0, packetBuffer, PacketHeader.LENGTH + SEND_DEVICE_LENGTH + RECEIVE_DEVICE_LENGTH +
 					DEVICE_TYPE_LENGTH + RELATIVE_FIELD_LENGTH, updownFlagBuffer.length);
-			System.arraycopy(padBuffer, 0, packetBuffer, PacketHeader.LENGTH + SEND_DEVICE_LENGTH + RECEIVE_DEVICE_LENGTH +
-					DEVICE_TYPE_LENGTH + RELATIVE_FIELD_LENGTH + UPDOWN_FLAG_LENGTH, padBuffer.length);
 			System.arraycopy(keyCodeBuffer, 0, packetBuffer, PacketHeader.LENGTH + SEND_DEVICE_LENGTH + RECEIVE_DEVICE_LENGTH +
-					DEVICE_TYPE_LENGTH + RELATIVE_FIELD_LENGTH + UPDOWN_FLAG_LENGTH + PAD_LENGTH, keyCodeBuffer.length);
+					DEVICE_TYPE_LENGTH + RELATIVE_FIELD_LENGTH + UPDOWN_FLAG_LENGTH, keyCodeBuffer.length);
 		} else if(getHeader().getMessageType() == PacketHeader.Message_Type.MOUSE) {
 			System.arraycopy(sendDeviceBuffer, 0, packetBuffer, PacketHeader.LENGTH, sendDeviceBuffer.length);
 			System.arraycopy(receiveDeviceBuffer, 0, packetBuffer, PacketHeader.LENGTH + SEND_DEVICE_LENGTH, receiveDeviceBuffer.length);
@@ -329,7 +374,18 @@ public class Packet {
 			System.arraycopy(pad3Buffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH, pad3Buffer.length);
 			System.arraycopy(helloBuffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH, helloBuffer.length);
 			System.arraycopy(byeBuffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH, byeBuffer.length);
-			
+			System.arraycopy(ip_firstBuffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH + BYE_LENGTH, 
+					ip_firstBuffer.length);
+			System.arraycopy(ip_secondBuffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH + BYE_LENGTH
+					+ IP_FIRST_LENGTH, ip_secondBuffer.length);
+			System.arraycopy(ip_thirdBuffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH + BYE_LENGTH
+					+ IP_FIRST_LENGTH + IP_SECOND_LENGTH, ip_thirdBuffer.length);
+			System.arraycopy(ip_forthBuffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH + BYE_LENGTH
+					+ IP_FIRST_LENGTH + IP_SECOND_LENGTH + IP_THIRD_LENGTH, ip_forthBuffer.length);
+			System.arraycopy(widthBuffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH + BYE_LENGTH
+					+ IP_FIRST_LENGTH + IP_SECOND_LENGTH + IP_THIRD_LENGTH + IP_FORTH_LENGTH, widthBuffer.length);
+			System.arraycopy(heightBuffer, 0, packetBuffer, PacketHeader.LENGTH + C_ID_LENGTH + PAD3_LENGTH + HELLO_LENGTH + BYE_LENGTH
+					+ IP_FIRST_LENGTH + IP_SECOND_LENGTH + IP_THIRD_LENGTH + IP_FORTH_LENGTH + WIDTH_LENGTH, heightBuffer.length);
 		}
 		return packetBuffer;
 	}
@@ -444,5 +500,53 @@ public class Packet {
 
 	public void setBye(int bye) {
 		this.bye = bye;
+	}
+	
+	public int getIpFirst() {
+		return ip_first;
+	}
+
+	public void setIpFirst(int ip_first) {
+		this.ip_first = ip_first;
+	}
+	
+	public int getIpSecond() {
+		return ip_second;
+	}
+
+	public void setIpSecond(int ip_second) {
+		this.ip_second = ip_second;
+	}
+	
+	public int getIpThird() {
+		return ip_third;
+	}
+
+	public void setIpThird(int ip_third) {
+		this.ip_third = ip_third;
+	}
+	
+	public int getIpForth() {
+		return ip_forth;
+	}
+
+	public void setIpForth(int ip_forth) {
+		this.ip_forth = ip_forth;
+	}
+	
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+	
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
 	}
 }

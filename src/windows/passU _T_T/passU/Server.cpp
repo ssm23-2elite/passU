@@ -112,6 +112,7 @@ BOOL CServer::OnInitDialog()
 	uninstallKeyhook = (UnInstallKeyboardHook)GetProcAddress(hinstDLL, "UnInstallKeyboardHook");
 	uninstallMousehook = (UnInstallMouseHook)GetProcAddress(hinstDLL, "UnInstallMouseHook");
 
+	dllWnd = ::FindWindow("MsgWnd", NULL);
 
 	if (!AfxSocketInit())
 	{
@@ -121,6 +122,8 @@ BOOL CServer::OnInitDialog()
 
 	for(int i = 0 ; i < 9 ; i ++){
 		ZeroMemory(&btnControl[i], sizeof(btnControl[i]));
+		client_nWidth[i] = 0;
+		client_nHeight[i] = 0;
 	}
 
 	m_keyBoardHook = FALSE;
@@ -143,24 +146,6 @@ BOOL CServer::OnInitDialog()
 	m_imgList.Add(&m_bmp_monitor, RGB(0, 0, 0));
 	m_imgList.Add(&m_bmp_phone, RGB(0, 0, 0));
 
-	/*LVITEM lvitem = {0};
-
-	lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
-	lvitem.iItem = 0;
-	lvitem.pszText = "127.0.0.1";
-	lvitem.lParam = (LPARAM)STATUS_PC;
-	lvitem.iImage = STATUS_PC - 1;
-
-	m_waiting_client.InsertItem(&lvitem);
-
-	lvitem.mask = LVIF_TEXT|LVIF_IMAGE|LVIF_PARAM;
-	lvitem.iItem = 0;
-	lvitem.pszText = "127.0.0.1";
-	lvitem.lParam = (LPARAM)STATUS_MOBILE;
-	lvitem.iImage = STATUS_MOBILE - 1;
-
-	m_waiting_client.InsertItem(&lvitem);*/
-
 	btnControl[0] = this->GetDlgItem(IDC_BUTTON1);
 	btnControl[1] = this->GetDlgItem(IDC_BUTTON2);
 	btnControl[2] = this->GetDlgItem(IDC_BUTTON3);
@@ -176,6 +161,8 @@ BOOL CServer::OnInitDialog()
 		btn_Bind[i] = 0;
 	}
 	m_pDragImage = NULL;
+	
+	
 
 	return TRUE;
 }
@@ -449,58 +436,12 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	case KEYBOARD_DATA: // keyboard
 		//hEVENT = (tagHEVENT *) pCopyDataStruct->lpData; // hEvent 구조체 연결(후킹된 자료)
 
-		//if(hEVENT->lParam >= 0){ // 키가 눌렸을 때 
-		//	//	TRACE("KEY CODE 도착, keyCode : %d\n", hEVENT->keyCode);
-
-		//	keyP.deviceType = 1;
-		//	keyP.msgType = 1;
-		//	keyP.keyCode = hEVENT->keyCode;
-		//	keyP.updownFlag = hEVENT->updown;
-
-		//	// 1. 연결된 클라이언트 들 중에서 
-		//	// 2. 지금 커서가 어디 있는지를 판별하고
-		//	// 3. 그 있는 쪽의 버튼에 연결된 클라이언트한테 이 정보를 보냄.
-
-		//	//example : 커서가 4에 있다고 가정
-		//	m_status = 4;
-
-		//	s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
-
-		//	/*while((btn_Bind[m_status-1] != s->c_id) && (btn_Bind[m_status - 1] != 0)){
-		//	pMainDlg->m_pSockList.GetNext(pos);
-		//	s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
-		//	}*/
-
-		//	s->Send((LPCSTR *)&mouseP, sizeof(KPACKET));
-		//}
 		break;
 
 
 	case MOUSE_DATA: // mouse
 		//mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
-		////TRACE("MOUSE CODE 도착, x : %d y : %d\n wheelFlag : %d updownFlag : %d leftRight : %d\n", mEVENT->xCoord, mEVENT->yCoord,mEVENT->wheelFlag, mEVENT->updownFlag, mEVENT->leftRight);
 
-
-		//mouseP.msgType = 2;
-		//mouseP.deviceType = mEVENT->deviceType;
-		//mouseP.leftRight = mEVENT->leftRight;
-		//mouseP.wheelFlag = mEVENT->wheelFlag;
-		//mouseP.updownFlag = mEVENT->updownFlag;
-		//mouseP.xCoord = mEVENT->xCoord;
-		//mouseP.yCoord = mEVENT->yCoord;
-
-		//// 1. 연결된 클라이언트 들 중에서
-		//// 2. 지금 커서가 어디 있는지를 판별하고
-		//// 3. 그 있는 쪽의 버튼에 연결된 클라이언트한테 이 정보를 보냄.
-		////example : 커서가 4에 있다고 가정
-		//m_status = 4;
-		//s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
-		///*	while((btn_Bind[m_status-1] != s->c_id) && (btn_Bind[m_status - 1] != 0)){
-		//pMainDlg->m_pSockList.GetNext(pos);
-		//s = (CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos);
-		//}*/
-
-		//s->Send((LPCSTR *)&mouseP, sizeof(MPACKET));
 		break;
 
 
@@ -520,6 +461,10 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 					clientP->c_id = ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->c_id = clientInfo[i].getID();
 					
+					// 클라이언트의 화면 크기 구해서 저장
+					client_nWidth[i] = clientP->nWidth;
+					client_nHeight[i] = clientP->nHeight;
+
 					// Client IP Address Setting
 					clientInfo[i].m_address.Format(_T("%d.%d.%d.%d"), clientP->ipFirst, clientP->ipSecond, clientP->ipThird, clientP->ipForth);
 
@@ -581,9 +526,10 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 			char buf[1024];
 			ZeroMemory(buf, sizeof(buf));
-			sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d",
-				MSG_CLIENT, clientP->c_id, clientP->pad3, clientP->hello,clientP->bye, clientP->ipFirst, clientP->ipSecond, clientP->ipThird, clientP->ipForth);
-			((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send(buf, strlen(buf));
+			sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
+				MSG_CLIENT, clientP->c_id, clientP->pad3, clientP->hello,clientP->bye, clientP->ipFirst, clientP->ipSecond, clientP->ipThird, clientP->ipForth,
+				0, 0);
+			((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send(buf, sizeof(CPACKET));
 
 		} else if(clientP->bye == 1){ // bye packet
 			// 굿바이패킷이면

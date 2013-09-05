@@ -79,6 +79,10 @@ public class PassUSocket implements PacketListener {
 
 			mServerConnectionListener.onServerConnected(ip, port);
 			
+			Packet packet = new Packet(
+					PacketHeader.Message_Type.CLIENT, 0, 2, 1, 0,
+					127, 0, 0, 1, AR.width, AR.height);
+			sendEcho(packet.toString().getBytes());
 			return true;
 		} catch(IOException e) {
 			e.printStackTrace();
@@ -94,8 +98,9 @@ public class PassUSocket implements PacketListener {
 	 */
 	public void disconnect(){
 		if(D.D) Log.w(LOG, "disconnect");
-		Packet packet = new Packet(PacketHeader.Message_Type.CLIENT, client_id, 0, 1);
-		sendEcho(packet.asByteArray());
+		Packet packet = new Packet(PacketHeader.Message_Type.CLIENT, client_id, 0, 0,  1,
+				127, 0, 0, 1, AR.width, AR.height);
+		sendEcho(packet.toString().getBytes());
 		
 		synchronized(this){
 			if(socket != null){
@@ -116,8 +121,9 @@ public class PassUSocket implements PacketListener {
 
 	private void cleanup(){
 		if(D.D) Log.w(LOG, "cleanup");
-		Packet packet = new Packet(PacketHeader.Message_Type.CLIENT, client_id, 0, 1);
-		sendEcho(packet.asByteArray());
+		Packet packet = new Packet(PacketHeader.Message_Type.CLIENT, client_id, 0, 0, 1,
+				127, 0, 0, 1, AR.width, AR.height);
+		sendEcho(packet.toString().getBytes());
 		
 		synchronized(this){
 			if(socket != null){
@@ -169,23 +175,22 @@ public class PassUSocket implements PacketListener {
 					mVirtEventListener.onKeyUp(keyCode);
 			} else if( packet.getUpdownFlag() == Packet.Updown_Flag.DOWN ) {
 				Integer keyCode = KeyCodeMap.M.get(packet.getKeyCode());
-				if(keyCode != null)
+				if(keyCode != null) { 
 					mVirtEventListener.onKeyDown(keyCode);
+					mVirtEventListener.onKeyUp(keyCode);
+				}
 			}
 		} else if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.MOUSE ) {
+			mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
+			AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
 			
 			if( packet.getLeftRight() == Packet.LeftRight.LEFT ) {
 				if( packet.getUpdownFlag() == Packet.Updown_Flag.UP ) {
-					AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
-					mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
 					mVirtEventListener.onTouchUp();
 				} else if( packet.getUpdownFlag() == Packet.Updown_Flag.DOWN ) {
-					AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
-					mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
 					mVirtEventListener.onTouchDown();
 				} else {
-					AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
-					mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
+					
 				}
 			}
 		} else if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.CLIENT ) {

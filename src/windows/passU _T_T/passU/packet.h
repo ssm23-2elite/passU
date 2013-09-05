@@ -8,6 +8,8 @@
 #define STATUS_MOBILE	2
 */
 
+#define SIZEOFPACKET 40
+
 typedef struct packet{
 	int msgType; // msgType : 1
 	int sendDev; // id
@@ -21,6 +23,7 @@ typedef struct packet{
 	int pad3;
 	int pad4;
 } PACKET;
+
 typedef struct keypacket{ // 키보드 키 값을 가지고 있는 패킷(TCP)
 	int msgType; // msgType : 1
 	int sendDev; // id
@@ -58,6 +61,8 @@ typedef struct c_packet{ // 클라이언트에서 쓸 패킷
 	int ipSecond;
 	int ipThird;
 	int ipForth;
+	int nWidth;
+	int nHeight;
 } CPACKET;
 
 typedef struct dataPacket{ // 데이터 전송 때 쓸 패킷
