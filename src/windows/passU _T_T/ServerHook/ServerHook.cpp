@@ -99,9 +99,7 @@ extern "C" __declspec(dllexport)
 
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 		if(!m_keyboard){
-			TRACE("Before return\n");
 			return 1;
-			TRACE("After return\n");
 		}
 
 	} else if(wParam == WM_KEYUP){
@@ -121,9 +119,7 @@ extern "C" __declspec(dllexport)
 
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 		if(!m_keyboard){
-			TRACE("Before return\n");
 			return 1;
-			TRACE("After return\n");
 		}
 	}
 	return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
@@ -168,9 +164,7 @@ extern "C" __declspec(dllexport)
 			//TRACE("LBUTTONDOWN\n");
 
 			if(!m_mouse){
-				TRACE("Before return\n");
 				return 1;
-				TRACE("After return\n");
 			}
 
 		} else if (wParam == WM_LBUTTONUP){ // 왼쪽 버튼 UP
@@ -197,9 +191,7 @@ extern "C" __declspec(dllexport)
 			//	MessageBox(g_hWnd, "LBUTTONUP", "WM_LBUTTONUP", MB_OK);
 
 			if(!m_mouse){
-				TRACE("Before return\n");
 				return 1;
-				TRACE("After return\n");
 			}
 		} else if (wParam == WM_RBUTTONDOWN){ // 오른쪽 버튼 DOWN
 			bRMouseDown = TRUE;
@@ -225,9 +217,7 @@ extern "C" __declspec(dllexport)
 			//	MessageBox(g_hWnd, "RBUTTONDOWN", "WM_RBUTTONDOWN", MB_OK);
 
 			if(!m_mouse){
-				TRACE("Before return\n");
 				return 1;
-				TRACE("After return\n");
 			}
 		} else if(wParam == WM_RBUTTONUP){ // 오른쪽 버튼 UP
 			bRMouseDown = FALSE;
@@ -254,9 +244,7 @@ extern "C" __declspec(dllexport)
 			//	MessageBox(g_hWnd, "RBUTTONUP", "WM_RBUTTONUP", MB_OK);
 
 			if(!m_mouse){
-				TRACE("Before return\n");
 				return 1;
-				TRACE("After return\n");
 			}
 		} else if(wParam == WM_MOUSEWHEEL){ // 휠 움직일 때
 			CDS.dwData = 1;
@@ -280,9 +268,7 @@ extern "C" __declspec(dllexport)
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
 			if(!m_mouse){
-				TRACE("Before return\n");
 				return 1;
-				TRACE("After return\n");
 			}
 		} else if(wParam == WM_MBUTTONDOWN){ // 휠 버튼 DOWN
 			bMMouseDown = TRUE;
@@ -305,9 +291,7 @@ extern "C" __declspec(dllexport)
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
 			if(!m_mouse){
-				TRACE("Before return\n");
 				return 1;
-				TRACE("After return\n");
 			}
 			//	TRACE("WHEELBUTTONDOWN\n");
 
@@ -333,9 +317,7 @@ extern "C" __declspec(dllexport)
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
 			if(!m_mouse){
-				TRACE("Before return\n");
 				return 1;
-				TRACE("After return\n");
 			}
 			//	TRACE("WHEELBUTTONUP\n");
 		} else if(wParam == WM_MOUSEMOVE){ // 마우스 이동
@@ -357,7 +339,12 @@ extern "C" __declspec(dllexport)
 			tmp.sendDev = 0;
 
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-
+			
+			/*if(!m_mouse){
+				TRACE("Before return\n");
+				return 1;
+				TRACE("After return\n");
+			}*/
 		}
 		//	} else
 		//		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
@@ -441,27 +428,20 @@ BOOL CreateMsgWnd(HINSTANCE hInst, HWND *phWnd){
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 {
-	TRACE("%p\n", hWnd);
 	switch(uiMsg){
 	case WM_KEYBOARD_FALSE: // 키보드 무시 이벤트 
 		// 여기서 메세지 처리
-		TRACE("WM_KEYBOARD_FALSE\n");
 		m_keyboard = FALSE;
-
 		break;
 	case WM_MOUSE_FALSE:
 		// 여기서 메세지 처리
-		TRACE("WM_MOUSE_FALSE\n");
 		m_mouse = FALSE;
-
 		break;
 	case WM_KEYBOARD_TRUE:
 		// 여기서 메세지 처리
-		TRACE("WM_KEYBOARD_TRUE\n");
 		m_keyboard = TRUE;
 		break;
 	case WM_MOUSE_TRUE:
-		TRACE("WM_MOUSE_TRUE\n");
 		m_mouse = TRUE;
 		break;
 	}

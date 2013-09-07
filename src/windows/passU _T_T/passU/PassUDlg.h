@@ -50,8 +50,8 @@ public:
 	int nWidth;
 	int nHeight;
 	
-	LPPOINT oldPoint;
-	LPPOINT currentPoint;
+	POINT oldPoint;
+	POINT currentPoint;
 
 	BOOL m_allowSend; // 클라이언트에 정보를 보낼지 말지를 결정하는 FLAG
 	BOOL m_changeWindow;

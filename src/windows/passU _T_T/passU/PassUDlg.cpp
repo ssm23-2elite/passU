@@ -134,6 +134,8 @@ BOOL CPassUDlg::OnInitDialog()
 	// 처음에는 클라이언트에 정보를 보내지 않는다.
 	m_allowSend = FALSE;
 
+	currentPoint.x = 0;
+	currentPoint.y = 0;
 
 	m_changeWindow = FALSE;
 
@@ -657,25 +659,25 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	MPACKET *mEVENT;
 
 	POSITION pos = m_pSockList.GetHeadPosition();
-	TRACE("WhereisPoint : %d\n", whereisPoint);
+	//TRACE("WhereisPoint : %d\n", whereisPoint);
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	switch(pCopyDataStruct->dwData){
 	case KEYBOARD_DATA:
 		hEVENT = (tagHEVENT *) pCopyDataStruct->lpData; // hEvent 구조체 연결(후킹된 자료)
 
 		if(hEVENT->lParam >= 0){ // 키가 눌렸을 때
-			TRACE("KEY CODE 도착\n");
+			//TRACE("KEY CODE 도착\n");
+		//	TRACE("Key Code : %d\n", hEVENT->keyCode);
 			if(m_allowSend == TRUE){
 				char buf[1024];
 				ZeroMemory(buf, sizeof(buf));
 				sprintf_s(buf, "%4d%4d%4d%1d%1d%1d%4d%8d",
 					MSG_KEYBOARD, 0, 0, 0,
 					0, hEVENT->updown, hEVENT->keyCode, 0);
-				TRACE("Key Code : %d\n", hEVENT->keyCode);
 
 				CPassUChildSocket *s = (CPassUChildSocket *)m_pSockList.GetAt(pos);
 
-				while(m_tab1.btn_Bind[whereisPoint - 1] != s->c_id && pos != NULL){
+				while((m_tab1.btn_Bind[whereisPoint - 1] != s->c_id) && (pos != NULL)){
 					(CPassUChildSocket *)m_pSockList.GetNext(pos);
 				}
 
@@ -688,24 +690,30 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 	case MOUSE_DATA:
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
-		TRACE("MOUSE DATA 도착\n");
+		//TRACE("MOUSE DATA 도착\n");
 		int i = 0;
 
+		if(currentPoint.x != 0 && currentPoint.y != 0){
+			SetCursorPos(currentPoint.x ,	currentPoint.y);
+			currentPoint.x = 0;
+			currentPoint.y = 0;
+		}
 
 		if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 3에 되어 있을 때(4번 버튼)
 				if(m_changeWindow == FALSE){ // scroll lock이 안눌러져 있으면
-					mEVENT->xCoord = nWidth - 15;
-
-					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-					/*keybd_event(VK_SCROLL, 0, 0, 0);
-					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
-					m_changeWindow = TRUE;
-					whereisPoint = 4;
-					//		currentID = 4;
+					mEVENT->xCoord = nWidth - 20;
 					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
 					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
 
+					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+					currentPoint.x = mEVENT->xCoord;
+					currentPoint.y = mEVENT->yCoord;
+
+					m_changeWindow = TRUE;
+					whereisPoint = 4;
+					//		currentID = 4;
+					
 					HideCursorAll();
 
 					m_allowSend = TRUE;
@@ -716,12 +724,13 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					return TRUE;
 
 				} else if(m_changeWindow == TRUE){ // scroll lock이 눌러져 있으면
-					mEVENT->xCoord = nWidth - 15;
+					mEVENT->xCoord = nWidth - 20;
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
 
 					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-
-					/*keybd_event(VK_SCROLL, 0, 0, 0);
-					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
+					currentPoint.x = mEVENT->xCoord;
+					currentPoint.y = mEVENT->yCoord;
 					m_changeWindow = FALSE;
 					whereisPoint = 5;
 					//		currentID = 6;
@@ -740,17 +749,18 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		if(mEVENT->yCoord <= 2) { // 화면 위쪽에 붙을 때
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[1] != 0)){ // 바인딩이 2번버튼에있을때
 				if(m_changeWindow == FALSE){
-
-					// scroll lock이 안눌러져 있으면
-					mEVENT->yCoord = nHeight - 15;
-
-					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-					/*keybd_event(VK_SCROLL, 0, 0, 0);
-					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
-					m_changeWindow = TRUE;
-
+					
 					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
 					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+					// scroll lock이 안눌러져 있으면
+					mEVENT->yCoord = nHeight - 20;
+
+					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+					currentPoint.x = mEVENT->xCoord;
+					currentPoint.y = mEVENT->yCoord;
+
+					m_changeWindow = TRUE;
+
 					whereisPoint = 2;
 					//	currentID = 2;
 					m_allowSend = TRUE;
@@ -761,11 +771,15 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			} else if((whereisPoint == 8) && (m_tab1.btn_Bind[7] != 0)){ // 8번 버튼에 바인딩되어있을 때
 				if(m_changeWindow == TRUE) // scroll lock이 눌러져 있으면
 				{
-					mEVENT->yCoord = nHeight - 15;
-
+					
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+					mEVENT->yCoord = nHeight - 20;
+					
 					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-					/*	keybd_event(VK_SCROLL, 0, 0, 0);
-					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
+					currentPoint.x = mEVENT->xCoord;
+					currentPoint.y = mEVENT->yCoord;
+
 					m_changeWindow = FALSE;
 					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
 					::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
@@ -780,23 +794,25 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			}
 		}
 
-		if(mEVENT->xCoord >= nWidth - 10){	 // 화면 오른 쪽에 붙을 때
+		if(mEVENT->xCoord >= nWidth - 2){	 // 화면 오른 쪽에 붙을 때
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[5] != 0)){ // 바인딩이 6번버튼에 있을 때
 				if(m_changeWindow == TRUE){
 					return TRUE;
 				} else if(m_changeWindow == FALSE) // scroll lock이 안눌러져 있으면
 				{
-					mEVENT->xCoord = 15;
+					
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+					mEVENT->xCoord = 20;
 
 					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-
+					currentPoint.x = mEVENT->xCoord;
+					currentPoint.y = mEVENT->yCoord;
 
 					/*keybd_event(VK_SCROLL, 0, 0, 0);
 					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
 					m_changeWindow = TRUE;
 
-					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
-					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
 					whereisPoint = 6;
 					//	currentID = 6;
 					m_allowSend = TRUE;
@@ -807,8 +823,13 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			} else if((whereisPoint == 4) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 4번 버튼에 있을 때
 				if(m_changeWindow == TRUE) // scroll lock이 눌러져 있으면
 				{
-					mEVENT->xCoord = 15;
+					
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+					mEVENT->xCoord = 20;
 					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+					currentPoint.x = mEVENT->xCoord;
+					currentPoint.y = mEVENT->yCoord;
 					/*keybd_event(VK_SCROLL, 0, 0, 0);
 					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
 					m_changeWindow = FALSE;
@@ -827,19 +848,22 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			}
 		}
 
-		if(mEVENT->yCoord >= nHeight - 10){ // 화면 아래쪽에 붙을 때
+		if(mEVENT->yCoord >= nHeight - 2){ // 화면 아래쪽에 붙을 때
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[7] != 0)){ // 바인딩이 8번 버튼에 있을 때
 				if(m_changeWindow == FALSE) // scroll lock이 안눌러져 있으면
 				{
-					mEVENT->yCoord = 15;
+					
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+					mEVENT->yCoord = 20;
 					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+					currentPoint.x = mEVENT->xCoord;
+					currentPoint.y = mEVENT->yCoord;
 					/*keybd_event(VK_SCROLL, 0, 0, 0);
 					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
 					m_changeWindow = TRUE;
 					whereisPoint = 8;
 					//	currentID = 8;
-					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
-					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
 					m_allowSend = TRUE;
 					TRACE("서버쪽에 있다가 아래쪽으로 붙음, 바인딩이 8번 버튼에 되어 있음\n");
 					HideCursorAll();
@@ -849,10 +873,14 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 
 				if(m_changeWindow = TRUE){ // scroll lock이 눌러져 있으면
-					mEVENT->yCoord = 15;
+					
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+					mEVENT->yCoord = 20;
 					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-					/*keybd_event(VK_SCROLL, 0, 0, 0);
-					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
+					currentPoint.x = mEVENT->xCoord;
+					currentPoint.y = mEVENT->yCoord;
+
 					m_changeWindow = FALSE;
 					whereisPoint = 5;
 					//		currentID = 2;
@@ -885,7 +913,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			TRACE("x : %d, y : %d\n", mEVENT->xCoord, mEVENT->yCoord);
 			CPassUChildSocket * s = (CPassUChildSocket *)m_pSockList.GetAt(pos);
 
-			while(m_tab1.btn_Bind[whereisPoint - 1] != s->c_id && pos != NULL){
+			while((m_tab1.btn_Bind[whereisPoint - 1] != s->c_id) && (pos != NULL)){
 				(CPassUChildSocket *)m_pSockList.GetNext(pos);
 			}
 

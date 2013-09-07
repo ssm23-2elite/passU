@@ -1,4 +1,4 @@
-﻿빌드 시작: 2013-09-07 오전 5:44:13
+﻿빌드 시작: 2013-09-07 오후 11:04:02
      1>2 노드의 "C:\Users\Administrator\Desktop\Mini Project\passU\src\windows\passU _T_T\ServerHook\ServerHook.vcxproj" 프로젝트(Rebuild 대상)입니다.
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl- /Od /Oy- /D _WINDLL /D _WINDLL /D _MBCS /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug\\" /Fd".\Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt ServerHook.cpp
@@ -12,4 +12,4 @@
 
 빌드했습니다.
 
-경과 시간: 00:00:02.87
+경과 시간: 00:00:03.43
