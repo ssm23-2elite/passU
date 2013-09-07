@@ -56,6 +56,11 @@ public:
 	BOOL m_allowSend; // 클라이언트에 정보를 보낼지 말지를 결정하는 FLAG
 	BOOL m_changeWindow;
 
+	void LoadCursorAll();
+	void ShowCursorAll();
+	void HideCursorAll();
+	void DestroyCursorAll();
+
 	//cursor 저장하는 핸들
 	HCURSOR hcur_UPARROW;
 	HCURSOR hcur_SIZEWE;
@@ -72,6 +77,9 @@ public:
     HCURSOR hcur_ARROW;
     HCURSOR hcur_APPSTARTING;
     HCURSOR hcur_WAIT;
+
+	// 감추기 전용 커서
+	HCURSOR hcur_HIDDEN;
 
 	//dll의 handle
 	HWND dllWnd;

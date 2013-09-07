@@ -141,36 +141,7 @@ BOOL CPassUDlg::OnInitDialog()
 	}
 
 	//마우스 커서 로딩
-	hcur_UPARROW = LoadCursor(NULL,IDC_UPARROW);
-	hcur_UPARROW = CopyCursor(hcur_UPARROW);
-	hcur_SIZEWE = LoadCursor(NULL, IDC_SIZEWE);
-	hcur_SIZEWE = CopyCursor(hcur_SIZEWE);
-	hcur_SIZENWSE = LoadCursor(NULL, IDC_SIZENWSE);
-	hcur_SIZENWSE = CopyCursor(hcur_SIZENWSE);
-	hcur_SIZENS = LoadCursor(NULL, IDC_SIZENS);
-	hcur_SIZENS = CopyCursor(hcur_SIZENS);
-	hcur_SIZENESW = LoadCursor(NULL, IDC_SIZENESW);
-	hcur_SIZENESW = CopyCursor(hcur_SIZENESW);
-	hcur_SIZEALL = LoadCursor(NULL, IDC_SIZEALL);
-	hcur_SIZEALL = CopyCursor(hcur_SIZEALL);
-	hcur_SIZE = LoadCursor(NULL, IDC_SIZE);
-	hcur_SIZE = CopyCursor(hcur_SIZE);
-	hcur_NO = LoadCursor(NULL, IDC_NO);
-	hcur_NO = CopyCursor(hcur_NO);
-	hcur_ICON = LoadCursor(NULL, IDC_ICON);
-	hcur_ICON = CopyCursor(hcur_ICON);
-	hcur_IBEAM = LoadCursor(NULL, IDC_IBEAM);
-	hcur_IBEAM = CopyCursor(hcur_IBEAM);
-	hcur_HELP = LoadCursor(NULL, IDC_HELP);
-	hcur_HELP = CopyCursor(hcur_HELP);
-	hcur_CROSS = LoadCursor(NULL, IDC_CROSS);
-	hcur_CROSS = CopyCursor(hcur_CROSS);
-	hcur_ARROW = LoadCursor(NULL, IDC_ARROW);
-	hcur_ARROW = CopyCursor(hcur_ARROW);
-	hcur_APPSTARTING = LoadCursor(NULL, IDC_APPSTARTING);
-	hcur_APPSTARTING = CopyCursor(hcur_APPSTARTING); 
-	hcur_WAIT = LoadCursor(NULL, IDC_WAIT);
-	hcur_WAIT = CopyCursor(hcur_WAIT);
+	LoadCursorAll();
 
 	m_changeWindow = FALSE;
 
@@ -226,7 +197,82 @@ HCURSOR CPassUDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+void CPassUDlg::LoadCursorAll() {
+	hcur_UPARROW = CopyCursor(LoadCursor(NULL, IDC_UPARROW));
+	hcur_SIZEWE = CopyCursor(LoadCursor(NULL, IDC_SIZEWE));
+	hcur_SIZENWSE = CopyCursor(LoadCursor(NULL, IDC_SIZENESW));
+	hcur_SIZENS = CopyCursor(LoadCursor(NULL, IDC_SIZENESW));
+	hcur_SIZENESW = CopyCursor(LoadCursor(NULL, IDC_SIZENESW));
+	hcur_SIZEALL = CopyCursor(LoadCursor(NULL, IDC_SIZEALL));
+	hcur_SIZE = CopyCursor(LoadCursor(NULL, IDC_SIZE));
+	hcur_NO = CopyCursor(LoadCursor(NULL, IDC_NO));
+	hcur_ICON = CopyCursor(LoadCursor(NULL, IDC_ICON));
+	hcur_IBEAM = CopyCursor(LoadCursor(NULL, IDC_IBEAM));
+	hcur_HELP = CopyCursor(LoadCursor(NULL, IDC_HELP));
+	hcur_CROSS = CopyCursor(LoadCursor(NULL, IDC_CROSS));
+	hcur_ARROW = CopyCursor(LoadCursor(NULL, IDC_ARROW));
+	hcur_APPSTARTING = CopyCursor(LoadCursor(NULL, IDC_APPSTARTING));
+	hcur_WAIT = CopyCursor(LoadCursor(NULL, IDC_WAIT));
 
+	hcur_HIDDEN = CopyCursor(::LoadCursorFromFile("trans.cur"));
+}
+
+void CPassUDlg::ShowCursorAll() {
+	::SetSystemCursor(hcur_ARROW, 32512);    // IDC_ARROW
+	::SetSystemCursor(hcur_IBEAM, 32513);    // IDC_IBEAM
+	::SetSystemCursor(hcur_WAIT, 32514);    // IDC_WAIT
+	::SetSystemCursor(hcur_CROSS, 32515);    // IDC_CROSS
+	::SetSystemCursor(hcur_UPARROW, 32516);    // IDC_UPARROW
+	::SetSystemCursor(hcur_SIZE, 32640);    // IDC_SIZE        
+	::SetSystemCursor(hcur_ICON, 32641);    // IDC_ICON
+	::SetSystemCursor(hcur_SIZENWSE, 32642);    // IDC_SIZENWSE
+	::SetSystemCursor(hcur_SIZEWE, 32644);    // IDC_SIZEWE
+	::SetSystemCursor(hcur_SIZENS, 32645);    // IDC_SIZENS
+	::SetSystemCursor(hcur_SIZENESW, 32643);    // IDC_SIZENESW            
+	::SetSystemCursor(hcur_SIZEALL, 32646);    // IDC_SIZEALL
+	::SetSystemCursor(hcur_NO, 32648);    // IDC_NO    
+	::SetSystemCursor(hcur_APPSTARTING, 32650);    // IDC_APPSTARTING
+	::SetSystemCursor(hcur_HELP, 32651);    // IDC_HELP
+}
+
+void CPassUDlg::HideCursorAll() {
+	::SetSystemCursor(hcur_HIDDEN, 32512);    // IDC_ARROW
+	::SetSystemCursor(hcur_HIDDEN, 32513);    // IDC_IBEAM
+	::SetSystemCursor(hcur_HIDDEN, 32514);    // IDC_WAIT
+	::SetSystemCursor(hcur_HIDDEN, 32515);    // IDC_CROSS
+	::SetSystemCursor(hcur_HIDDEN, 32516);    // IDC_UPARROW
+	::SetSystemCursor(hcur_HIDDEN, 32640);    // IDC_SIZE        
+	::SetSystemCursor(hcur_HIDDEN, 32641);    // IDC_ICON
+	::SetSystemCursor(hcur_HIDDEN, 32642);    // IDC_SIZENWSE
+	::SetSystemCursor(hcur_HIDDEN, 32644);    // IDC_SIZEWE
+	::SetSystemCursor(hcur_HIDDEN, 32645);    // IDC_SIZENS
+	::SetSystemCursor(hcur_HIDDEN, 32643);    // IDC_SIZENESW            
+	::SetSystemCursor(hcur_HIDDEN, 32646);    // IDC_SIZEALL
+	::SetSystemCursor(hcur_HIDDEN, 32648);    // IDC_NO    
+	::SetSystemCursor(hcur_HIDDEN, 32650);    // IDC_APPSTARTING
+	::SetSystemCursor(hcur_HIDDEN, 32651);    // IDC_HELP
+}
+
+void CPassUDlg::DestroyCursorAll() {
+	ShowCursorAll();
+	::DestroyCursor(hcur_ARROW);
+	::DestroyCursor(hcur_ARROW);
+	::DestroyCursor(hcur_IBEAM);
+	::DestroyCursor(hcur_WAIT);
+	::DestroyCursor(hcur_CROSS);
+	::DestroyCursor(hcur_UPARROW);
+	::DestroyCursor(hcur_SIZE);
+	::DestroyCursor(hcur_ICON);
+	::DestroyCursor(hcur_SIZENWSE);
+	::DestroyCursor(hcur_SIZEWE);
+	::DestroyCursor(hcur_SIZENS);
+	::DestroyCursor(hcur_SIZENESW);
+	::DestroyCursor(hcur_SIZEALL);
+	::DestroyCursor(hcur_NO);
+	::DestroyCursor(hcur_APPSTARTING);
+	::DestroyCursor(hcur_HELP);
+	::DestroyCursor(hcur_HIDDEN);
+}
 
 void CPassUDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 {
@@ -560,6 +606,7 @@ void CPassUDlg::OnDestroy()
 {
 	CDialogEx::OnDestroy();
 
+	DestroyCursorAll();
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }
 
@@ -691,8 +738,8 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
 		TRACE("MOUSE DATA 도착\n");
 		int i = 0;
-		
-				
+
+
 		if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 3에 되어 있을 때(4번 버튼)
 				if(m_changeWindow == FALSE){ // scroll lock이 안눌러져 있으면
@@ -707,21 +754,8 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
 					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
 
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32512);    // IDC_ARROW
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32513);    // IDC_IBEAM
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32514);    // IDC_WAIT
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32515);    // IDC_CROSS
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32516);    // IDC_UPARROW
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32640);    // IDC_SIZE
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32641);    // IDC_ICON
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32642);    // IDC_SIZENWSE
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32643);    // IDC_SIZENESW
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32644);    // IDC_SIZEWE
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32645);    // IDC_SIZENS
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32646);    // IDC_SIZEALL
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32648);    // IDC_NO
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32650);    // IDC_APPSTARTING
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32651);    // IDC_HELP
+					HideCursorAll();
+
 					m_allowSend = TRUE;
 					TRACE("서버쪽에 있다가 왼쪽으로 붙음, 바인딩이 4번 버튼에 되어있음\n");
 				}
@@ -748,23 +782,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					TRACE("6번 버튼에 있다가 왼쪽으로 붙어서 서버로 돌아옴, 바인딩이 6번버튼에 되어 있음\n");
 					// 원래대로 마우스 커서 돌리기
 
-					//hcur_ARROW = CopyCursor(LoadCursor(NULL, IDC_ARROW));
-
-					//::SetSystemCursor(::SetCursor(hcur_ARROW), 32512);    // IDC_ARROW
-					//::SetSystemCursor(::SetCursor(hcur_IBEAM), 32513);    // IDC_IBEAM
-					//::SetSystemCursor(::SetCursor(hcur_WAIT), 32514);    // IDC_WAIT
-					//::SetSystemCursor(::SetCursor(hcur_CROSS), 32515);    // IDC_CROSS
-					//::SetSystemCursor(::SetCursor(hcur_UPARROW), 32516);    // IDC_UPARROW
-					//::SetSystemCursor(::SetCursor(hcur_SIZE), 32640);    // IDC_SIZE        
-					//::SetSystemCursor(::SetCursor(hcur_ICON), 32641);    // IDC_ICON
-					//::SetSystemCursor(::SetCursor(hcur_SIZENWSE), 32642);    // IDC_SIZENWSE
-					//::SetSystemCursor(::SetCursor(hcur_SIZEWE), 32644);    // IDC_SIZEWE
-					//::SetSystemCursor(::SetCursor(hcur_SIZENS), 32645);    // IDC_SIZENS
-					//::SetSystemCursor(::SetCursor(hcur_SIZENESW), 32643);    // IDC_SIZENESW            
-					//::SetSystemCursor(::SetCursor(hcur_SIZEALL), 32646);    // IDC_SIZEALL
-					//::SetSystemCursor(::SetCursor(hcur_NO), 32648);    // IDC_NO    
-					//::SetSystemCursor(::SetCursor(hcur_APPSTARTING), 32650);    // IDC_APPSTARTING
-					//::SetSystemCursor(::SetCursor(hcur_HELP), 32651);    // IDC_HELP
+					ShowCursorAll();
 				}
 			}
 		}
@@ -779,29 +797,16 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
 					/*keybd_event(VK_SCROLL, 0, 0, 0);
 					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
-				m_changeWindow = TRUE;
-					
+					m_changeWindow = TRUE;
+
 					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
 					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
 					whereisPoint = 2;
 					//	currentID = 2;
 					m_allowSend = TRUE;
 					TRACE("서버쪽에 있다가 위쪽으로 붙음, 바인딩이 2번 버튼에 되어 있음\n");
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32512);    // IDC_ARROW
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32513);    // IDC_IBEAM
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32514);    // IDC_WAIT
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32515);    // IDC_CROSS
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32516);    // IDC_UPARROW
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32640);    // IDC_SIZE
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32641);    // IDC_ICON
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32642);    // IDC_SIZENWSE
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32643);    // IDC_SIZENESW
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32644);    // IDC_SIZEWE
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32645);    // IDC_SIZENS
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32646);    // IDC_SIZEALL
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32648);    // IDC_NO
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32650);    // IDC_APPSTARTING
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32651);    // IDC_HELP
+					
+					HideCursorAll();
 				}
 			} else if((whereisPoint == 8) && (m_tab1.btn_Bind[7] != 0)){ // 8번 버튼에 바인딩되어있을 때
 				if(m_changeWindow == TRUE) // scroll lock이 눌러져 있으면
@@ -809,7 +814,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					mEVENT->yCoord = nHeight - 15;
 
 					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				/*	keybd_event(VK_SCROLL, 0, 0, 0);
+					/*	keybd_event(VK_SCROLL, 0, 0, 0);
 					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
 					m_changeWindow = FALSE;
 					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
@@ -819,21 +824,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					m_allowSend = FALSE;
 					TRACE("8번 버튼에 있다가 위쪽으로 붙어서 서버로 돌아옴, 바인딩이 8번버튼에 되어 있음\n");
 					// 원래대로 마우스 커서 돌리기
-					//::SetSystemCursor(::SetCursor(hcur_ARROW), 32512);    // IDC_ARROW
-					//::SetSystemCursor(::SetCursor(hcur_IBEAM), 32513);    // IDC_IBEAM
-					//::SetSystemCursor(::SetCursor(hcur_WAIT), 32514);    // IDC_WAIT
-					//::SetSystemCursor(::SetCursor(hcur_CROSS), 32515);    // IDC_CROSS
-					//::SetSystemCursor(::SetCursor(hcur_UPARROW), 32516);    // IDC_UPARROW
-					//::SetSystemCursor(::SetCursor(hcur_SIZE), 32640);    // IDC_SIZE        
-					//::SetSystemCursor(::SetCursor(hcur_ICON), 32641);    // IDC_ICON
-					//::SetSystemCursor(::SetCursor(hcur_SIZENWSE), 32642);    // IDC_SIZENWSE
-					//::SetSystemCursor(::SetCursor(hcur_SIZEWE), 32644);    // IDC_SIZEWE
-					//::SetSystemCursor(::SetCursor(hcur_SIZENS), 32645);    // IDC_SIZENS
-					//::SetSystemCursor(::SetCursor(hcur_SIZENESW), 32643);    // IDC_SIZENESW            
-					//::SetSystemCursor(::SetCursor(hcur_SIZEALL), 32646);    // IDC_SIZEALL
-					//::SetSystemCursor(::SetCursor(hcur_NO), 32648);    // IDC_NO    
-					//::SetSystemCursor(::SetCursor(hcur_APPSTARTING), 32650);    // IDC_APPSTARTING
-					//::SetSystemCursor(::SetCursor(hcur_HELP), 32651);    // IDC_HELP
+					ShowCursorAll();
 				}
 			}
 		}
@@ -860,21 +851,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					m_allowSend = TRUE;
 
 					TRACE("서버쪽에 있다가 오른쪽으로 붙음, 바인딩이 6번 버튼에 되어 있음\n");
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32512);    // IDC_ARROW
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32513);    // IDC_IBEAM
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32514);    // IDC_WAIT
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32515);    // IDC_CROSS
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32516);    // IDC_UPARROW
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32640);    // IDC_SIZE
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32641);    // IDC_ICON
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32642);    // IDC_SIZENWSE
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32643);    // IDC_SIZENESW
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32644);    // IDC_SIZEWE
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32645);    // IDC_SIZENS
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32646);    // IDC_SIZEALL
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32648);    // IDC_NO
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32650);    // IDC_APPSTARTING
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32651);    // IDC_HELP
+					HideCursorAll();
 				}
 
 			} else if((whereisPoint == 4) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 4번 버튼에 있을 때
@@ -892,21 +869,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					m_allowSend = FALSE;
 
 					// 원래대로 마우스 커서 돌리기
-					//::SetSystemCursor(::SetCursor(hcur_ARROW), 32512);    // IDC_ARROW
-					//::SetSystemCursor(::SetCursor(hcur_IBEAM), 32513);    // IDC_IBEAM
-					//::SetSystemCursor(::SetCursor(hcur_WAIT), 32514);    // IDC_WAIT
-					//::SetSystemCursor(::SetCursor(hcur_CROSS), 32515);    // IDC_CROSS
-					//::SetSystemCursor(::SetCursor(hcur_UPARROW), 32516);    // IDC_UPARROW
-					//::SetSystemCursor(::SetCursor(hcur_SIZE), 32640);    // IDC_SIZE        
-					//::SetSystemCursor(::SetCursor(hcur_ICON), 32641);    // IDC_ICON
-					//::SetSystemCursor(::SetCursor(hcur_SIZENWSE), 32642);    // IDC_SIZENWSE
-					//::SetSystemCursor(::SetCursor(hcur_SIZEWE), 32644);    // IDC_SIZEWE
-					//::SetSystemCursor(::SetCursor(hcur_SIZENS), 32645);    // IDC_SIZENS
-					//::SetSystemCursor(::SetCursor(hcur_SIZENESW), 32643);    // IDC_SIZENESW            
-					//::SetSystemCursor(::SetCursor(hcur_SIZEALL), 32646);    // IDC_SIZEALL
-					//::SetSystemCursor(::SetCursor(hcur_NO), 32648);    // IDC_NO    
-					//::SetSystemCursor(::SetCursor(hcur_APPSTARTING), 32650);    // IDC_APPSTARTING
-					//::SetSystemCursor(::SetCursor(hcur_HELP), 32651);    // IDC_HELP        
+					ShowCursorAll();       
 
 				}
 
@@ -929,21 +892,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
 					m_allowSend = TRUE;
 					TRACE("서버쪽에 있다가 아래쪽으로 붙음, 바인딩이 8번 버튼에 되어 있음\n");
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32512);    // IDC_ARROW
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32513);    // IDC_IBEAM
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32514);    // IDC_WAIT
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32515);    // IDC_CROSS
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32516);    // IDC_UPARROW
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32640);    // IDC_SIZE
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32641);    // IDC_ICON
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32642);    // IDC_SIZENWSE
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32643);    // IDC_SIZENESW
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32644);    // IDC_SIZEWE
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32645);    // IDC_SIZENS
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32646);    // IDC_SIZEALL
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32648);    // IDC_NO
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32650);    // IDC_APPSTARTING
-					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32651);    // IDC_HELP
+					HideCursorAll();
 				}
 
 			} else if((whereisPoint == 2) && (m_tab1.btn_Bind[1] != 0)){ // 바인딩이 2번 버튼에 되어 있을 때
@@ -960,21 +909,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
 					::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
 					// 원래대로 마우스 커서 돌리기
-					//::SetSystemCursor(::SetCursor(hcur_ARROW), 32512);    // IDC_ARROW
-					//::SetSystemCursor(::SetCursor(hcur_IBEAM), 32513);    // IDC_IBEAM
-					//::SetSystemCursor(::SetCursor(hcur_WAIT), 32514);    // IDC_WAIT
-					//::SetSystemCursor(::SetCursor(hcur_CROSS), 32515);    // IDC_CROSS
-					//::SetSystemCursor(::SetCursor(hcur_UPARROW), 32516);    // IDC_UPARROW
-					//::SetSystemCursor(::SetCursor(hcur_SIZE), 32640);    // IDC_SIZE        
-					//::SetSystemCursor(::SetCursor(hcur_ICON), 32641);    // IDC_ICON
-					//::SetSystemCursor(::SetCursor(hcur_SIZENWSE), 32642);    // IDC_SIZENWSE
-					//::SetSystemCursor(::SetCursor(hcur_SIZEWE), 32644);    // IDC_SIZEWE
-					//::SetSystemCursor(::SetCursor(hcur_SIZENS), 32645);    // IDC_SIZENS
-					//::SetSystemCursor(::SetCursor(hcur_SIZENESW), 32643);    // IDC_SIZENESW            
-					//::SetSystemCursor(::SetCursor(hcur_SIZEALL), 32646);    // IDC_SIZEALL
-					//::SetSystemCursor(::SetCursor(hcur_NO), 32648);    // IDC_NO    
-					//::SetSystemCursor(::SetCursor(hcur_APPSTARTING), 32650);    // IDC_APPSTARTING
-					//::SetSystemCursor(::SetCursor(hcur_HELP), 32651);    // IDC_HELP
+					ShowCursorAll();
 					m_allowSend = FALSE;
 					TRACE("2번에 있다가 아래쪽으로 붙음, 바인딩이 2번 버튼에 되어 있음\n");
 				}

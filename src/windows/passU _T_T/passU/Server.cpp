@@ -139,8 +139,7 @@ BOOL CServer::OnInitDialog()
 		WSACleanup();
 	}
 
-	serverIPAddress.Append(strIpAddress);
-
+	SetDlgItemText(IDC_IPADDRESS, strIpAddress);
 
 	hinstDLL = LoadLibrary(_T("ServerHook.dll"));
 	if(!hinstDLL)
