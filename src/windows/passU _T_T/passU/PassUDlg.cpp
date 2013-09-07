@@ -133,6 +133,47 @@ BOOL CPassUDlg::OnInitDialog()
 
 	// 처음에는 클라이언트에 정보를 보내지 않는다.
 	m_allowSend = FALSE;
+
+	//Scroll_lock 안눌러져있는 상태로 만든다.
+	if(::GetKeyState(VK_SCROLL) < 0){
+		keybd_event(VK_SCROLL, 0, 0, 0);
+		keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);
+	}
+
+	//마우스 커서 로딩
+	hcur_UPARROW = LoadCursor(NULL,IDC_UPARROW);
+	hcur_UPARROW = CopyCursor(hcur_UPARROW);
+	hcur_SIZEWE = LoadCursor(NULL, IDC_SIZEWE);
+	hcur_SIZEWE = CopyCursor(hcur_SIZEWE);
+	hcur_SIZENWSE = LoadCursor(NULL, IDC_SIZENWSE);
+	hcur_SIZENWSE = CopyCursor(hcur_SIZENWSE);
+	hcur_SIZENS = LoadCursor(NULL, IDC_SIZENS);
+	hcur_SIZENS = CopyCursor(hcur_SIZENS);
+	hcur_SIZENESW = LoadCursor(NULL, IDC_SIZENESW);
+	hcur_SIZENESW = CopyCursor(hcur_SIZENESW);
+	hcur_SIZEALL = LoadCursor(NULL, IDC_SIZEALL);
+	hcur_SIZEALL = CopyCursor(hcur_SIZEALL);
+	hcur_SIZE = LoadCursor(NULL, IDC_SIZE);
+	hcur_SIZE = CopyCursor(hcur_SIZE);
+	hcur_NO = LoadCursor(NULL, IDC_NO);
+	hcur_NO = CopyCursor(hcur_NO);
+	hcur_ICON = LoadCursor(NULL, IDC_ICON);
+	hcur_ICON = CopyCursor(hcur_ICON);
+	hcur_IBEAM = LoadCursor(NULL, IDC_IBEAM);
+	hcur_IBEAM = CopyCursor(hcur_IBEAM);
+	hcur_HELP = LoadCursor(NULL, IDC_HELP);
+	hcur_HELP = CopyCursor(hcur_HELP);
+	hcur_CROSS = LoadCursor(NULL, IDC_CROSS);
+	hcur_CROSS = CopyCursor(hcur_CROSS);
+	hcur_ARROW = LoadCursor(NULL, IDC_ARROW);
+	hcur_ARROW = CopyCursor(hcur_ARROW);
+	hcur_APPSTARTING = LoadCursor(NULL, IDC_APPSTARTING);
+	hcur_APPSTARTING = CopyCursor(hcur_APPSTARTING); 
+	hcur_WAIT = LoadCursor(NULL, IDC_WAIT);
+	hcur_WAIT = CopyCursor(hcur_WAIT);
+
+	m_changeWindow = FALSE;
+
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -258,7 +299,7 @@ int CPassUDlg::ParseData(char *buf, int len)
 	} else if(msgType == MSG_CLIENT) {
 		CPACKET packet;
 
- 		ParseClientData(buf, &packet);
+		ParseClientData(buf, &packet);
 
 		COPYDATASTRUCT CDS;
 
@@ -533,7 +574,7 @@ void CPassUDlg::OnConnectStart(void)
 	ZeroMemory(buf, sizeof(buf));
 	sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
 		MSG_CLIENT, 0, STATUS_PC, 1, 0, m_tab2.ipFirst, m_tab2.ipSecond, m_tab2.ipThird, m_tab2.ipForth, nWidth, nHeight);
-	
+
 	m_pClient->Send((LPCSTR *)&buf, SIZEOFPACKET); // 헬로 패킷 보냄
 }
 
@@ -565,9 +606,6 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 			keybd_event(packet.keyCode, 0, KEYEVENTF_KEYUP, 0);
 		else if(packet.updownFlag == 0){ // down
 			keybd_event(packet.keyCode, 0, 0, 0);
-			if(packet.keyCode == VK_SCROLL){
-				mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-			}
 		}
 	} else if(msgType == MSG_MOUSE) {
 		MPACKET packet;
@@ -597,7 +635,7 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		ZeroMemory(&packet, sizeof(DPACKET));
 
 		memcpy(&packet.usbdesc, buf + sizeof(packet.msgType) + sizeof(packet.len), packet.len);
-		
+
 		COPYDATASTRUCT CDS;
 
 		CDS.dwData = 4; // receiveData
@@ -653,92 +691,295 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
 		TRACE("MOUSE DATA 도착\n");
 		int i = 0;
+		
+				
 		if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 3에 되어 있을 때(4번 버튼)
-				mEVENT->xCoord = nWidth - 15;
+				if(m_changeWindow == FALSE){ // scroll lock이 안눌러져 있으면
+					mEVENT->xCoord = nWidth - 15;
 
-				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				whereisPoint = 4;
-				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
-				::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+					/*keybd_event(VK_SCROLL, 0, 0, 0);
+					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
+					m_changeWindow = TRUE;
+					whereisPoint = 4;
+					//		currentID = 4;
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
 
-				m_allowSend = TRUE;
-				TRACE("서버쪽에 있다가 왼쪽으로 붙음, 바인딩이 4번 버튼에 되어있음\n");
-
-
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32512);    // IDC_ARROW
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32513);    // IDC_IBEAM
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32514);    // IDC_WAIT
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32515);    // IDC_CROSS
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32516);    // IDC_UPARROW
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32640);    // IDC_SIZE
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32641);    // IDC_ICON
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32642);    // IDC_SIZENWSE
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32643);    // IDC_SIZENESW
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32644);    // IDC_SIZEWE
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32645);    // IDC_SIZENS
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32646);    // IDC_SIZEALL
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32648);    // IDC_NO
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32650);    // IDC_APPSTARTING
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32651);    // IDC_HELP
+					m_allowSend = TRUE;
+					TRACE("서버쪽에 있다가 왼쪽으로 붙음, 바인딩이 4번 버튼에 되어있음\n");
+				}
 			} else if((whereisPoint == 6) && (m_tab1.btn_Bind[5] != 0)){ // 6번버튼에 바인딩되어있을 때
-				mEVENT->xCoord = nWidth - 15;
-				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				whereisPoint = 5;
-				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
-				::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+				if(m_changeWindow == FALSE){
+					return TRUE;
 
-				m_allowSend = FALSE;
-				TRACE("6번 버튼에 있다가 왼쪽으로 붙어서 서버로 돌아옴, 바인딩이 6번버튼에 되어 있음\n");
+				} else if(m_changeWindow == TRUE){ // scroll lock이 눌러져 있으면
+					mEVENT->xCoord = nWidth - 15;
+
+					Sleep(1000);
+					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+					Sleep(1000);
+
+					/*keybd_event(VK_SCROLL, 0, 0, 0);
+					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
+					m_changeWindow = FALSE;
+					whereisPoint = 5;
+					//		currentID = 6;
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+
+					m_allowSend = FALSE;
+					TRACE("6번 버튼에 있다가 왼쪽으로 붙어서 서버로 돌아옴, 바인딩이 6번버튼에 되어 있음\n");
+					// 원래대로 마우스 커서 돌리기
+
+					//hcur_ARROW = CopyCursor(LoadCursor(NULL, IDC_ARROW));
+
+					//::SetSystemCursor(::SetCursor(hcur_ARROW), 32512);    // IDC_ARROW
+					//::SetSystemCursor(::SetCursor(hcur_IBEAM), 32513);    // IDC_IBEAM
+					//::SetSystemCursor(::SetCursor(hcur_WAIT), 32514);    // IDC_WAIT
+					//::SetSystemCursor(::SetCursor(hcur_CROSS), 32515);    // IDC_CROSS
+					//::SetSystemCursor(::SetCursor(hcur_UPARROW), 32516);    // IDC_UPARROW
+					//::SetSystemCursor(::SetCursor(hcur_SIZE), 32640);    // IDC_SIZE        
+					//::SetSystemCursor(::SetCursor(hcur_ICON), 32641);    // IDC_ICON
+					//::SetSystemCursor(::SetCursor(hcur_SIZENWSE), 32642);    // IDC_SIZENWSE
+					//::SetSystemCursor(::SetCursor(hcur_SIZEWE), 32644);    // IDC_SIZEWE
+					//::SetSystemCursor(::SetCursor(hcur_SIZENS), 32645);    // IDC_SIZENS
+					//::SetSystemCursor(::SetCursor(hcur_SIZENESW), 32643);    // IDC_SIZENESW            
+					//::SetSystemCursor(::SetCursor(hcur_SIZEALL), 32646);    // IDC_SIZEALL
+					//::SetSystemCursor(::SetCursor(hcur_NO), 32648);    // IDC_NO    
+					//::SetSystemCursor(::SetCursor(hcur_APPSTARTING), 32650);    // IDC_APPSTARTING
+					//::SetSystemCursor(::SetCursor(hcur_HELP), 32651);    // IDC_HELP
+				}
 			}
 		}
 
 		if(mEVENT->yCoord <= 2) { // 화면 위쪽에 붙을 때
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[1] != 0)){ // 바인딩이 2번버튼에있을때
-				mEVENT->yCoord = nHeight - 15;
-				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
-				::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
-				whereisPoint = 2;
-				m_allowSend = TRUE;
-				TRACE("서버쪽에 있다가 위쪽으로 붙음, 바인딩이 2번 버튼에 되어 있음\n");
+				if(m_changeWindow == FALSE){
 
+					// scroll lock이 안눌러져 있으면
+					mEVENT->yCoord = nHeight - 15;
+
+					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+					/*keybd_event(VK_SCROLL, 0, 0, 0);
+					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
+				m_changeWindow = TRUE;
+					
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+					whereisPoint = 2;
+					//	currentID = 2;
+					m_allowSend = TRUE;
+					TRACE("서버쪽에 있다가 위쪽으로 붙음, 바인딩이 2번 버튼에 되어 있음\n");
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32512);    // IDC_ARROW
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32513);    // IDC_IBEAM
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32514);    // IDC_WAIT
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32515);    // IDC_CROSS
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32516);    // IDC_UPARROW
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32640);    // IDC_SIZE
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32641);    // IDC_ICON
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32642);    // IDC_SIZENWSE
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32643);    // IDC_SIZENESW
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32644);    // IDC_SIZEWE
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32645);    // IDC_SIZENS
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32646);    // IDC_SIZEALL
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32648);    // IDC_NO
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32650);    // IDC_APPSTARTING
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32651);    // IDC_HELP
+				}
 			} else if((whereisPoint == 8) && (m_tab1.btn_Bind[7] != 0)){ // 8번 버튼에 바인딩되어있을 때
-				mEVENT->yCoord = nHeight - 15;
-				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
-				::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
-				whereisPoint = 5;
-				m_allowSend = FALSE;
-				TRACE("8번 버튼에 있다가 위쪽으로 붙어서 서버로 돌아옴, 바인딩이 8번버튼에 되어 있음\n");
+				if(m_changeWindow == TRUE) // scroll lock이 눌러져 있으면
+				{
+					mEVENT->yCoord = nHeight - 15;
 
+					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+				/*	keybd_event(VK_SCROLL, 0, 0, 0);
+					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
+					m_changeWindow = FALSE;
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+					whereisPoint = 5;
+					//	currentID = 8;
+					m_allowSend = FALSE;
+					TRACE("8번 버튼에 있다가 위쪽으로 붙어서 서버로 돌아옴, 바인딩이 8번버튼에 되어 있음\n");
+					// 원래대로 마우스 커서 돌리기
+					//::SetSystemCursor(::SetCursor(hcur_ARROW), 32512);    // IDC_ARROW
+					//::SetSystemCursor(::SetCursor(hcur_IBEAM), 32513);    // IDC_IBEAM
+					//::SetSystemCursor(::SetCursor(hcur_WAIT), 32514);    // IDC_WAIT
+					//::SetSystemCursor(::SetCursor(hcur_CROSS), 32515);    // IDC_CROSS
+					//::SetSystemCursor(::SetCursor(hcur_UPARROW), 32516);    // IDC_UPARROW
+					//::SetSystemCursor(::SetCursor(hcur_SIZE), 32640);    // IDC_SIZE        
+					//::SetSystemCursor(::SetCursor(hcur_ICON), 32641);    // IDC_ICON
+					//::SetSystemCursor(::SetCursor(hcur_SIZENWSE), 32642);    // IDC_SIZENWSE
+					//::SetSystemCursor(::SetCursor(hcur_SIZEWE), 32644);    // IDC_SIZEWE
+					//::SetSystemCursor(::SetCursor(hcur_SIZENS), 32645);    // IDC_SIZENS
+					//::SetSystemCursor(::SetCursor(hcur_SIZENESW), 32643);    // IDC_SIZENESW            
+					//::SetSystemCursor(::SetCursor(hcur_SIZEALL), 32646);    // IDC_SIZEALL
+					//::SetSystemCursor(::SetCursor(hcur_NO), 32648);    // IDC_NO    
+					//::SetSystemCursor(::SetCursor(hcur_APPSTARTING), 32650);    // IDC_APPSTARTING
+					//::SetSystemCursor(::SetCursor(hcur_HELP), 32651);    // IDC_HELP
+				}
 			}
-		} 
+		}
 
 		if(mEVENT->xCoord >= nWidth - 10){	 // 화면 오른 쪽에 붙을 때
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[5] != 0)){ // 바인딩이 6번버튼에 있을 때
-				mEVENT->xCoord = 15;
-				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
-				::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
-				whereisPoint = 6;
-				m_allowSend = TRUE;
-				TRACE("서버쪽에 있다가 오른쪽으로 붙음, 바인딩이 6번 버튼에 되어 있음\n");
+				if(m_changeWindow == TRUE){
+					return TRUE;
+				} else if(m_changeWindow == FALSE) // scroll lock이 안눌러져 있으면
+				{
+					mEVENT->xCoord = 15;
+
+					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+
+
+					/*keybd_event(VK_SCROLL, 0, 0, 0);
+					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
+					m_changeWindow = TRUE;
+
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+					whereisPoint = 6;
+					//	currentID = 6;
+					m_allowSend = TRUE;
+
+					TRACE("서버쪽에 있다가 오른쪽으로 붙음, 바인딩이 6번 버튼에 되어 있음\n");
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32512);    // IDC_ARROW
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32513);    // IDC_IBEAM
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32514);    // IDC_WAIT
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32515);    // IDC_CROSS
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32516);    // IDC_UPARROW
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32640);    // IDC_SIZE
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32641);    // IDC_ICON
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32642);    // IDC_SIZENWSE
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32643);    // IDC_SIZENESW
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32644);    // IDC_SIZEWE
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32645);    // IDC_SIZENS
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32646);    // IDC_SIZEALL
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32648);    // IDC_NO
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32650);    // IDC_APPSTARTING
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32651);    // IDC_HELP
+				}
 
 			} else if((whereisPoint == 4) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 4번 버튼에 있을 때
-				mEVENT->xCoord = 15;
-				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
-				::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
-				whereisPoint = 5;
-				m_allowSend = FALSE;
+				if(m_changeWindow == TRUE) // scroll lock이 눌러져 있으면
+				{
+					mEVENT->xCoord = 15;
+					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+					/*keybd_event(VK_SCROLL, 0, 0, 0);
+					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
+					m_changeWindow = FALSE;
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+					whereisPoint = 5;
+					//	currentID = 4;
+					m_allowSend = FALSE;
+
+					// 원래대로 마우스 커서 돌리기
+					//::SetSystemCursor(::SetCursor(hcur_ARROW), 32512);    // IDC_ARROW
+					//::SetSystemCursor(::SetCursor(hcur_IBEAM), 32513);    // IDC_IBEAM
+					//::SetSystemCursor(::SetCursor(hcur_WAIT), 32514);    // IDC_WAIT
+					//::SetSystemCursor(::SetCursor(hcur_CROSS), 32515);    // IDC_CROSS
+					//::SetSystemCursor(::SetCursor(hcur_UPARROW), 32516);    // IDC_UPARROW
+					//::SetSystemCursor(::SetCursor(hcur_SIZE), 32640);    // IDC_SIZE        
+					//::SetSystemCursor(::SetCursor(hcur_ICON), 32641);    // IDC_ICON
+					//::SetSystemCursor(::SetCursor(hcur_SIZENWSE), 32642);    // IDC_SIZENWSE
+					//::SetSystemCursor(::SetCursor(hcur_SIZEWE), 32644);    // IDC_SIZEWE
+					//::SetSystemCursor(::SetCursor(hcur_SIZENS), 32645);    // IDC_SIZENS
+					//::SetSystemCursor(::SetCursor(hcur_SIZENESW), 32643);    // IDC_SIZENESW            
+					//::SetSystemCursor(::SetCursor(hcur_SIZEALL), 32646);    // IDC_SIZEALL
+					//::SetSystemCursor(::SetCursor(hcur_NO), 32648);    // IDC_NO    
+					//::SetSystemCursor(::SetCursor(hcur_APPSTARTING), 32650);    // IDC_APPSTARTING
+					//::SetSystemCursor(::SetCursor(hcur_HELP), 32651);    // IDC_HELP        
+
+				}
+
 				TRACE("4번 버튼에 있다가 서버쪽으로 돌아옴, 바인딩이 4번버튼에 되어 있음\n");
 			}
 		}
 
 		if(mEVENT->yCoord >= nHeight - 10){ // 화면 아래쪽에 붙을 때
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[7] != 0)){ // 바인딩이 8번 버튼에 있을 때
-				mEVENT->yCoord = 15;
-				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				whereisPoint = 8;
-				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
-				::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
-				m_allowSend = TRUE;
-				TRACE("서버쪽에 있다가 아래쪽으로 붙음, 바인딩이 8번 버튼에 되어 있음\n");
-			} else if((whereisPoint == 2) && (m_tab1.btn_Bind[1] != 0)){ // 바인딩이 2번 버튼에 되어 있을 때
-				mEVENT->yCoord = 15;
-				SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-				whereisPoint = 5;
-				::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
-				::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+				if(m_changeWindow == FALSE) // scroll lock이 안눌러져 있으면
+				{
+					mEVENT->yCoord = 15;
+					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+					/*keybd_event(VK_SCROLL, 0, 0, 0);
+					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
+					m_changeWindow = TRUE;
+					whereisPoint = 8;
+					//	currentID = 8;
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0); // 이 메시지를 보내면 이제 키보드 이벤트 처리는 안되고, 정보를 받아만 온다.
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0); // 이 메시지를 보내면 이제 마우스 이벤트 처리는 안되고, 정보를 받아만 온다.
+					m_allowSend = TRUE;
+					TRACE("서버쪽에 있다가 아래쪽으로 붙음, 바인딩이 8번 버튼에 되어 있음\n");
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32512);    // IDC_ARROW
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32513);    // IDC_IBEAM
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32514);    // IDC_WAIT
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32515);    // IDC_CROSS
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32516);    // IDC_UPARROW
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32640);    // IDC_SIZE
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32641);    // IDC_ICON
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32642);    // IDC_SIZENWSE
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32643);    // IDC_SIZENESW
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32644);    // IDC_SIZEWE
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32645);    // IDC_SIZENS
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32646);    // IDC_SIZEALL
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32648);    // IDC_NO
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32650);    // IDC_APPSTARTING
+					//::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32651);    // IDC_HELP
+				}
 
-				m_allowSend = FALSE;
-				TRACE("2번에 있다가 아래쪽으로 붙음, 바인딩이 2번 버튼에 되어 있음\n");
+			} else if((whereisPoint == 2) && (m_tab1.btn_Bind[1] != 0)){ // 바인딩이 2번 버튼에 되어 있을 때
+
+
+				if(m_changeWindow = TRUE){ // scroll lock이 눌러져 있으면
+					mEVENT->yCoord = 15;
+					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
+					/*keybd_event(VK_SCROLL, 0, 0, 0);
+					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
+					m_changeWindow = FALSE;
+					whereisPoint = 5;
+					//		currentID = 2;
+					::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+					::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+					// 원래대로 마우스 커서 돌리기
+					//::SetSystemCursor(::SetCursor(hcur_ARROW), 32512);    // IDC_ARROW
+					//::SetSystemCursor(::SetCursor(hcur_IBEAM), 32513);    // IDC_IBEAM
+					//::SetSystemCursor(::SetCursor(hcur_WAIT), 32514);    // IDC_WAIT
+					//::SetSystemCursor(::SetCursor(hcur_CROSS), 32515);    // IDC_CROSS
+					//::SetSystemCursor(::SetCursor(hcur_UPARROW), 32516);    // IDC_UPARROW
+					//::SetSystemCursor(::SetCursor(hcur_SIZE), 32640);    // IDC_SIZE        
+					//::SetSystemCursor(::SetCursor(hcur_ICON), 32641);    // IDC_ICON
+					//::SetSystemCursor(::SetCursor(hcur_SIZENWSE), 32642);    // IDC_SIZENWSE
+					//::SetSystemCursor(::SetCursor(hcur_SIZEWE), 32644);    // IDC_SIZEWE
+					//::SetSystemCursor(::SetCursor(hcur_SIZENS), 32645);    // IDC_SIZENS
+					//::SetSystemCursor(::SetCursor(hcur_SIZENESW), 32643);    // IDC_SIZENESW            
+					//::SetSystemCursor(::SetCursor(hcur_SIZEALL), 32646);    // IDC_SIZEALL
+					//::SetSystemCursor(::SetCursor(hcur_NO), 32648);    // IDC_NO    
+					//::SetSystemCursor(::SetCursor(hcur_APPSTARTING), 32650);    // IDC_APPSTARTING
+					//::SetSystemCursor(::SetCursor(hcur_HELP), 32651);    // IDC_HELP
+					m_allowSend = FALSE;
+					TRACE("2번에 있다가 아래쪽으로 붙음, 바인딩이 2번 버튼에 되어 있음\n");
+				}
+
+
 			}
 		}
 

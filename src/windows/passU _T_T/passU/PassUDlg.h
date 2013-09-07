@@ -50,10 +50,28 @@ public:
 	int nWidth;
 	int nHeight;
 	
-	
+	LPPOINT oldPoint;
+	LPPOINT currentPoint;
+
 	BOOL m_allowSend; // 클라이언트에 정보를 보낼지 말지를 결정하는 FLAG
+	BOOL m_changeWindow;
 
-
+	//cursor 저장하는 핸들
+	HCURSOR hcur_UPARROW;
+	HCURSOR hcur_SIZEWE;
+    HCURSOR hcur_SIZENWSE;
+    HCURSOR hcur_SIZENS;
+    HCURSOR hcur_SIZENESW;
+    HCURSOR hcur_SIZEALL;
+    HCURSOR hcur_SIZE;
+    HCURSOR hcur_NO;
+    HCURSOR hcur_ICON;
+    HCURSOR hcur_IBEAM;
+    HCURSOR hcur_HELP;
+    HCURSOR hcur_CROSS;
+    HCURSOR hcur_ARROW;
+    HCURSOR hcur_APPSTARTING;
+    HCURSOR hcur_WAIT;
 
 	//dll의 handle
 	HWND dllWnd;
