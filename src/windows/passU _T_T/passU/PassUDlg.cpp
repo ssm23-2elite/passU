@@ -134,7 +134,7 @@ BOOL CPassUDlg::OnInitDialog()
 	// 처음에는 클라이언트에 정보를 보내지 않는다.
 	m_allowSend = FALSE;
 
-	
+
 	m_changeWindow = FALSE;
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -481,15 +481,19 @@ void CPassUDlg::Accept(void)
 
 void CPassUDlg::CleanUp(void)
 {
-	if(m_pServer)	delete m_pServer;
+	if(m_SorC){
+		if(m_pServer)	delete m_pServer;
 
-	CPassUChildSocket *pChild;
+		CPassUChildSocket *pChild;
 
-	while(!m_pSockList.IsEmpty()){
-		pChild = (CPassUChildSocket *)m_pSockList.RemoveHead();
-		delete pChild;
+		while(!m_pSockList.IsEmpty()){
+			pChild = (CPassUChildSocket *)m_pSockList.RemoveHead();
+			delete pChild;
+		}
+		AfxMessageBox(_T("Clean Up!"));
+	} else{
+		if(m_pClient)	delete m_pClient;
 	}
-	AfxMessageBox(_T("Clean Up!"));
 }
 
 void CPassUDlg::CloseChild(CPassUChildSocket *s){
@@ -567,7 +571,9 @@ void CPassUDlg::OnConnectStart(void)
 
 void CPassUDlg::ClientCleanUp(void)
 {
+	if(!m_SorC){
 	if(m_pClient)	delete m_pClient;
+	}
 }
 
 
@@ -666,7 +672,14 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					MSG_KEYBOARD, 0, 0, 0,
 					0, hEVENT->updown, hEVENT->keyCode, 0);
 				TRACE("Key Code : %d\n", hEVENT->keyCode);
-				((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
+
+				CPassUChildSocket *s = (CPassUChildSocket *)m_pSockList.GetAt(pos);
+
+				while(m_tab1.btn_Bind[whereisPoint - 1] != s->c_id && pos != NULL){
+					(CPassUChildSocket *)m_pSockList.GetNext(pos);
+				}
+
+				((CPassUChildSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
 				break;
 			}
 
@@ -742,7 +755,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					//	currentID = 2;
 					m_allowSend = TRUE;
 					TRACE("서버쪽에 있다가 위쪽으로 붙음, 바인딩이 2번 버튼에 되어 있음\n");
-					
+
 					HideCursorAll();
 				}
 			} else if((whereisPoint == 8) && (m_tab1.btn_Bind[7] != 0)){ // 8번 버튼에 바인딩되어있을 때
@@ -861,8 +874,8 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			// Client 좌표 = (서버좌표 * 클라이언트 해상도[ Client ID ]) / 서버해상도
 			//											   Client ID = btn_Bind[ 버튼인덱스 ]
 
-			mEVENT->xCoord = (mEVENT->xCoord * m_tab1.client_nWidth[m_tab1.btn_Bind[i]]) / nWidth;
-			mEVENT->yCoord = (mEVENT->yCoord * m_tab1.client_nHeight[m_tab1.btn_Bind[i]]) / nHeight;
+			mEVENT->xCoord = (mEVENT->xCoord * m_tab1.client_nWidth[m_tab1.btn_Bind[whereisPoint - 1]]) / nWidth;
+			mEVENT->yCoord = (mEVENT->yCoord * m_tab1.client_nHeight[m_tab1.btn_Bind[whereisPoint - 1]]) / nHeight;
 
 			char buf[1024];
 			ZeroMemory(buf, sizeof(buf));
@@ -870,8 +883,13 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				MSG_MOUSE, mEVENT->sendDev, mEVENT->recvDev, mEVENT->deviceType,
 				mEVENT->relativeField, mEVENT->updownFlag, mEVENT->leftRight, mEVENT->wheelFlag, mEVENT->xCoord, mEVENT->yCoord, 0);
 			TRACE("x : %d, y : %d\n", mEVENT->xCoord, mEVENT->yCoord);
+			CPassUChildSocket * s = (CPassUChildSocket *)m_pSockList.GetAt(pos);
 
-			((CPassUClientSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
+			while(m_tab1.btn_Bind[whereisPoint - 1] != s->c_id && pos != NULL){
+				(CPassUChildSocket *)m_pSockList.GetNext(pos);
+			}
+
+			((CPassUChildSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
 		}
 
 		break;

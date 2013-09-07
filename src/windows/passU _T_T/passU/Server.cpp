@@ -495,9 +495,9 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					clientP->c_id = ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->c_id = clientInfo[i].getID();
 
 					// 클라이언트의 화면 크기 구해서 저장
-					client_nWidth[i] = clientP->nWidth;
-					client_nHeight[i] = clientP->nHeight;
-
+					client_nWidth[i + 1] = clientP->nWidth;
+					client_nHeight[i + 1] = clientP->nHeight;
+					
 					// Client IP Address Setting
 					clientInfo[i].m_address.Format(_T("%d.%d.%d.%d"), clientP->ipFirst, clientP->ipSecond, clientP->ipThird, clientP->ipForth);
 
