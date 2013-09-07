@@ -134,15 +134,7 @@ BOOL CPassUDlg::OnInitDialog()
 	// 처음에는 클라이언트에 정보를 보내지 않는다.
 	m_allowSend = FALSE;
 
-	//Scroll_lock 안눌러져있는 상태로 만든다.
-	if(::GetKeyState(VK_SCROLL) < 0){
-		keybd_event(VK_SCROLL, 0, 0, 0);
-		keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);
-	}
-
-	//마우스 커서 로딩
-	LoadCursorAll();
-
+	
 	m_changeWindow = FALSE;
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -197,81 +189,28 @@ HCURSOR CPassUDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-void CPassUDlg::LoadCursorAll() {
-	hcur_UPARROW = CopyCursor(LoadCursor(NULL, IDC_UPARROW));
-	hcur_SIZEWE = CopyCursor(LoadCursor(NULL, IDC_SIZEWE));
-	hcur_SIZENWSE = CopyCursor(LoadCursor(NULL, IDC_SIZENESW));
-	hcur_SIZENS = CopyCursor(LoadCursor(NULL, IDC_SIZENESW));
-	hcur_SIZENESW = CopyCursor(LoadCursor(NULL, IDC_SIZENESW));
-	hcur_SIZEALL = CopyCursor(LoadCursor(NULL, IDC_SIZEALL));
-	hcur_SIZE = CopyCursor(LoadCursor(NULL, IDC_SIZE));
-	hcur_NO = CopyCursor(LoadCursor(NULL, IDC_NO));
-	hcur_ICON = CopyCursor(LoadCursor(NULL, IDC_ICON));
-	hcur_IBEAM = CopyCursor(LoadCursor(NULL, IDC_IBEAM));
-	hcur_HELP = CopyCursor(LoadCursor(NULL, IDC_HELP));
-	hcur_CROSS = CopyCursor(LoadCursor(NULL, IDC_CROSS));
-	hcur_ARROW = CopyCursor(LoadCursor(NULL, IDC_ARROW));
-	hcur_APPSTARTING = CopyCursor(LoadCursor(NULL, IDC_APPSTARTING));
-	hcur_WAIT = CopyCursor(LoadCursor(NULL, IDC_WAIT));
-
-	hcur_HIDDEN = CopyCursor(::LoadCursorFromFile("trans.cur"));
-}
-
 void CPassUDlg::ShowCursorAll() {
-	::SetSystemCursor(hcur_ARROW, 32512);    // IDC_ARROW
-	::SetSystemCursor(hcur_IBEAM, 32513);    // IDC_IBEAM
-	::SetSystemCursor(hcur_WAIT, 32514);    // IDC_WAIT
-	::SetSystemCursor(hcur_CROSS, 32515);    // IDC_CROSS
-	::SetSystemCursor(hcur_UPARROW, 32516);    // IDC_UPARROW
-	::SetSystemCursor(hcur_SIZE, 32640);    // IDC_SIZE        
-	::SetSystemCursor(hcur_ICON, 32641);    // IDC_ICON
-	::SetSystemCursor(hcur_SIZENWSE, 32642);    // IDC_SIZENWSE
-	::SetSystemCursor(hcur_SIZEWE, 32644);    // IDC_SIZEWE
-	::SetSystemCursor(hcur_SIZENS, 32645);    // IDC_SIZENS
-	::SetSystemCursor(hcur_SIZENESW, 32643);    // IDC_SIZENESW            
-	::SetSystemCursor(hcur_SIZEALL, 32646);    // IDC_SIZEALL
-	::SetSystemCursor(hcur_NO, 32648);    // IDC_NO    
-	::SetSystemCursor(hcur_APPSTARTING, 32650);    // IDC_APPSTARTING
-	::SetSystemCursor(hcur_HELP, 32651);    // IDC_HELP
+	SystemParametersInfo(SPI_SETCURSORS, 0, NULL, 0);
 }
-
 void CPassUDlg::HideCursorAll() {
-	::SetSystemCursor(hcur_HIDDEN, 32512);    // IDC_ARROW
-	::SetSystemCursor(hcur_HIDDEN, 32513);    // IDC_IBEAM
-	::SetSystemCursor(hcur_HIDDEN, 32514);    // IDC_WAIT
-	::SetSystemCursor(hcur_HIDDEN, 32515);    // IDC_CROSS
-	::SetSystemCursor(hcur_HIDDEN, 32516);    // IDC_UPARROW
-	::SetSystemCursor(hcur_HIDDEN, 32640);    // IDC_SIZE        
-	::SetSystemCursor(hcur_HIDDEN, 32641);    // IDC_ICON
-	::SetSystemCursor(hcur_HIDDEN, 32642);    // IDC_SIZENWSE
-	::SetSystemCursor(hcur_HIDDEN, 32644);    // IDC_SIZEWE
-	::SetSystemCursor(hcur_HIDDEN, 32645);    // IDC_SIZENS
-	::SetSystemCursor(hcur_HIDDEN, 32643);    // IDC_SIZENESW            
-	::SetSystemCursor(hcur_HIDDEN, 32646);    // IDC_SIZEALL
-	::SetSystemCursor(hcur_HIDDEN, 32648);    // IDC_NO    
-	::SetSystemCursor(hcur_HIDDEN, 32650);    // IDC_APPSTARTING
-	::SetSystemCursor(hcur_HIDDEN, 32651);    // IDC_HELP
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32512);    // IDC_ARROW
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32513);    // IDC_IBEAM
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32514);    // IDC_WAIT
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32515);    // IDC_CROSS
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32516);    // IDC_UPARROW
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32640);    // IDC_SIZE        
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32641);    // IDC_ICON
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32642);    // IDC_SIZENWSE
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32644);    // IDC_SIZEWE
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32645);    // IDC_SIZENS
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32643);    // IDC_SIZENESW            
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32646);    // IDC_SIZEALL
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32648);    // IDC_NO    
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32650);    // IDC_APPSTARTING
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32651);    // IDC_HELP
 }
-
 void CPassUDlg::DestroyCursorAll() {
-	ShowCursorAll();
-	::DestroyCursor(hcur_ARROW);
-	::DestroyCursor(hcur_ARROW);
-	::DestroyCursor(hcur_IBEAM);
-	::DestroyCursor(hcur_WAIT);
-	::DestroyCursor(hcur_CROSS);
-	::DestroyCursor(hcur_UPARROW);
-	::DestroyCursor(hcur_SIZE);
-	::DestroyCursor(hcur_ICON);
-	::DestroyCursor(hcur_SIZENWSE);
-	::DestroyCursor(hcur_SIZEWE);
-	::DestroyCursor(hcur_SIZENS);
-	::DestroyCursor(hcur_SIZENESW);
-	::DestroyCursor(hcur_SIZEALL);
-	::DestroyCursor(hcur_NO);
-	::DestroyCursor(hcur_APPSTARTING);
-	::DestroyCursor(hcur_HELP);
-	::DestroyCursor(hcur_HIDDEN);
+	SystemParametersInfo(SPI_SETCURSORS, 0, NULL, 0);
 }
 
 void CPassUDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
@@ -766,9 +705,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				} else if(m_changeWindow == TRUE){ // scroll lock이 눌러져 있으면
 					mEVENT->xCoord = nWidth - 15;
 
-					Sleep(1000);
 					SetCursorPos(mEVENT->xCoord, mEVENT->yCoord);
-					Sleep(1000);
 
 					/*keybd_event(VK_SCROLL, 0, 0, 0);
 					keybd_event(VK_SCROLL, 0, KEYEVENTF_KEYUP, 0);*/
@@ -781,8 +718,8 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					m_allowSend = FALSE;
 					TRACE("6번 버튼에 있다가 왼쪽으로 붙어서 서버로 돌아옴, 바인딩이 6번버튼에 되어 있음\n");
 					// 원래대로 마우스 커서 돌리기
-
 					ShowCursorAll();
+
 				}
 			}
 		}
@@ -825,6 +762,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					TRACE("8번 버튼에 있다가 위쪽으로 붙어서 서버로 돌아옴, 바인딩이 8번버튼에 되어 있음\n");
 					// 원래대로 마우스 커서 돌리기
 					ShowCursorAll();
+
 				}
 			}
 		}
@@ -849,9 +787,8 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					whereisPoint = 6;
 					//	currentID = 6;
 					m_allowSend = TRUE;
-
-					TRACE("서버쪽에 있다가 오른쪽으로 붙음, 바인딩이 6번 버튼에 되어 있음\n");
 					HideCursorAll();
+					TRACE("서버쪽에 있다가 오른쪽으로 붙음, 바인딩이 6번 버튼에 되어 있음\n");
 				}
 
 			} else if((whereisPoint == 4) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 4번 버튼에 있을 때
@@ -869,7 +806,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					m_allowSend = FALSE;
 
 					// 원래대로 마우스 커서 돌리기
-					ShowCursorAll();       
+					ShowCursorAll();     
 
 				}
 
