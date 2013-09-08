@@ -199,7 +199,7 @@ BOOL CServer::OnInitDialog()
 	}
 	m_pDragImage = NULL;
 
-	installKeyhook();
+//	installKeyhook();
 
 	return TRUE;
 }
