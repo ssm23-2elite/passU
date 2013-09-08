@@ -140,10 +140,12 @@ void CClient::OnBnClickedCancel()
 
 BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 {
+	CPACKET *cPacket;
+	DPACKET *dPacket;
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	switch(pCopyDataStruct->dwData){
 	case 3: // client
-		CPACKET *cPacket = (CPACKET *)pCopyDataStruct->lpData; // 구조체 연결
+		cPacket = (CPACKET *)pCopyDataStruct->lpData; // 구조체 연결
 		
 		if(cPacket->hello == 1){ // hello packet에 대한 ACK가 왔을 때
 			// Client ID를 부여받는다.
@@ -157,7 +159,7 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		}
 		break;
 	case 4:
-		DPACKET* dPacket = (DPACKET *) pCopyDataStruct->lpData; // 구조체 연결
+		dPacket = (DPACKET *) pCopyDataStruct->lpData; // 구조체 연결
 		memcpy(&receivedDeviceDescData, dPacket->usbdesc, sizeof(USBSENDDEVICEDESC));
 		
 		CString tmp;
