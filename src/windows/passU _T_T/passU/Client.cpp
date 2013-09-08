@@ -149,7 +149,8 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		
 		if(cPacket->hello == 1){ // hello packet에 대한 ACK가 왔을 때
 			// Client ID를 부여받는다.
-			client_ID = p->sendDev;
+			client_ID = cPacket->c_id;
+			
 
 		} else if(cPacket->bye == 1){ // bye 패킷을 받았을 때
 
