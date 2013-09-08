@@ -1,14 +1,15 @@
-﻿빌드 시작: 2013-09-08 오후 4:18:48
-     1>3 노드의 "C:\Users\Administrator\Desktop\Mini Project\passU\src\windows\passU _T_T\ServerHook\ServerHook.vcxproj" 프로젝트(Build 대상)입니다.
+﻿빌드 시작: 2013-09-09 오전 2:33:47
+     1>3 노드의 "D:\Workspace\SSM\passU\src\windows\passU _T_T\ServerHook\ServerHook.vcxproj" 프로젝트(Rebuild 대상)입니다.
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl- /Od /Oy- /D _WINDLL /D _WINDLL /D _MBCS /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug\\" /Fd".\Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt ServerHook.cpp
          ServerHook.cpp
          _WIN32_WINNT not defined. Defaulting to _WIN32_WINNT_MAXVER (see WinSDKVer.h)
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:".\Debug\ServerHook.dll" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:".\Debug\ServerHook.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\Debug\ServerHook.lib" /MACHINE:X86 /DLL .\Debug\ServerHook.obj
-         ServerHook.vcxproj -> C:\Users\Administrator\Desktop\Mini Project\passU\src\windows\passU _T_T\ServerHook\.\Debug\ServerHook.dll
-     1>"C:\Users\Administrator\Desktop\Mini Project\passU\src\windows\passU _T_T\ServerHook\ServerHook.vcxproj" 프로젝트를 빌드했습니다(Build 대상).
+            .\Debug\ServerHook.lib 라이브러리 및 .\Debug\ServerHook.exp 개체를 생성하고 있습니다.
+         ServerHook.vcxproj -> D:\Workspace\SSM\passU\src\windows\passU _T_T\ServerHook\.\Debug\ServerHook.dll
+     1>"D:\Workspace\SSM\passU\src\windows\passU _T_T\ServerHook\ServerHook.vcxproj" 프로젝트를 빌드했습니다(Rebuild 대상).
 
 빌드했습니다.
 
-경과 시간: 00:00:03.00
+경과 시간: 00:00:02.80

@@ -11,14 +11,9 @@ import org.secmem232.passu.android.network.ServerConnectionListener;
 import org.secmem232.passu.android.network.VirtualEventListener;
 
 import android.app.Service;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;

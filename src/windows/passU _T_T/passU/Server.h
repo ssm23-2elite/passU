@@ -84,8 +84,7 @@ public:
 	void OnChangeLocationInfo(int index);
 	void bindWatingClient(int btn_index, int client_index);
 	void OnDisconnectedClient(int client_index);
-	void OnArrivedScreenEdge(int position);
-
+	
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnBnClickedButton3();
@@ -98,12 +97,12 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
-	PACKET packMessage(int msgType, int sendDev, int recvDev, int deviceType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3, int pad4);
 	virtual BOOL OnInitDialog();
 	afx_msg void OnLvnBegindragList1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	int GetHitIndex(CPoint);
 	void MoveListItem(const INT _nSource, const INT _nDest);
+	void OnButtonClick(int position);
 
 	afx_msg void OnDestroy();
 };

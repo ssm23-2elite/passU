@@ -121,6 +121,7 @@ public class PassU extends Activity {
 	protected void onStop() {
 		super.onStop();
 	}
+	
 	@Override
 	protected void onResume() {
 		if(D.D) Log.w(LOG, "onResume");
@@ -160,37 +161,11 @@ public class PassU extends Activity {
 	
 	private void tryConnect(final String ip, final int port) {
 		if(D.D) Log.w(LOG, "tryConnect");
-		/*StrictMode.enableDefaults();
-		Socket socket = new Socket();
-		try {
-			InetAddress ia = InetAddress.getByName(ip);
-			InetSocketAddress remoteAddr = new InetSocketAddress(ia, port);
-			final int connectionTimeout = 1000;	// 1 seconds
-			socket.connect(remoteAddr, connectionTimeout);
-			if(socket.isConnected())
-			{
-				if(!socket.isClosed()) 
-					socket.close();
-				*/
-				if(!Util.Services.isServiceAliveU(getApplicationContext())){
-					Util.Services.startPassUService(PassU.this, ip, port);
-				}
-				bindService(new Intent(this, PassUService.class), conn, Context.BIND_AUTO_CREATE);
-	/*		} else {
-				printOutput("Connection failed");
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			printOutput("Connection failed");
-		} catch (Exception e) {
-			e.printStackTrace();
-			printOutput("Unknown error");
-		} finally {
-			try {
-				if(!socket.isClosed()) 
-					socket.close();
-			} catch (Exception e) {};
-		}*/
+		
+		if(!Util.Services.isServiceAliveU(getApplicationContext())){
+			Util.Services.startPassUService(PassU.this, ip, port);
+		}
+		bindService(new Intent(this, PassUService.class), conn, Context.BIND_AUTO_CREATE);
 	}
 
 	private void printOutput(final String update) {

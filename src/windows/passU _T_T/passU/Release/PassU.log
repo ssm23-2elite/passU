@@ -1,0 +1,25 @@
+﻿빌드 시작: 2013-09-08 오후 11:15:08
+     1>2 노드의 "D:\Workspace\SSM\passU\src\windows\passU _T_T\passU\PassU.vcxproj" 프로젝트(Build 대상)입니다.
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\PassU.pch" /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt PassUDlg.cpp Server.cpp
+         PassUDlg.cpp
+         Server.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Workspace\SSM\passU\src\windows\passU _T_T\Release\PassU.exe" /INCREMENTAL:NO /NOLOGO /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"D:\Workspace\SSM\passU\src\windows\passU _T_T\Release\PassU.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Workspace\SSM\passU\src\windows\passU _T_T\Release\PassU.lib" /MACHINE:X86 /SAFESEH Release\PassU.res
+         Release\Client.obj
+         Release\ClientInfo.obj
+         Release\PassU.obj
+         Release\PassUChildSocket.obj
+         Release\PassUClientSocket.obj
+         Release\PassUDlg.obj
+         Release\PassUServerSocket.obj
+         Release\Server.obj
+         Release\stdafx.obj
+         코드를 생성하고 있습니다.
+         코드를 생성했습니다.
+         PassU.vcxproj -> D:\Workspace\SSM\passU\src\windows\passU _T_T\Release\PassU.exe
+     1>"D:\Workspace\SSM\passU\src\windows\passU _T_T\passU\PassU.vcxproj" 프로젝트를 빌드했습니다(Build 대상).
+
+빌드했습니다.
+
+경과 시간: 00:00:03.99

@@ -54,12 +54,11 @@ public:
 	POINT currentPoint;
 
 	BOOL m_allowSend; // 클라이언트에 정보를 보낼지 말지를 결정하는 FLAG
-	BOOL m_changeWindow;
-
+	
 	void ShowCursorAll();
 	void HideCursorAll();
 	void DestroyCursorAll();
-
+	
 	//dll의 handle
 	HWND dllWnd;
 
@@ -97,6 +96,7 @@ public:
 	void ClientCleanUp(void);
 	void ReceiveClientData(CPassUClientSocket * s);
 	void CloseClient(CPassUClientSocket * s);
+	void OnArrivedScreenEdge(MPACKET *packet, BOOL bClient, int position);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

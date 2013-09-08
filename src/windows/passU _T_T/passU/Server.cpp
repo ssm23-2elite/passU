@@ -199,14 +199,11 @@ BOOL CServer::OnInitDialog()
 	}
 	m_pDragImage = NULL;
 
-//	installKeyhook();
+	installKeyhook();
 
 	return TRUE;
 }
 // CServer 메시지 처리기입니다.
-
-
-
 
 void CServer::OnChangeLocationInfo(int index)
 {
@@ -219,126 +216,66 @@ void CServer::bindWatingClient(int btn_index, int client_index)
 
 	btn_Bind[btn_index] = client_index;
 	clientInfo[client_index - 1].setPosition(btn_index);
-
 }
-
-void CServer::OnArrivedScreenEdge(int position)
-{
-
-}
-
 
 void CServer::OnBnClickedButton1()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(btn_Bind[0] != 0){
-		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
-		{
-			m_cBtn[0].SetBitmap(NULL);
-			btn_Bind[0] = 0;
-			RedrawWindow();
-		}
-	}
+	OnButtonClick(0);
 }
 
 
 void CServer::OnBnClickedButton2()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(btn_Bind[1] != 0){
-		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
-		{
-			m_cBtn[1].SetBitmap(NULL);
-			btn_Bind[1] = 0;
-			RedrawWindow();
-		}
-	}
+	OnButtonClick(1);
 }
 
 
 void CServer::OnBnClickedButton3()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(btn_Bind[2] != 0){
-		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
-		{
-			m_cBtn[2].SetBitmap(NULL);
-			btn_Bind[2] = 0;
-			RedrawWindow();
-		}
-	}
+	OnButtonClick(2);
 }
 
 
 void CServer::OnBnClickedButton4()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(btn_Bind[3] != 0){
-		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
-		{
-			m_cBtn[3].SetBitmap(NULL);
-			btn_Bind[3] = 0;
-			RedrawWindow();
-		}
-	}
+	OnButtonClick(3);
 }
 
 
 void CServer::OnBnClickedButton6()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(btn_Bind[5] != 0){
-		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
-		{
-			m_cBtn[5].SetBitmap(NULL);
-			btn_Bind[5] = 0;
-			RedrawWindow();
-		}
-	}
+	OnButtonClick(5);
 }
 
 
 void CServer::OnBnClickedButton7()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(btn_Bind[6] != 0){
-		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
-		{
-			m_cBtn[6].SetBitmap(NULL);
-			btn_Bind[6] = 0;
-			RedrawWindow();
-		}
-	}
+	OnButtonClick(6);
 }
 
 
 void CServer::OnBnClickedButton8()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(btn_Bind[7] != 0){
-		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
-		{
-			m_cBtn[7].SetBitmap(NULL);
-			btn_Bind[7] = 0;
-			RedrawWindow();
-		}
-	}
+	OnButtonClick(7);
 }
 
 
 void CServer::OnBnClickedButton9()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(btn_Bind[8] != 0){
-		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
+	OnButtonClick(8);
+}
+
+void CServer::OnButtonClick(int position)
+{
+	if(btn_Bind[position] != 0) {
+	if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
 		{
-			m_cBtn[8].SetBitmap(NULL);
-			btn_Bind[8] = 0;
+			m_cBtn[position].SetBitmap(NULL);
+			btn_Bind[position] = 0;
 			RedrawWindow();
 		}
 	}
 }
-
 
 void CServer::OnLButtonUp(UINT nFlags, CPoint point)
 {
@@ -486,8 +423,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			// 버튼에 클라이언트 연결해주고, 첫번째 클라이언트면 후킹 시작하고
 			// 클라이언트에 자신의 id 알려주고
 			// 리스트 컨트롤에 아이콘 하나 추가
-			//	TRACE("client\n");
-
+			
 			if(pMainDlg->m_pSockList.GetCount() == 1){
 
 				m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
@@ -683,32 +619,12 @@ int CServer::GetHitIndex(CPoint point) // 커서 위치의 리스트아이템 인덱스를 찾는
 	return m_waiting_client.HitTest(&HitInfo);
 }
 
-PACKET CServer::packMessage(int msgType, int sendDev, int recvDev, int deviceType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3, int pad4)
-{
-	PACKET tmp;
-
-	tmp.msgType = msgType;
-	tmp.sendDev = sendDev;
-	tmp.recvDev = recvDev;
-	tmp.deviceType = deviceType;
-	tmp.relativeField = relativeField;
-	tmp.updownFlag = updownFlag;
-	tmp.pad1 = pad1;
-	tmp.keyCode = keyCode;
-	tmp.pad2 = pad2;
-	tmp.pad3 = pad3;
-	tmp.pad4 = pad4;
-
-	return tmp;
-}
-
 void CServer::OnDestroy()
 {
 	CDialogEx::OnDestroy();
 
 	m_bmp_monitor.Detach();
 	m_bmp_phone.Detach();
-	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }
 
 int GetPassUSBDesc()

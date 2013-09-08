@@ -12,6 +12,7 @@ import org.secmem232.passu.android.mouse.PassUService;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -164,13 +165,15 @@ public class Util {
 		 * @param context Application/Activity's context
 		 * @see org.secmem232.passu.android.mouse.PassUService PassUService
 		 */
-		public static void startPassUService(Context context, String ip, int port){
+		public static ComponentName startPassUService(Context context, String ip, int port){
 			if(!isServiceAliveU(context)){
 				if(D) Log.d(LOG, "Starting PassUService..");
 				Intent intent = new Intent(context, PassUService.class);
 				intent.putExtra("ip", ip);
 				intent.putExtra("port", port);
-				context.startService(intent);
+				return context.startService(intent);
+			} else {
+				return null;
 			}
 		}
 	}
