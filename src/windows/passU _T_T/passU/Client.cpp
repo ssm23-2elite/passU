@@ -143,11 +143,13 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	switch(pCopyDataStruct->dwData){
 	case 3: // client
-		if(p->deviceType == 1){ // hello packet에 대한 ACK가 왔을 때
+		CPACKET *cPacket = (CPACKET *)pCopyDataStruct->lpData; // 구조체 연결
+		
+		if(cPacket->hello == 1){ // hello packet에 대한 ACK가 왔을 때
 			// Client ID를 부여받는다.
 			client_ID = p->sendDev;
 
-		} else if(p->relativeField == 1){ // bye 패킷을 받았을 때
+		} else if(cPacket->bye == 1){ // bye 패킷을 받았을 때
 
 			OnDisconnect();
 			m_connectFlag = false;
