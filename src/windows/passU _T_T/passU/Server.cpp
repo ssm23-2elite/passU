@@ -178,9 +178,7 @@ BOOL CServer::OnInitDialog()
 
 	m_bmp_monitor.LoadBitmapA(IDB_MONITOR);
 	m_bmp_phone.LoadBitmapA(IDB_PHONE);
-
 	m_imgList.Create(60, 60, ILC_COLOR24 | ILC_MASK, 1, 1);
-	m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
 
 	m_imgList.Add(&m_bmp_monitor, RGB(0, 0, 0));
 	m_imgList.Add(&m_bmp_phone, RGB(0, 0, 0));
@@ -220,6 +218,7 @@ void CServer::bindWatingClient(int btn_index, int client_index)
 	// 클라이언트 index를 넣어줘서 버튼하고 binding시키는 것
 
 	btn_Bind[btn_index] = client_index;
+	clientInfo[client_index].setPosition(btn_index);
 
 }
 
@@ -431,7 +430,8 @@ void CServer::MoveListItem(const INT _nSource, const INT _nDest)
 	m_waiting_client.GetItem(&Item);   
 
 	Item.iItem = _nDest;   
-	m_waiting_client.InsertItem(&Item);   
+	m_waiting_client.InsertItem(&Item);
+
 
 
 
@@ -487,6 +487,16 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			// 클라이언트에 자신의 id 알려주고
 			// 리스트 컨트롤에 아이콘 하나 추가
 			//	TRACE("client\n");
+
+			if(pMainDlg->m_pSockList.GetCount() == 1){
+
+				m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
+
+
+				installKeyhook();
+				installMousehook();
+			}
+
 			for(int i = 0 ; i < 9 ; i ++){
 				if(clientInfo[i].clientID == 0){
 					// client ID Setting
@@ -552,11 +562,6 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					pMainDlg->m_pSockList.GetNext(pos);
 			}
 
-			if(pMainDlg->m_pSockList.GetCount() == 1){
-				installKeyhook();
-				installMousehook();
-			}
-
 			char buf[1024];
 			ZeroMemory(buf, sizeof(buf));
 			sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
@@ -583,8 +588,10 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
 			}
 
-			uninstallKeyhook();
-			uninstallMousehook();
+			if(pMainDlg->m_pSockList.GetCount() == 0){
+				uninstallKeyhook();
+				uninstallMousehook();
+			}
 		}
 		break;
 	}

@@ -5,6 +5,7 @@
 #include "PassU.h"
 #include "Client.h"
 #include "afxdialogex.h"
+#include "PassUDlg.h"
 
 #include <initguid.h>
 #include <setupapi.h>
@@ -65,6 +66,7 @@ void CClient::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_IPADDRESS1, m_IpAddressCtrl);
 	DDX_Control(pDX, IDC_BUTTON1, m_cBtn_connect);
+	DDX_Control(pDX, IDC_BUTTON2, m_CBtn_Cancel);
 }
 
 
@@ -82,16 +84,20 @@ void CClient::OnConnectServer(void)
 {
 }
 
-void CClient::OnDisconnect(void)
-{
-	//CPACKET tmp;
+void CClient::OnDisconnect(void) // 서버가 닫혔을 때 실행되는 함수
+{	
+	CPassUDlg * pMainDlg = (CPassUDlg *)::AfxGetMainWnd();
+	pMainDlg->m_pClient->Close();
 
-	//tmp.msgType = 3;
-	//tmp.c_id = client_ID;
+	client_ID = 0;
+	m_cBtn_connect.EnableWindow(TRUE);
+	m_CBtn_Cancel.EnableWindow(FALSE);
+	m_address.Format(_T(""));
+	ipFirst = 0;
+	ipSecond = 0;
+	ipThird = 0;
+	ipForth = 0;
 
-	//m_clientSock.Send((LPCSTR *)&tmp, sizeof(CPACKET));
-	//// BYE 패킷을 보냄
-	//m_clientSock.Close();
 }
 
 
@@ -113,6 +119,8 @@ void CClient::OnBnClickedConnect() // Connect 버튼을 눌렀을 때
 	m_clientSock.Connect(m_address, 30000);
 	*/
 	m_cBtn_connect.EnableWindow(FALSE);
+	
+	m_CBtn_Cancel.EnableWindow(TRUE);
 	OnConnectServer();
 }
 
@@ -121,6 +129,11 @@ void CClient::OnBnClickedCancel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_cBtn_connect.EnableWindow(TRUE);
+	ipFirst = 0;
+	ipSecond = 0;
+	ipThird = 0;
+	ipForth = 0;
+	m_IpAddressCtrl.ClearAddress();
 
 	m_connectFlag = false;
 }
@@ -134,7 +147,7 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			// Client ID를 부여받는다.
 			client_ID = p->sendDev;
 
-		} else if(p->deviceType == 2){ // bye 패킷을 받았을 때
+		} else if(p->relativeField == 1){ // bye 패킷을 받았을 때
 
 			OnDisconnect();
 			m_connectFlag = false;
@@ -174,8 +187,7 @@ int addDevice(void)
 	if( bl == FALSE )
 		return 0; // 이런경우는 없어야 한다
 
-	handle = CreateFile( pDeviceName, GENERIC_READ|GENERIC_WRITE, 0, 0, OPEN_ALWAYS, 0
-		, 0 );
+	handle = CreateFile( pDeviceName, GENERIC_READ|GENERIC_WRITE, 0, 0, OPEN_ALWAYS, 0 , 0 );
 	if( handle == (HANDLE)-1 ) {
 		free( pDeviceName );
 		return -1; // Stack은 있지만, 현재 접근이 금지되어 있다

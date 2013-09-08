@@ -484,7 +484,25 @@ void CPassUDlg::Accept(void)
 void CPassUDlg::CleanUp(void)
 {
 	if(m_SorC){
+		m_pServer->Close();
 		if(m_pServer)	delete m_pServer;
+
+		m_tab1.m_waiting_client.DeleteAllItems();
+
+		for(int i = 0 ; i < 9 ; i ++){
+			int tmp = m_tab1.btn_Bind[i];
+			m_tab1.btn_Bind[i] = 0;
+			m_tab1.m_cBtn[i].SetBitmap(NULL);
+			m_tab1.client_nWidth[i] = 0;
+			m_tab1.client_nHeight[i] = 0;
+			m_tab1.clientInfo[i].clientID = 0;
+			m_tab1.clientInfo[i].setIP("0.0.0.0");
+			m_tab1.clientInfo[i].setPosition(0);
+			m_tab1.clientInfo[i].setStatus(STATUS_EMPTY);
+		}
+
+		UpdateData();
+		Invalidate();
 
 		CPassUChildSocket *pChild;
 
@@ -492,16 +510,48 @@ void CPassUDlg::CleanUp(void)
 			pChild = (CPassUChildSocket *)m_pSockList.RemoveHead();
 			delete pChild;
 		}
+
+		m_pSockList.RemoveAll();
+
+
 		AfxMessageBox(_T("Clean Up!"));
 	} else{
 		if(m_pClient)	delete m_pClient;
 	}
 }
 
-void CPassUDlg::CloseChild(CPassUChildSocket *s){
+void CPassUDlg::CloseChild(CPassUChildSocket *s){ // 클라이언트쪽에서 종료하였을 때 호출되는 함수
 
 	CPassUChildSocket *pChild;
 	POSITION pos = m_pSockList.GetHeadPosition();
+	
+	CString tmpStr;
+
+
+	for(int i = 0 ; i < 9 ; i ++){
+		if(m_tab1.clientInfo[i].clientID == s->c_id){
+			m_tab1.m_cBtn[i].SetBitmap(NULL);
+			m_tab1.btn_Bind[i] = 0;
+
+
+			tmpStr.Format(_T("%d , IP : %s"), m_tab1.clientInfo[i].clientID, m_tab1.clientInfo[i].m_address);
+			// 리스트 컨트롤에서 삭제
+			LVFINDINFO find_item;
+			find_item.flags = LVFI_STRING;
+			find_item.psz = tmpStr;
+
+			int index = m_tab1.m_waiting_client.FindItem(&find_item);
+			if(-1 != index)	m_tab1.m_waiting_client.DeleteItem(index);
+
+			m_tab1.m_waiting_client.DeleteItem(0);
+			m_tab1.clientInfo[i].setID(0);
+			m_tab1.clientInfo[i].setIP("0.0.0.0");
+			m_tab1.clientInfo[i].setPosition(0);
+			m_tab1.clientInfo[i].setStatus(STATUS_EMPTY);
+
+		}
+	}
+
 	while(pos != NULL){
 		pChild = (CPassUChildSocket *)m_pSockList.GetAt(pos);
 
@@ -512,6 +562,7 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s){
 		}
 		m_pSockList.GetNext(pos);
 	}
+
 }
 
 void CPassUDlg::OnStartServer()
@@ -519,6 +570,8 @@ void CPassUDlg::OnStartServer()
 	m_pServer = new CPassUServerSocket();
 	m_pServer->Create(30000);
 	m_pServer->Listen();
+
+	//Nagle 알고리즘 해제
 	const char opt_val = true;
 	setsockopt(*m_pServer, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
 	//AfxMessageBox(_T("InitServer"));
@@ -534,6 +587,8 @@ void CPassUDlg::OnBnClickedButton1()
 	}
 
 	m_CBtn_Start.EnableWindow(FALSE);
+		
+	m_CBtn_Stop.EnableWindow(TRUE);
 }
 
 
@@ -541,17 +596,27 @@ void CPassUDlg::OnBnClickedButton2()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	m_CBtn_Start.EnableWindow(TRUE);
-	CleanUp();
+		m_CBtn_Start.EnableWindow(TRUE);
+		m_CBtn_Stop.EnableWindow(FALSE);
+
+	if(m_SorC){
+		CleanUp();
+	} else{
+		ClientCleanUp();
+	}
 	//CDialog::OnCancel();
 }
 
 
 void CPassUDlg::OnDestroy()
 {
-	CDialogEx::OnDestroy();
-
+	if(m_SorC){ // Server일 시
+ 		CleanUp();
+	} else{
+		ClientCleanUp();
+	}
 	DestroyCursorAll();
+	CDialogEx::OnDestroy();
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }
 
@@ -573,9 +638,7 @@ void CPassUDlg::OnConnectStart(void)
 
 void CPassUDlg::ClientCleanUp(void)
 {
-	if(!m_SorC){
-	if(m_pClient)	delete m_pClient;
-	}
+	
 }
 
 
@@ -624,6 +687,18 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		} else if(packet.wheelFlag == 3){ // wheel move
 			mouse_event(MOUSEEVENTF_WHEEL,  0, 0, 0, 5);
 		}
+	} else if(msgType == MSG_CLIENT){
+		CPACKET packet;
+		ZeroMemory( &packet, sizeof(CPACKET));
+		ParseClientData(buf, &packet);
+
+		COPYDATASTRUCT CDS;
+
+		CDS.dwData = 3; // client
+		CDS.cbData = sizeof(CPACKET);
+		CDS.lpData = &packet;
+		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	
 	} else if(msgType == MSG_DATA) {
 		DPACKET packet;
 		ZeroMemory(&packet, sizeof(DPACKET));
@@ -642,14 +717,19 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 
 void CPassUDlg::CloseClient(CPassUClientSocket * s)
 {
-	char buf[1024];
-	ZeroMemory(buf, sizeof(buf));
-	sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
-		MSG_CLIENT, m_tab2.client_ID, STATUS_PC, 0, 1, 0, 0, 0, 0, 0, 0);
+	m_pClient->Close();
+	if(m_pClient)	delete m_pClient;
+	m_tab2.m_cBtn_connect.EnableWindow(TRUE);
+	m_tab2.ipFirst = 0;
+	m_tab2.ipSecond = 0;
+	m_tab2.ipThird = 0;
+	m_tab2.ipForth = 0;
+	m_tab2.m_IpAddressCtrl.ClearAddress();
 
-	s->Send(buf, SIZEOFPACKET); // bye 패킷 전송
+	m_tab2.m_connectFlag = false;
+	m_CBtn_Start.EnableWindow(TRUE);
+	m_CBtn_Stop.EnableWindow(TRUE);
 
-	ClientCleanUp();
 }
 
 

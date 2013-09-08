@@ -36,4 +36,5 @@ public:
 	BYTE ipFirst, ipSecond, ipThird, ipForth;
 	PACKET *p;
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
+	CButton m_CBtn_Cancel;
 };
