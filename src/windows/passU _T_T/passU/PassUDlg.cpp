@@ -530,8 +530,13 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s){ // 클라이언트쪽에서 종료하였을
 
 	for(int i = 0 ; i < 9 ; i ++){
 		if(m_tab1.clientInfo[i].clientID == s->c_id){
-			m_tab1.m_cBtn[i].SetBitmap(NULL);
-			m_tab1.btn_Bind[i] = 0;
+
+			m_tab1.m_cBtn[((m_tab1.clientInfo[i]).getPosition())].SetBitmap(NULL);
+			
+			UpdateData();
+			Invalidate();
+
+			m_tab1.btn_Bind[(m_tab1.clientInfo[i]).getPosition()] = 0;
 
 
 			tmpStr.Format(_T("%d , IP : %s"), m_tab1.clientInfo[i].clientID, m_tab1.clientInfo[i].m_address);
@@ -548,7 +553,7 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s){ // 클라이언트쪽에서 종료하였을
 			m_tab1.clientInfo[i].setIP("0.0.0.0");
 			m_tab1.clientInfo[i].setPosition(0);
 			m_tab1.clientInfo[i].setStatus(STATUS_EMPTY);
-
+			break;
 		}
 	}
 

@@ -218,7 +218,7 @@ void CServer::bindWatingClient(int btn_index, int client_index)
 	// 클라이언트 index를 넣어줘서 버튼하고 binding시키는 것
 
 	btn_Bind[btn_index] = client_index;
-	clientInfo[client_index].setPosition(btn_index);
+	clientInfo[client_index - 1].setPosition(btn_index);
 
 }
 
