@@ -31,15 +31,15 @@ BOOLEAN GetDeviceStackName( struct _GUID * pGuid, char ** ppDeviceName, int inde
 typedef struct
 {
 	USB_DEVICE_DESCRIPTOR			 DeviceDescriptor;
-	USB_CONFIGURATION_DESCRIPTOR	 ConfigDesc;
+    USB_CONFIGURATION_DESCRIPTOR	 ConfigDesc;
 	USB_INTERFACE_DESCRIPTOR	     InterfaceDesc;
 	USB_ENDPOINT_DESCRIPTOR	         EndpointDescriptor[2];
 	CHAR DeviceId[50];
-	WCHAR DeviceDesc[20];
-	CHAR HwId[40];
+	CHAR DeviceDesc[40];
+	CHAR HwId[80];
 	CHAR Service[20];
 	CHAR DeviceClass[20];
-
+	
 } USBSENDDEVICEDESC, *PUSBSENDDEVICEDESC;
 
 USBSENDDEVICEDESC receivedDeviceDescData;
@@ -161,7 +161,7 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		break;
 	case 4:
 		dPacket = (DPACKET *) pCopyDataStruct->lpData; // 구조체 연결
-		memcpy(&receivedDeviceDescData, dPacket->usbdesc, sizeof(USBSENDDEVICEDESC));
+		memcpy(&receivedDeviceDescData, &dPacket->usbdesc, sizeof(USBSENDDEVICEDESC));
 		
 		CString tmp;
 		tmp.Format(_T("Hardware ID : %s\n"

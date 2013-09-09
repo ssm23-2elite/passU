@@ -505,21 +505,25 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				0, 0);
 			((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send(buf, sizeof(CPACKET));
 			
-			/*if(clientP->pad3 == STATUS_PC) {
+			if(clientP->pad3 == STATUS_PC) {
 				GetPassUSBDesc();
 				
 				DPACKET packet;
+				ZeroMemory(&packet, sizeof(DPACKET));
 				packet.msgType = MSG_DATA;
 				packet.len = sizeof(USBSENDDEVICEDESC);
 				memcpy(&packet.usbdesc, &sendToDeviceDescData, sizeof(USBSENDDEVICEDESC));
 
-				((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send((char*)&packet, sizeof(DPACKET));
-			}*/
+				char buf[4096];
+				int len = sprintf_s(buf, "%4d%4d", packet.msgType, packet.len);
+				memcpy(buf + 8, packet.usbdesc, packet.len);
+				((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send((char*)&buf, 8 + sizeof(USBSENDDEVICEDESC));
+			}
 		} else if(clientP->bye == 1){ // bye packet
 			// 굿바이패킷이면
 			// 버튼에 클라이언트 해제
 			s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
-			while(clientP->c_id == s->c_id){
+			while((clientP->c_id == s->c_id) && (pos != NULL)){
 				((CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos));
 				s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
 			}

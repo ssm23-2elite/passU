@@ -7,6 +7,7 @@
 #include "PassUDlg.h"
 #include "afxdialogex.h"
 #include "PassUClientSocket.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -107,6 +108,7 @@ BOOL CPassUDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+	ShowCursorAll();
 
 	CString tmp;
 	tmp.Format(_T("SERVER"));
@@ -656,7 +658,7 @@ void CPassUDlg::ClientCleanUp(void)
 
 void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 {
-	char buf[1024];
+	char buf[4096];
 	ZeroMemory(buf, sizeof(buf));
 	s->Receive(&buf, sizeof(buf));
 
@@ -681,7 +683,7 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 
 		ParseMouseData(buf, &packet);
 
-		//SetCursorPos(packet.xCoord, packet.yCoord);
+		SetCursorPos(packet.xCoord, packet.yCoord);
 
 		if(packet.leftRight == 1 && packet.updownFlag== 0){ // right up
 			mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
@@ -715,6 +717,12 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		DPACKET packet;
 		ZeroMemory(&packet, sizeof(DPACKET));
 
+		packet.msgType = msgType;
+
+		char lenBuf[4];
+		memcpy(lenBuf, buf + sizeof(packet.msgType), sizeof(lenBuf));
+		packet.len = byteToint(lenBuf, 4);
+		
 		memcpy(&packet.usbdesc, buf + sizeof(packet.msgType) + sizeof(packet.len), packet.len);
 
 		COPYDATASTRUCT CDS;
@@ -846,6 +854,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 			while((m_tab1.btn_Bind[whereisPoint - 1] != s->c_id) && (pos != NULL)){
 				(CPassUChildSocket *)m_pSockList.GetNext(pos);
+				s =  ((CPassUChildSocket *)m_pSockList.GetAt(pos));
 			}
 
 			((CPassUChildSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
