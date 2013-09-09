@@ -2413,9 +2413,9 @@ VOID
 			memcpy(&sendToDeviceDescData.EndpointDescriptor[0], &((PUSB_PIPE_INFO)info->ConnectionInfo->PipeList)[0], sizeof(sendToDeviceDescData.EndpointDescriptor[0]) );
 			memcpy(&sendToDeviceDescData.EndpointDescriptor[1], &((PUSB_PIPE_INFO)info->ConnectionInfo->PipeList)[1], sizeof(sendToDeviceDescData.EndpointDescriptor[0]) );
 
-			strcpy_s(sendToDeviceDescData.DeviceId, info->UsbDeviceProperties->DeviceId);
+			strncpy_s(sendToDeviceDescData.DeviceId, info->UsbDeviceProperties->DeviceId, 21 );
 			strcpy_s(sendToDeviceDescData.DeviceDesc, info->UsbDeviceProperties->DeviceDesc);
-			strcpy_s(sendToDeviceDescData.HwId, info->UsbDeviceProperties->HwId);
+			strncpy_s(sendToDeviceDescData.HwId, info->UsbDeviceProperties->HwId, 21 );
 			strcpy_s(sendToDeviceDescData.Service, info->UsbDeviceProperties->Service);
 			strcpy_s(sendToDeviceDescData.DeviceClass, info->UsbDeviceProperties->DeviceClass);
 			}

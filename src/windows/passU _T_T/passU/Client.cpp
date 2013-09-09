@@ -57,6 +57,36 @@ IMPLEMENT_DYNAMIC(CClient, CDialogEx)
 
 }
 
+
+/***
+ * 32bit 인지 64bit인지 확인
+ */
+typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+
+LPFN_ISWOW64PROCESS fnIsWow64Process;
+
+BOOL IsWow64()
+{
+    BOOL bIsWow64 = FALSE;
+
+    //IsWow64Process is not available on all supported versions of Windows.
+    //Use GetModuleHandle to get a handle to the DLL that contains the function
+    //and GetProcAddress to get a pointer to the function if available.
+
+    fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress(
+        GetModuleHandle(TEXT("kernel32")),"IsWow64Process");
+
+    if(NULL != fnIsWow64Process)
+    {
+        if (!fnIsWow64Process(GetCurrentProcess(),&bIsWow64))
+        {
+            //handle error
+        }
+    }
+    return bIsWow64;
+}
+
+
 CClient::~CClient()
 {
 }
@@ -163,12 +193,15 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		dPacket = (DPACKET *) pCopyDataStruct->lpData; // 구조체 연결
 		memcpy(&receivedDeviceDescData, &dPacket->usbdesc, sizeof(USBSENDDEVICEDESC));
 		
-		CString tmp;
-		tmp.Format(_T("Hardware ID : %s\n"
-			"Device Descriptor : %s\n"),
-			receivedDeviceDescData.HwId, receivedDeviceDescData.DeviceDesc);
-		AfxMessageBox(tmp);
-		//addDevice();
+		if(IsWow64() == FALSE) { // 32bit이면 usb 삽입 ㄱㄱ {
+			CString tmp;
+			tmp.Format(_T("Hardware ID : %s\n"
+				"Device Descriptor : %s\n"),
+				receivedDeviceDescData.HwId, receivedDeviceDescData.DeviceDesc);
+			AfxMessageBox(tmp);
+		
+			addDevice();
+		}
 		break;
 	}
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
