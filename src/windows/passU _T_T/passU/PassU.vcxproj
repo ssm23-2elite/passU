@@ -14,6 +14,7 @@
     <ProjectGuid>{E1335E4A-F0C0-4BDA-9BF2-CA9734BD49C9}</ProjectGuid>
     <RootNamespace>PassU</RootNamespace>
     <Keyword>MFCProj</Keyword>
+    <ProjectName> </ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

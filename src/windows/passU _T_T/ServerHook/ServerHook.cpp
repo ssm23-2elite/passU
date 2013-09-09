@@ -340,9 +340,6 @@ extern "C" __declspec(dllexport)
 
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 			
-			if(!m_mouse){
-				return 1;
-			}
 		}
 		//	} else
 		//		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
