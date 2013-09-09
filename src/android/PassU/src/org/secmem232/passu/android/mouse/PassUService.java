@@ -129,25 +129,6 @@ public class PassUService extends Service implements
 		super.onDestroy();
 	}
 
-	/*	
-	private void showConnectionNotification(String ipAddress){
-		Notification notification = new Notification();
-		PendingIntent intent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(this, Main.class), 0);
-		notification.icon = R.drawable.ic_launcher;
-		notification.tickerText = String.format(getString(R.string.connected_to_s), ipAddress);
-		notification.when = System.currentTimeMillis();
-		notification.setLatestEventInfo(getApplicationContext(), getString(R.string.app_name), String.format(getString(R.string.connected_to_s), ipAddress), intent);
-
-		notification.flags |= Notification.FLAG_ONGOING_EVENT;
-		NotificationManager notifManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-		notifManager.notify(NOTIFICATION_ID, notification);
-	}
-
-		private void dismissNotification(){
-		NotificationManager notifManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-		notifManager.cancelAll();
-	}*/
-
 	public void onViewInit() {
 		if(D.D) Log.w(LOG, "onViewInit");
 

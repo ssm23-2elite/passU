@@ -9,6 +9,7 @@ import java.net.Socket;
 import org.secmem232.passu.android.AR;
 import org.secmem232.passu.android.D;
 import org.secmem232.passu.android.natives.KeyCodeMap;
+import org.secmem232.passu.android.natives.NativeKeyCode;
 import org.secmem232.passu.android.natives.WindowsKeyCode;
 
 import android.graphics.Point;
@@ -198,8 +199,8 @@ public class PassUSocket implements PacketListener {
 				}
 			} else if( packet.getLeftRight() == Packet.LeftRight.RIGHT ) {
 				if( packet.getUpdownFlag() == Packet.Updown_Flag.DOWN ) {
-					mVirtEventListener.onKeyDown(WindowsKeyCode.KEY_F2);
-					mVirtEventListener.onKeyUp(WindowsKeyCode.KEY_F2);
+					mVirtEventListener.onKeyDown(NativeKeyCode.KEY_BACK);
+					mVirtEventListener.onKeyUp(NativeKeyCode.KEY_BACK);
 				} 
 			}
 		} else if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.CLIENT ) {
