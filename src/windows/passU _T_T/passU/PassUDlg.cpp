@@ -651,10 +651,42 @@ void CPassUDlg::OnConnectStart(void)
 	m_pClient->Create();
 	m_pClient->Connect(m_tab2.m_address, 30000);
 
+	m_tab1.strIpAddress;
+
+	int ipFirst = 0, ipSecond = 0, ipThird = 0, ipForth = 0;
+	int i = 0;
+
+	while(m_tab1.strIpAddress.GetAt(i) != '.' ){
+		ipFirst = ipFirst * 10 + (m_tab1.strIpAddress.GetAt(i) - '0');
+		i ++ ;
+	}
+
+	i ++ ;
+
+	while(m_tab1.strIpAddress.GetAt(i) != '.'){
+		ipSecond = ipSecond * 10 + (m_tab1.strIpAddress.GetAt(i) - '0');
+		i ++ ;
+	}
+
+	i ++ ;
+
+	while(m_tab1.strIpAddress.GetAt(i) != '.'){
+		ipThird = ipThird * 10 + (m_tab1.strIpAddress.GetAt(i) - '0');
+		i ++ ;
+	}
+
+	i ++ ;
+
+	while(m_tab1.strIpAddress.GetAt(i) != '.' && (m_tab1.strIpAddress.GetLength() != i)){
+		ipForth = ipForth * 10 + (m_tab1.strIpAddress.GetAt(i) - '0');
+		i ++ ;
+	}
+
+
 	char buf[1024];
 	ZeroMemory(buf, sizeof(buf));
 	sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
-		MSG_CLIENT, 0, STATUS_PC, 1, 0, m_tab2.ipFirst, m_tab2.ipSecond, m_tab2.ipThird, m_tab2.ipForth, nWidth, nHeight);
+		MSG_CLIENT, 0, STATUS_PC, 1, 0, ipFirst, ipSecond, ipThird, ipForth, nWidth, nHeight);
 
 	m_pClient->Send((LPCSTR *)&buf, SIZEOFPACKET); // Çï·Î ÆÐÅ¶ º¸³¿
 }

@@ -106,6 +106,9 @@
       <Filter>리소스 파일</Filter>
     </None>
     <None Include="ClassDiagram.cd" />
+    <None Include="res\trans.cur">
+      <Filter>리소스 파일</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\PassU.ico">

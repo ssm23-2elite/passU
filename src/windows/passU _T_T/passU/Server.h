@@ -27,7 +27,7 @@ public:
 	CString serverIPAddress;
 	HINSTANCE hinstDLL; // DLL 로딩
 	HHOOK hHook; // HHOOK
-
+	CString strIpAddress;
 	CButton m_cBtn[9];
 
 	CClientInfo clientInfo[9]; // 각각의 index는 client ID

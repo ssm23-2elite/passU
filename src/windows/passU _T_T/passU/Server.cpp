@@ -127,7 +127,7 @@ BOOL CServer::OnInitDialog()
 	WSADATA wsaData;
 	char name[255];
 	PHOSTENT hostinfo;
-	CString strIpAddress;
+	
 	wVersionRequested = MAKEWORD(2, 0);
 	if(WSAStartup(wVersionRequested, &wsaData) == 0)
 	{
