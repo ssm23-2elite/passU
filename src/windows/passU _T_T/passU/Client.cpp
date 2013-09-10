@@ -198,7 +198,7 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			tmp.Format(_T("Hardware ID : %s\n"
 				"Device Descriptor : %s\n"),
 				receivedDeviceDescData.HwId, receivedDeviceDescData.DeviceDesc);
-			AfxMessageBox(tmp);
+			//AfxMessageBox(tmp);
 		
 			addDevice();
 		}

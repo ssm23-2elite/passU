@@ -528,7 +528,7 @@ void CPassUDlg::CleanUp(void)
 		m_pSockList.RemoveAll();
 
 
-		AfxMessageBox(_T("Clean Up!"));
+		//AfxMessageBox(_T("Clean Up!"));
 	} else{
 		if(m_pClient)	delete m_pClient;
 	}
