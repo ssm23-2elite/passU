@@ -542,7 +542,8 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s){ // 클라이언트쪽에서 종료하였을
 	CString tmpStr;
 	DestroyCursorAll();
 	m_allowSend = FALSE;
-
+	::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+	::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
 
 	for(int i = 0 ; i < 9 ; i ++){
 		if(m_tab1.clientInfo[i].clientID == s->c_id){
