@@ -124,8 +124,9 @@ public class Util {
 	public static int ByteToInt(byte [] data){
 		int result = 0;
 		for(int i=0; i<data.length; i++){
-			if(data[i] == ' ')
+			if(data[i] == ' ') {
 				continue;
+			}
 			result = result * 10 + (data[i]-'0');
 		}
 		return result;
