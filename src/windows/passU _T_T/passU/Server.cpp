@@ -519,14 +519,19 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				memcpy(buf + 8, packet.usbdesc, packet.len);
 				((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send((char*)&buf, 8 + sizeof(USBSENDDEVICEDESC));
 			}
-		} else if(clientP->bye == 1){ // bye packet
+		} else if(clientP->bye == 1){ // bye packet 을 클라이언트에서 받았을 때
 			// 굿바이패킷이면
-			// 버튼에 클라이언트 해제
+			// 버튼에 클라이언트 해제, LIST에서 제거, 클라이언트 전체 해제
 			s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
 			while((clientP->c_id == s->c_id) && (pos != NULL)){
 				((CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos));
 				s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
 			}
+
+			
+
+
+
 
 			if(pMainDlg->m_pSockList.GetCount() == 0){
 				uninstallKeyhook();

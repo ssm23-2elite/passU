@@ -527,9 +527,18 @@ void CPassUDlg::CleanUp(void)
 
 		m_pSockList.RemoveAll();
 
-
-		//AfxMessageBox(_T("Clean Up!"));
 	} else{
+		CPACKET tmp;
+
+		tmp.bye = 1;
+		tmp.c_id = m_tab2.client_ID;
+		tmp.hello = 0;
+		tmp.msgType = 3;
+	
+		char buf[1024];
+		ZeroMemory(buf, sizeof(buf));
+		sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
+		MSG_CLIENT, m_tab2.client_ID, STATUS_PC, 0, 1, 0, 0, 0, 0, 0, 0);
 		if(m_pClient)	delete m_pClient;
 	}
 }
@@ -633,7 +642,7 @@ void CPassUDlg::OnDestroy()
 	if(m_SorC){ // Server¿œ Ω√
  		CleanUp();
 	} else{
-		ClientCleanUp();
+		CleanUp();
 	}
 	DestroyCursorAll();
 	CDialogEx::OnDestroy();
