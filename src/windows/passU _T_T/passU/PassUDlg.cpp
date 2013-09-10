@@ -540,6 +540,8 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s){ // 클라이언트쪽에서 종료하였을
 	POSITION pos = m_pSockList.GetHeadPosition();
 	
 	CString tmpStr;
+	DestroyCursorAll();
+	m_allowSend = FALSE;
 
 
 	for(int i = 0 ; i < 9 ; i ++){
