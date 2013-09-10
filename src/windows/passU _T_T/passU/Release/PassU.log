@@ -1,8 +1,8 @@
-﻿빌드 시작: 2013-09-10 오전 3:57:16
+﻿빌드 시작: 2013-09-11 오전 12:47:37
      1>2 노드의 "D:\Workspace\SSM\passU\src\windows\passU _T_T\passU\PassU.vcxproj" 프로젝트(Build 대상)입니다.
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\PassU.pch" /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Server.cpp
-         Server.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\PassU.pch" /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt PassUDlg.cpp
+         PassUDlg.cpp
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Workspace\SSM\passU\src\windows\passU _T_T\Release\PassU.exe" /INCREMENTAL:NO /NOLOGO /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"D:\Workspace\SSM\passU\src\windows\passU _T_T\Release\PassU.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Workspace\SSM\passU\src\windows\passU _T_T\Release\PassU.lib" /MACHINE:X86 /SAFESEH Release\PassU.res
          Release\Client.obj
@@ -21,4 +21,4 @@
 
 빌드했습니다.
 
-경과 시간: 00:00:03.60
+경과 시간: 00:00:12.31

@@ -1,24 +1,10 @@
-﻿빌드 시작: 2013-09-11 오전 12:02:19
-     1>2 노드의 "C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\passU\PassU.vcxproj" 프로젝트(Build 대상)입니다.
+﻿빌드 시작: 2013-09-11 오전 1:37:11
+     1>2 노드의 "D:\Workspace\SSM\passU\src\windows\passU _T_T\passU\PassU.vcxproj" 프로젝트(Build 대상)입니다.
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"Debug\PassU.pch" /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
-         stdafx.cpp
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\PassU.pch" /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Client.cpp ClientInfo.cpp PassU.cpp PassUChildSocket.cpp PassUClientSocket.cpp PassUDlg.cpp PassUServerSocket.cpp Server.cpp
-         Server.cpp
-         PassUServerSocket.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _WINDOWS /D _DEBUG /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\PassU.pch" /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt PassUDlg.cpp
          PassUDlg.cpp
-         PassUClientSocket.cpp
-         PassUChildSocket.cpp
-         PassU.cpp
-         ClientInfo.cpp
-         Client.cpp
-     1>c:\users\administrator\desktop\mini project\src\windows\passu _t_t\passu\client.cpp(296): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-                 c:\program files (x86)\microsoft visual studio 11.0\vc\include\string.h(110) : 'strcpy' 선언을 참조하십시오.
-         코드를 생성하고 있습니다...
-       ResourceCompile:
-         C:\Program Files (x86)\Windows Kits\8.0\bin\x86\rc.exe /D _DEBUG /D _AFXDLL /l"0x0412" /IDebug\ /nologo /fo"Debug\PassU.res" PassU.rc 
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\Debug\PassU.exe" /INCREMENTAL /NOLOGO /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\Debug\PassU.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\Debug\PassU.lib" /MACHINE:X86 Debug\PassU.res
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Workspace\SSM\passU\src\windows\passU _T_T\Debug\PassU.exe" /INCREMENTAL /NOLOGO /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"D:\Workspace\SSM\passU\src\windows\passU _T_T\Debug\PassU.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Workspace\SSM\passU\src\windows\passU _T_T\Debug\PassU.lib" /MACHINE:X86 Debug\PassU.res
          Debug\Client.obj
          Debug\ClientInfo.obj
          Debug\PassU.obj
@@ -28,9 +14,9 @@
          Debug\PassUServerSocket.obj
          Debug\Server.obj
          Debug\stdafx.obj
-         PassU.vcxproj -> C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\Debug\PassU.exe
-     1>"C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\passU\PassU.vcxproj" 프로젝트를 빌드했습니다(Build 대상).
+         PassU.vcxproj -> D:\Workspace\SSM\passU\src\windows\passU _T_T\Debug\PassU.exe
+     1>"D:\Workspace\SSM\passU\src\windows\passU _T_T\passU\PassU.vcxproj" 프로젝트를 빌드했습니다(Build 대상).
 
 빌드했습니다.
 
-경과 시간: 00:00:18.07
+경과 시간: 00:00:00.41

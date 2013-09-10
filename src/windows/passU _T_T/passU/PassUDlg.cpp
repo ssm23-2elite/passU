@@ -629,11 +629,7 @@ void CPassUDlg::OnBnClickedButton2()
 		m_CBtn_Start.EnableWindow(TRUE);
 		m_CBtn_Stop.EnableWindow(FALSE);
 
-	if(m_SorC){
-		CleanUp();
-	} else{
-		ClientCleanUp();
-	}
+	CleanUp();
 	//CDialog::OnCancel();
 }
 
