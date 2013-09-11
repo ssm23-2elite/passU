@@ -45,6 +45,7 @@ typedef struct
 USBSENDDEVICEDESC receivedDeviceDescData;
 
 int addDevice(void);
+int removeDevice(void);
 // CClient 대화 상자입니다.
 
 IMPLEMENT_DYNAMIC(CClient, CDialogEx)
@@ -175,7 +176,7 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	switch(pCopyDataStruct->dwData){
 	case 2: // USB
-		AfxMessageBox("USB");
+		removeDevice();
 
 		break;
 
@@ -185,13 +186,9 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		if(cPacket->hello == 1){ // hello packet에 대한 ACK가 왔을 때
 			// Client ID를 부여받는다.
 			client_ID = cPacket->c_id;
-			
-
 		} else if(cPacket->bye == 1){ // bye 패킷을 받았을 때
-
 			OnDisconnect();
 			m_connectFlag = false;
-
 		}
 		break;
 	case 4:
@@ -199,12 +196,6 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		memcpy(&receivedDeviceDescData, &dPacket->usbdesc, sizeof(USBSENDDEVICEDESC));
 		
 		if(IsWow64() == FALSE) { // 32bit이면 usb 삽입 ㄱㄱ {
-			CString tmp;
-			tmp.Format(_T("Hardware ID : %s\n"
-				"Device Descriptor : %s\n"),
-				receivedDeviceDescData.HwId, receivedDeviceDescData.DeviceDesc);
-			//AfxMessageBox(tmp);
-		
 			addDevice();
 		}
 		break;
@@ -239,6 +230,37 @@ int addDevice(void)
 	// 값 넣는 곳
 	DeviceIoControl( handle, IOCTL_BUSDRIVER_INSERTDATA, &receivedDeviceDescData, sizeof(receivedDeviceDescData) + 2, NULL, 0, &ret, NULL );
 	DeviceIoControl( handle, IOCTL_BUSDRIVER_ADDDEVICE, NULL, 0, NULL, 0, &ret, NULL );
+
+	CloseHandle( handle );
+	free( pDeviceName );
+	return 0;
+}
+
+int removeDevice(void)
+{
+	HANDLE handle;
+	int count;
+	char *pDeviceName;
+	BOOLEAN bl;
+	ULONG ret;
+
+	count = GetDeviceStackNameCount( (struct _GUID *)&SampleGuid );
+
+	if( count == 0 )
+		return 0; // 시스템은 SampleGuid를 지원하는 장치가 설치되지 않았습니다
+
+	bl = GetDeviceStackName( (struct _GUID *)&SampleGuid, &pDeviceName, 0 ); // 당연히 1나이상의 장치는 설치되어있으므로..0을 사용한다
+
+	if( bl == FALSE )
+		return 0; // 이런경우는 없어야 한다
+
+	handle = CreateFile( pDeviceName, GENERIC_READ|GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0 , 0 );
+	if( handle == (HANDLE)-1 ) {
+		free( pDeviceName );
+		return -1; // Stack은 있지만, 현재 접근이 금지되어 있다
+	}
+
+	DeviceIoControl( handle, IOCTL_BUSDRIVER_REMOVEDEVICE, NULL, 0, NULL, 0, &ret, NULL );
 
 	CloseHandle( handle );
 	free( pDeviceName );
