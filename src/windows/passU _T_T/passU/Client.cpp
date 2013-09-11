@@ -124,11 +124,13 @@ void CClient::OnDisconnect(void) // 서버가 닫혔을 때 실행되는 함수
 	m_cBtn_connect.EnableWindow(TRUE);
 	m_CBtn_Cancel.EnableWindow(FALSE);
 	m_address.Format(_T(""));
+	m_IpAddressCtrl.ClearAddress();
+
 	ipFirst = 0;
 	ipSecond = 0;
 	ipThird = 0;
 	ipForth = 0;
-
+	m_connectFlag = false;
 }
 
 
@@ -139,11 +141,12 @@ void CClient::OnBnClickedConnect() // Connect 버튼을 눌렀을 때
 
 
 	UpdateData();
-	
+
 	m_IpAddressCtrl.GetAddress(ipFirst, ipSecond, ipThird, ipForth);
+	
 	m_address.Format(_T("%d.%d.%d.%d"), ipFirst, ipSecond, ipThird, ipForth);
-	if(m_address.GetLength() == 0){
-		AfxMessageBox(_T("IP 주소를 입력하세요."));
+	if(m_address.GetLength() < 9 || m_address.GetAt(0) == '0' || m_address.GetAt(m_address.GetLength() - 1) == '0'){
+		AfxMessageBox(_T("IP 주소를 올바르게 입력하세요."));
 		return ;
 	}
 
@@ -170,7 +173,7 @@ void CClient::OnBnClickedCancel()
 	ipForth = 0;
 
 	m_IpAddressCtrl.ClearAddress();
-
+	m_address.Format(_T(""));
 	m_connectFlag = false;
 }
 
@@ -182,6 +185,7 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	switch(pCopyDataStruct->dwData){
 	case 2: // USB
 		removeDevice();
+		OnDisconnect();
 
 		break;
 

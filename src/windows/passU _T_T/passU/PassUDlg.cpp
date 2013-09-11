@@ -130,7 +130,7 @@ BOOL CPassUDlg::OnInitDialog()
 	m_pwndShow = &m_tab1;
 	whereisPoint = 5;
 	UpdateData(FALSE);
-
+	m_CBtn_Stop.EnableWindow(FALSE);
 	// 자신의 화면 구하기
 	nWidth = GetSystemMetrics(SM_CXSCREEN);
 	nHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -239,6 +239,17 @@ void CPassUDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 		m_tab1.ShowWindow(SW_SHOW);
 		m_pwndShow = &m_tab1;
 		m_SorC = TRUE;
+		if(m_pServer == NULL){
+			m_CBtn_Start.EnableWindow(TRUE);
+		}
+
+		if(m_tab2.m_connectFlag == TRUE){
+			m_CBtn_Stop.EnableWindow(FALSE);
+			m_CBtn_Start.EnableWindow(FALSE);
+		}
+
+		if(m_pServer != NULL)
+			m_CBtn_Stop.EnableWindow(TRUE);
 		break;
 
 	case 1:
@@ -246,6 +257,11 @@ void CPassUDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 		m_pwndShow = &m_tab2;
 		m_SorC = FALSE;
 		m_CBtn_Start.EnableWindow(FALSE);
+		if(m_pServer != NULL)
+			m_CBtn_Stop.EnableWindow(FALSE);
+		if(m_tab2.m_connectFlag == TRUE){
+			m_CBtn_Stop.EnableWindow(TRUE);
+		}
 		break;
 	}
 
@@ -507,7 +523,7 @@ void CPassUDlg::CleanUp(void)
 		if(m_pServer == NULL)
 			return ;
 		m_pServer->Close();
-		if(m_pServer)	delete m_pServer;
+		if(m_pServer)	m_pServer = NULL;
 
 		m_tab1.m_waiting_client.DeleteAllItems();
 
@@ -561,7 +577,7 @@ void CPassUDlg::CleanUp(void)
 
 		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
-		if(m_pClient)	delete m_pClient;
+		if(m_pClient)	m_pClient = NULL;
 	}
 }
 
@@ -634,12 +650,15 @@ void CPassUDlg::OnBnClickedButton1()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_SorC){
 		OnStartServer();
+		m_tab2.EnableWindow(FALSE);
 	} else{
 		OnConnectStart();
+		m_tab2.m_CBtn_Cancel.EnableWindow(FALSE);
+		m_tab2.m_connectFlag = TRUE;
+		m_tab1.EnableWindow(FALSE);
 	}
 
 	m_CBtn_Start.EnableWindow(FALSE);
-
 	m_CBtn_Stop.EnableWindow(TRUE);
 }
 
@@ -647,9 +666,17 @@ void CPassUDlg::OnBnClickedButton2()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	m_CBtn_Start.EnableWindow(TRUE);
-	m_CBtn_Stop.EnableWindow(FALSE);
+	if(m_SorC){
+		m_CBtn_Start.EnableWindow(TRUE);
+		m_CBtn_Stop.EnableWindow(FALSE);
+	} else{
+		m_CBtn_Start.EnableWindow(FALSE);
+		m_CBtn_Stop.EnableWindow(FALSE);
+		m_tab2.m_CBtn_Cancel.EnableWindow(TRUE);
+	}
 
+	m_tab2.EnableWindow(TRUE);
+	m_tab1.EnableWindow(TRUE);
 	CleanUp();
 	//CDialog::OnCancel();
 }
@@ -826,8 +853,8 @@ void CPassUDlg::CloseClient(CPassUClientSocket * s)
 	m_tab2.m_IpAddressCtrl.ClearAddress();
 
 	m_tab2.m_connectFlag = false;
-	m_CBtn_Start.EnableWindow(TRUE);
-	m_CBtn_Stop.EnableWindow(TRUE);
+	m_CBtn_Start.EnableWindow(FALSE);
+	m_CBtn_Stop.EnableWindow(FALSE);
 }
 
 BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
