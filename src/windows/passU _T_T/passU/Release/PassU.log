@@ -1,22 +1,9 @@
-﻿빌드 시작: 2013-09-11 오전 5:03:05
+﻿빌드 시작: 2013-09-11 오후 11:27:32
      1>2 노드의 "C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\passU\PassU.vcxproj" 프로젝트(Build 대상)입니다.
-     1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D _WINDOWS /D NDEBUG /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\PassU.pch" /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt PassUDlg.cpp
-         PassUDlg.cpp
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\Release\PassU.exe" /INCREMENTAL:NO /NOLOGO /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /manifestinput:"C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\Include\Manifest\dpiaware.manifest" /DEBUG /PDB:"C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\Release\PassU.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\Release\PassU.lib" /MACHINE:X86 /SAFESEH Release\PassU.res
-         Release\Client.obj
-         Release\ClientInfo.obj
-         Release\PassU.obj
-         Release\PassUChildSocket.obj
-         Release\PassUClientSocket.obj
-         Release\PassUDlg.obj
-         Release\PassUServerSocket.obj
-         Release\Server.obj
-         Release\stdafx.obj
-     1>LINK : fatal error LNK1104: 'C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\Release\PassU.exe' 파일을 열 수 없습니다.
-     1>"C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\passU\PassU.vcxproj" 프로젝트를 빌드했습니다(Build 대상). - 실패
+     1>Link:
+         PassU.vcxproj -> C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\Release\PassU.exe
+     1>"C:\Users\Administrator\Desktop\Mini Project\src\windows\passU _T_T\passU\PassU.vcxproj" 프로젝트를 빌드했습니다(Build 대상).
 
-빌드하지 못했습니다.
+빌드했습니다.
 
-경과 시간: 00:00:00.99
+경과 시간: 00:00:00.19

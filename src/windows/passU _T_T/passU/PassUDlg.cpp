@@ -527,6 +527,8 @@ void CPassUDlg::CleanUp(void)
 
 		m_pSockList.RemoveAll();
 
+		if(m_pServer)	delete m_pServer;
+
 	} else{
 		CPACKET tmp;
 
@@ -539,6 +541,16 @@ void CPassUDlg::CleanUp(void)
 		ZeroMemory(buf, sizeof(buf));
 		sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
 		MSG_CLIENT, m_tab2.client_ID, STATUS_PC, 0, 1, 0, 0, 0, 0, 0, 0);
+
+		COPYDATASTRUCT CDS;
+
+		CDS.dwData = 2;
+		CDS.cbData = sizeof(CPACKET);
+		CDS.lpData = &tmp;
+
+
+		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
 		if(m_pClient)	delete m_pClient;
 	}
 }
@@ -574,7 +586,6 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s){ // 클라이언트쪽에서 종료하였을
 			int index = m_tab1.m_waiting_client.FindItem(&find_item);
 			if(-1 != index)	m_tab1.m_waiting_client.DeleteItem(index);
 
-			m_tab1.m_waiting_client.DeleteItem(0);
 			m_tab1.clientInfo[i].setID(0);
 			m_tab1.clientInfo[i].setIP("0.0.0.0");
 			m_tab1.clientInfo[i].setPosition(0);
@@ -776,6 +787,16 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 
 void CPassUDlg::CloseClient(CPassUClientSocket * s)
 {
+
+	COPYDATASTRUCT CDS;
+	CPACKET tmp;
+	
+	CDS.dwData = 2;
+	CDS.cbData = sizeof(CPACKET);
+	CDS.lpData = &tmp;
+
+	::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
 	m_pClient->Close();
 	if(m_pClient)	delete m_pClient;
 	m_tab2.m_cBtn_connect.EnableWindow(TRUE);
@@ -826,13 +847,6 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	case MOUSE_DATA:
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
 		int i = 0;
-
-		
-		if(currentPoint.x != 0 && currentPoint.y != 0){
-			SetCursorPos(currentPoint.x ,	currentPoint.y);
-			currentPoint.x = 0;
-			currentPoint.y = 0;
-		}
 
 		if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
 			if((whereisPoint == 5) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 3에 되어 있을 때(4번 버튼)
@@ -918,10 +932,6 @@ void CPassUDlg::OnArrivedScreenEdge(MPACKET *packet, BOOL bClient, int position)
 
 		ShowCursorAll();
 	}
-
-	SetCursorPos(packet->xCoord, packet->yCoord);
-	currentPoint.x = packet->xCoord;
-	currentPoint.y = packet->yCoord;
 
 	whereisPoint = position;		
 }

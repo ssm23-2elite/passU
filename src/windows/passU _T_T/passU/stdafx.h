@@ -66,6 +66,7 @@
 #define MSG_MOUSE	2
 #define	MSG_CLIENT	3
 #define	MSG_DATA	4
+#define MSG_USB	5
 
 #define WM_KEYBOARD_FALSE	WM_USER + 1001
 #define WM_MOUSE_FALSE	WM_USER + 1002
