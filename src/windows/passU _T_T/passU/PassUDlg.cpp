@@ -118,7 +118,8 @@ BOOL CPassUDlg::OnInitDialog()
 	m_Tab.InsertItem(1, tmp);
 
 	CRect rect;
-
+	m_pServer = NULL;
+	m_pClient = NULL;
 	m_Tab.GetClientRect(&rect);
 	m_tab1.Create(IDD_SERVER, &m_Tab);
 	m_tab1.SetWindowPos(NULL, 5, 25, rect.Width() - 10 , rect.Height() - 30, SWP_SHOWWINDOW|SWP_NOZORDER);
@@ -244,6 +245,7 @@ void CPassUDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 		m_tab2.ShowWindow(SW_SHOW);
 		m_pwndShow = &m_tab2;
 		m_SorC = FALSE;
+		m_CBtn_Start.EnableWindow(FALSE);
 		break;
 	}
 
@@ -502,6 +504,8 @@ void CPassUDlg::Accept(void)
 void CPassUDlg::CleanUp(void)
 {
 	if(m_SorC){
+		if(m_pServer == NULL)
+			return ;
 		m_pServer->Close();
 		if(m_pServer)	delete m_pServer;
 
@@ -531,9 +535,11 @@ void CPassUDlg::CleanUp(void)
 
 		m_pSockList.RemoveAll();
 
-		if(m_pServer)	delete m_pServer;
 
 	} else{
+		if(m_pClient == NULL)
+			return ;
+
 		CPACKET tmp;
 
 		tmp.bye = 1;

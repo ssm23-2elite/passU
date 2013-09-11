@@ -135,23 +135,23 @@ void CClient::OnDisconnect(void) // 서버가 닫혔을 때 실행되는 함수
 void CClient::OnBnClickedConnect() // Connect 버튼을 눌렀을 때
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	/*if(m_address.GetLength() == 0){
-	AfxMessageBox(_T("IP 주소를 입력하세요."));
-	return ;
-	}*/
+	
 
 
 	UpdateData();
-
+	
 	m_IpAddressCtrl.GetAddress(ipFirst, ipSecond, ipThird, ipForth);
 	m_address.Format(_T("%d.%d.%d.%d"), ipFirst, ipSecond, ipThird, ipForth);
+	if(m_address.GetLength() == 0){
+		AfxMessageBox(_T("IP 주소를 입력하세요."));
+		return ;
+	}
 
-	/*m_clientSock.Create();
-	m_clientSock.Connect(m_address, 30000);
-	*/
 	m_cBtn_connect.EnableWindow(FALSE);
-	
+	CPassUDlg * pMainDlg = (CPassUDlg *)::AfxGetMainWnd();
+	pMainDlg->m_CBtn_Start.EnableWindow(TRUE);
 	m_CBtn_Cancel.EnableWindow(TRUE);
+	
 	OnConnectServer();
 }
 
@@ -160,10 +160,15 @@ void CClient::OnBnClickedCancel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_cBtn_connect.EnableWindow(TRUE);
+	
+	CPassUDlg * pMainDlg = (CPassUDlg *)::AfxGetMainWnd();
+	pMainDlg->m_CBtn_Start.EnableWindow(FALSE);
+
 	ipFirst = 0;
 	ipSecond = 0;
 	ipThird = 0;
 	ipForth = 0;
+
 	m_IpAddressCtrl.ClearAddress();
 
 	m_connectFlag = false;
