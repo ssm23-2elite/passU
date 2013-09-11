@@ -964,7 +964,7 @@ BOOL CPassUDlg::PreTranslateMessage(MSG* pMsg)
 LRESULT CPassUDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
-		if(m_SorC == TRUE && message == WM_DEVICECHANGE /*&& m_pSockList.GetCount() != 0*/){
+		if(m_SorC == TRUE && message == WM_DEVICECHANGE && m_pSockList.GetCount() != 0){
 			TRACE("USB 꽂았음\n");
 			USBDeviceChange(wParam, lParam);
 		}
