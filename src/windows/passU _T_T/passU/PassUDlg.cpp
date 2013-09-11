@@ -151,6 +151,9 @@ void CPassUDlg::OnSysCommand(UINT nID, LPARAM lParam)
 		CAboutDlg dlgAbout;
 		dlgAbout.DoModal();
 	}
+
+	// if((nID & 0xFFF0) == SC_MINIMIZE) ShowWindow(SW_HIDE);
+
 	else
 	{
 		CDialogEx::OnSysCommand(nID, lParam);
@@ -787,10 +790,9 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 
 void CPassUDlg::CloseClient(CPassUClientSocket * s)
 {
-
 	COPYDATASTRUCT CDS;
 	CPACKET tmp;
-	
+
 	CDS.dwData = 2;
 	CDS.cbData = sizeof(CPACKET);
 	CDS.lpData = &tmp;
@@ -809,7 +811,6 @@ void CPassUDlg::CloseClient(CPassUClientSocket * s)
 	m_tab2.m_connectFlag = false;
 	m_CBtn_Start.EnableWindow(TRUE);
 	m_CBtn_Stop.EnableWindow(TRUE);
-
 }
 
 BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
