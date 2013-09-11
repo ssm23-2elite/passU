@@ -81,6 +81,8 @@ public:
 	CBitmap m_bmp_monitor;
 	CBitmap m_bmp_phone;
 
+	void SendUSBInfo(CPassUChildSocket *s);
+	void RemoveUSBInfo(CPassUChildSocket *s);
 	void OnChangeLocationInfo(int index);
 	void bindWatingClient(int btn_index, int client_index);
 	void OnDisconnectedClient(int client_index);

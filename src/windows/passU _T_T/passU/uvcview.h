@@ -404,8 +404,6 @@ PUCHAR                          g_descEnd;
 // ENUM.C
 //
 
-int GetDesc();
-
 VOID
 EnumerateHostControllers (
     ULONG     *DevicesConnected

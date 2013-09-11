@@ -75,6 +75,7 @@ public:
 	CPassUServerSocket *m_pServer;
 	CObList m_pSockList;
 	BOOL m_SorC;
+	BOOL USBDeviceChange(UINT uEvent, DWORD dwEventData);
 	void OnStartServer();
 	void Accept(void);
 	void ReceiveData(CPassUChildSocket * s);
@@ -99,4 +100,5 @@ public:
 	void OnArrivedScreenEdge(MPACKET *packet, BOOL bClient, int position);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 };

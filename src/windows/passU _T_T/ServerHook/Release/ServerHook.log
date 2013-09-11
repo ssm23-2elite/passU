@@ -1,5 +1,5 @@
-﻿빌드 시작: 2013-09-11 오후 11:01:43
-     1>3 노드의 "D:\Workspace\SSM\passU\src\windows\passU _T_T\ServerHook\ServerHook.vcxproj" 프로젝트(Build 대상)입니다.
+﻿빌드 시작: 2013-09-12 오전 3:16:31
+     1>3 노드의 "D:\Workspace\SSM\passU\src\windows\passU _T_T\ServerHook\ServerHook.vcxproj" 프로젝트(Rebuild 대상)입니다.
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V110\Microsoft.CppBuild.targets(346,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D _WINDLL /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt ServerHook.cpp
@@ -11,8 +11,8 @@
          코드를 생성하고 있습니다.
          코드를 생성했습니다.
          ServerHook.vcxproj -> D:\Workspace\SSM\passU\src\windows\passU _T_T\ServerHook\..\Release\ServerHook.dll
-     1>"D:\Workspace\SSM\passU\src\windows\passU _T_T\ServerHook\ServerHook.vcxproj" 프로젝트를 빌드했습니다(Build 대상).
+     1>"D:\Workspace\SSM\passU\src\windows\passU _T_T\ServerHook\ServerHook.vcxproj" 프로젝트를 빌드했습니다(Rebuild 대상).
 
 빌드했습니다.
 
-경과 시간: 00:00:06.17
+경과 시간: 00:00:04.52

@@ -7,6 +7,7 @@
 #include "PassUDlg.h"
 #include "afxdialogex.h"
 #include "PassUClientSocket.h"
+#include <Dbt.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -124,7 +125,7 @@ BOOL CPassUDlg::OnInitDialog()
 	m_tab2.Create(IDD_CLIENT, &m_Tab);
 	m_tab2.SetWindowPos(NULL, 5, 25, rect.Width() - 10, rect.Height() - 30, SWP_NOZORDER);
 
-
+	m_SorC = TRUE;
 	m_pwndShow = &m_tab1;
 	whereisPoint = 5;
 	UpdateData(FALSE);
@@ -258,7 +259,7 @@ void CPassUDlg::ReceiveData(CPassUChildSocket * s)
 	int len = s->Receive(&buf, sizeof(buf));
 
 	ParseData(buf, len);
-		
+
 }
 
 int CPassUDlg::ParseData(char *buf, int len)
@@ -283,7 +284,7 @@ int CPassUDlg::ParseData(char *buf, int len)
 		MPACKET packet;
 
 		ParseMouseData(buf, &packet);
-		
+
 		if(oldPoint.x == 0 && oldPoint.y == 0) {
 			oldPoint.x = packet.xCoord;
 			oldPoint.y = packet.yCoord;
@@ -539,11 +540,11 @@ void CPassUDlg::CleanUp(void)
 		tmp.c_id = m_tab2.client_ID;
 		tmp.hello = 0;
 		tmp.msgType = 3;
-	
+
 		char buf[1024];
 		ZeroMemory(buf, sizeof(buf));
 		sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
-		MSG_CLIENT, m_tab2.client_ID, STATUS_PC, 0, 1, 0, 0, 0, 0, 0, 0);
+			MSG_CLIENT, m_tab2.client_ID, STATUS_PC, 0, 1, 0, 0, 0, 0, 0, 0);
 
 		COPYDATASTRUCT CDS;
 
@@ -562,7 +563,7 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s){ // 클라이언트쪽에서 종료하였을
 
 	CPassUChildSocket *pChild;
 	POSITION pos = m_pSockList.GetHeadPosition();
-	
+
 	CString tmpStr;
 	DestroyCursorAll();
 	m_allowSend = FALSE;
@@ -573,7 +574,7 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s){ // 클라이언트쪽에서 종료하였을
 		if(m_tab1.clientInfo[i].clientID == s->c_id){
 
 			m_tab1.m_cBtn[((m_tab1.clientInfo[i]).getPosition())].SetBitmap(NULL);
-			
+
 			UpdateData();
 			Invalidate();
 
@@ -632,7 +633,7 @@ void CPassUDlg::OnBnClickedButton1()
 	}
 
 	m_CBtn_Start.EnableWindow(FALSE);
-		
+
 	m_CBtn_Stop.EnableWindow(TRUE);
 }
 
@@ -640,8 +641,8 @@ void CPassUDlg::OnBnClickedButton2()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-		m_CBtn_Start.EnableWindow(TRUE);
-		m_CBtn_Stop.EnableWindow(FALSE);
+	m_CBtn_Start.EnableWindow(TRUE);
+	m_CBtn_Stop.EnableWindow(FALSE);
 
 	CleanUp();
 	//CDialog::OnCancel();
@@ -650,7 +651,7 @@ void CPassUDlg::OnBnClickedButton2()
 void CPassUDlg::OnDestroy()
 {
 	if(m_SorC){ // Server일 시
- 		CleanUp();
+		CleanUp();
 	} else{
 		CleanUp();
 	}
@@ -707,7 +708,7 @@ void CPassUDlg::OnConnectStart(void)
 
 void CPassUDlg::ClientCleanUp(void)
 {
-	
+
 }
 
 void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
@@ -766,7 +767,7 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		CDS.cbData = sizeof(CPACKET);
 		CDS.lpData = &packet;
 		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-	
+
 	} else if(msgType == MSG_DATA) {
 		DPACKET packet;
 		ZeroMemory(&packet, sizeof(DPACKET));
@@ -776,12 +777,22 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		char lenBuf[4];
 		memcpy(lenBuf, buf + sizeof(packet.msgType), sizeof(lenBuf));
 		packet.len = byteToint(lenBuf, 4);
-		
+
 		memcpy(&packet.usbdesc, buf + sizeof(packet.msgType) + sizeof(packet.len), packet.len);
 
 		COPYDATASTRUCT CDS;
 
 		CDS.dwData = 4; // receiveData
+		CDS.cbData = sizeof(DPACKET);
+		CDS.lpData = &packet;
+		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	} else if(msgType == MSG_REMOVE_USB) {
+		DPACKET packet;
+		ZeroMemory(&packet, sizeof(DPACKET));
+
+		COPYDATASTRUCT CDS;
+
+		CDS.dwData = 2; // receiveData
 		CDS.cbData = sizeof(DPACKET);
 		CDS.lpData = &packet;
 		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
@@ -947,4 +958,43 @@ BOOL CPassUDlg::PreTranslateMessage(MSG* pMsg)
 	} 
 
 	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+LRESULT CPassUDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+		if(m_SorC == TRUE && message == WM_DEVICECHANGE /*&& m_pSockList.GetCount() != 0*/){
+			TRACE("USB 꽂았음\n");
+			USBDeviceChange(wParam, lParam);
+		}
+	return CDialogEx::DefWindowProc(message, wParam, lParam);
+}
+
+BOOL CPassUDlg::USBDeviceChange(UINT uEvent, DWORD dwEventData)
+{
+	COPYDATASTRUCT CDS;
+	CPACKET packet;
+
+	switch (uEvent)
+	{
+	case DBT_DEVICEARRIVAL:
+		// 새로운 장치 발생
+		CDS.dwData = 5; // Send New Device
+		CDS.cbData = sizeof(CPACKET);
+		CDS.lpData = &packet;
+		::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		break;
+	case DBT_DEVICEREMOVECOMPLETE:
+		// 장치 연결 해제
+		CPACKET packet;
+		CDS.dwData = 6; // Remove Device
+		CDS.cbData = sizeof(CPACKET);
+		CDS.lpData = &packet;
+		::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		break;
+	default:
+		break;
+	}
+	return TRUE;
 }

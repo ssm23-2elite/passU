@@ -63,6 +63,7 @@ PCHAR ConnectionStatuses[] =
 ULONG TotalDevicesConnected;
 
 USBSENDDEVICEDESC sendToDeviceDescData;
+BOOL GetPassUSBDescSuc;
 
 int GetPassUSBDesc();
 
@@ -127,7 +128,7 @@ BOOL CServer::OnInitDialog()
 	WSADATA wsaData;
 	char name[255];
 	PHOSTENT hostinfo;
-	
+
 	wVersionRequested = MAKEWORD(2, 0);
 	if(WSAStartup(wVersionRequested, &wsaData) == 0)
 	{
@@ -268,7 +269,7 @@ void CServer::OnBnClickedButton9()
 void CServer::OnButtonClick(int position)
 {
 	if(btn_Bind[position] != 0) {
-	if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
+		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
 		{
 			m_cBtn[position].SetBitmap(NULL);
 			btn_Bind[position] = 0;
@@ -398,6 +399,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	// Main Dialog 포인터를 받아옴
 	CPassUDlg * pMainDlg = (CPassUDlg *)::AfxGetMainWnd();
 	POSITION pos = pMainDlg->m_pSockList.GetHeadPosition();
+	CPACKET* clientP;
 
 	TRACE("OnCopyData\n");
 
@@ -416,14 +418,14 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 
 	case RECEIVE_DATA: // receiveData
-		CPACKET* clientP = (CPACKET *) pCopyDataStruct->lpData; // 구조체 연결
+		clientP = (CPACKET *) pCopyDataStruct->lpData; // 구조체 연결
 
 		if(clientP->hello == 1){ // hello packet
 			// 헬로 패킷이면 클라이언트 정보 설정
 			// 버튼에 클라이언트 연결해주고, 첫번째 클라이언트면 후킹 시작하고
 			// 클라이언트에 자신의 id 알려주고
 			// 리스트 컨트롤에 아이콘 하나 추가
-			
+
 			if(pMainDlg->m_pSockList.GetCount() == 1){
 
 				m_waiting_client.SetImageList(&m_imgList, LVSIL_NORMAL);
@@ -443,7 +445,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					// 클라이언트의 화면 크기 구해서 저장
 					client_nWidth[i + 1] = clientP->nWidth;
 					client_nHeight[i + 1] = clientP->nHeight;
-					
+
 					// Client IP Address Setting
 					clientInfo[i].m_address.Format(_T("%d.%d.%d.%d"), clientP->ipFirst, clientP->ipSecond, clientP->ipThird, clientP->ipForth);
 
@@ -504,20 +506,13 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				MSG_CLIENT, clientP->c_id, clientP->pad3, clientP->hello,clientP->bye, clientP->ipFirst, clientP->ipSecond, clientP->ipThird, clientP->ipForth,
 				0, 0);
 			((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send(buf, sizeof(CPACKET));
-			
-			if(clientP->pad3 == STATUS_PC) {
-				GetPassUSBDesc();
-				
-				DPACKET packet;
-				ZeroMemory(&packet, sizeof(DPACKET));
-				packet.msgType = MSG_DATA;
-				packet.len = sizeof(USBSENDDEVICEDESC);
-				memcpy(&packet.usbdesc, &sendToDeviceDescData, sizeof(USBSENDDEVICEDESC));
 
-				char buf[4096];
-				int len = sprintf_s(buf, "%4d%4d", packet.msgType, packet.len);
-				memcpy(buf + 8, packet.usbdesc, packet.len);
-				((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send((char*)&buf, 8 + sizeof(USBSENDDEVICEDESC));
+			if(clientP->pad3 == STATUS_PC) {
+				//GetPassUSBDesc();
+				//
+				//if(GetPassUSBDescSuc == TRUE) {
+				//	SendUSBInfo(((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos)));
+				//}
 			}
 		} else if(clientP->bye == 1){ // bye packet 을 클라이언트에서 받았을 때
 			// 굿바이패킷이면
@@ -528,22 +523,75 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
 			}
 
-			
-
-
-
-
 			if(pMainDlg->m_pSockList.GetCount() == 0){
 				uninstallKeyhook();
 				uninstallMousehook();
 			}
 		}
 		break;
+	case NEW_USB:
+		GetPassUSBDesc();
+		if(GetPassUSBDescSuc == TRUE) {
+			//POSITION tmp = pMainDlg->m_pSockList.GetHeadPosition();
+			
+			s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
+			while(s->c_id != 0 && pos != NULL){
+				
+				s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
+				if(clientInfo[s->c_id - 1].getStatus() == STATUS_PC)
+				{
+					// clientID 에 해당하는 소켓을 얻는 구간
+					SendUSBInfo(s);
+				}
+
+				((CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos));
+			}
+		}
+		break;
+	case REMOVE_USB:
+		s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
+		while(s->c_id != 0 && pos != NULL){
+			s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
+			if(clientInfo[s->c_id - 1].getStatus() == STATUS_PC)
+			{
+				// clientID 에 해당하는 소켓을 얻는 구간
+				RemoveUSBInfo(s);
+			}
+
+			((CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos));
+		}
+		break;
 	}
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
 }
 
+void CServer::SendUSBInfo(CPassUChildSocket *s)
+{
+	DPACKET packet;
+	ZeroMemory(&packet, sizeof(DPACKET));
+	packet.msgType = MSG_DATA;
+	packet.len = sizeof(USBSENDDEVICEDESC);
+	memcpy(&packet.usbdesc, &sendToDeviceDescData, sizeof(USBSENDDEVICEDESC));
 
+	char buf[4096];
+	int len = sprintf_s(buf, "%4d%4d", packet.msgType, packet.len);
+	memcpy(buf + 8, packet.usbdesc, packet.len);
+	s->Send((char*)&buf, 8 + sizeof(USBSENDDEVICEDESC));
+}
+
+void CServer::RemoveUSBInfo(CPassUChildSocket *s)
+{
+	DPACKET packet;
+	ZeroMemory(&packet, sizeof(DPACKET));
+	packet.msgType = MSG_REMOVE_USB;
+	packet.len = sizeof(USBSENDDEVICEDESC);
+	memcpy(&packet.usbdesc, &sendToDeviceDescData, sizeof(USBSENDDEVICEDESC));
+
+	char buf[4096];
+	int len = sprintf_s(buf, "%4d%4d", packet.msgType, packet.len);
+	memcpy(buf + 8, packet.usbdesc, packet.len);
+	s->Send((char*)&buf, 8 + sizeof(USBSENDDEVICEDESC));
+}
 void CServer::OnLvnBegindragList1(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
@@ -647,6 +695,8 @@ int GetPassUSBDesc()
 	ULONG                            requiredLength = 0;
 	BOOL                             success;
 
+	GetPassUSBDescSuc = FALSE;
+
 	ZeroMemory(&sendToDeviceDescData, sizeof(USBSENDDEVICEDESC));
 	gHubList.DeviceInfo = INVALID_HANDLE_VALUE;
 	InitializeListHead(&gHubList.ListHead);
@@ -666,11 +716,8 @@ int GetPassUSBDesc()
 
 	deviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
 
-	for (index=0;
-		SetupDiEnumDeviceInfo(deviceInfo,
-		index,
-		&deviceInfoData); // 디바이스 정보 요소를 명시하는 구조체 반환
-	index++)
+	for (index=0; SetupDiEnumDeviceInfo(deviceInfo, index, &deviceInfoData); // 디바이스 정보 요소를 명시하는 구조체 반환
+		index++)
 	{
 		deviceInterfaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
 
@@ -800,14 +847,6 @@ VOID
 			USBHOSTCONTROLLERINFO,
 			ListEntry);
 
-		if (strcmp(driverKeyName, hcInfoInList->DriverKey) == 0)
-		{
-			// 이미 리스트에 존재 즉, 열거 안함
-			//
-			FREE(driverKeyName);
-			FREE(hcInfo);
-			return;
-		}
 
 		listEntry = listEntry->Flink;
 	}
@@ -2400,29 +2439,31 @@ VOID
 
 			//결과값
 
-			
+
 			PUSB_DESCRIPTOR_REQUEST ConfigReqDesc = ((PUSBEXTERNALHUBINFO)info)->ConfigDesc;
 			PUSB_COMMON_DESCRIPTOR  commonDesc = (PUSB_COMMON_DESCRIPTOR)(ConfigReqDesc + 1);
 			PUSB_CONFIGURATION_DESCRIPTOR   ConfigDesc = (PUSB_CONFIGURATION_DESCRIPTOR)commonDesc;
 			PUSB_INTERFACE_DESCRIPTOR   InterfaceDesc;
 
-			if(ConfigReqDesc != NULL)
-			{memcpy(&sendToDeviceDescData.DeviceDescriptor, &info->ConnectionInfo->DeviceDescriptor, sizeof(sendToDeviceDescData.DeviceDescriptor) );
-			memcpy(&sendToDeviceDescData.ConfigDesc, ConfigDesc, ConfigDesc->bLength );
+			if(ConfigReqDesc != NULL && info->ConnectionInfo->DeviceDescriptor.iSerialNumber == 3)
+			{
+				GetPassUSBDescSuc = TRUE;
+				memcpy(&sendToDeviceDescData.DeviceDescriptor, &info->ConnectionInfo->DeviceDescriptor, sizeof(sendToDeviceDescData.DeviceDescriptor) );
+				memcpy(&sendToDeviceDescData.ConfigDesc, ConfigDesc, ConfigDesc->bLength );
 
-			commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)commonDesc + commonDesc->bLength);
-			InterfaceDesc = (PUSB_INTERFACE_DESCRIPTOR)commonDesc;
+				commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)commonDesc + commonDesc->bLength);
+				InterfaceDesc = (PUSB_INTERFACE_DESCRIPTOR)commonDesc;
 
-			memcpy(&sendToDeviceDescData.InterfaceDesc, InterfaceDesc, sizeof(sendToDeviceDescData.InterfaceDesc) );
+				memcpy(&sendToDeviceDescData.InterfaceDesc, InterfaceDesc, sizeof(sendToDeviceDescData.InterfaceDesc) );
 
-			memcpy(&sendToDeviceDescData.EndpointDescriptor[0], &((PUSB_PIPE_INFO)info->ConnectionInfo->PipeList)[0], sizeof(sendToDeviceDescData.EndpointDescriptor[0]) );
-			memcpy(&sendToDeviceDescData.EndpointDescriptor[1], &((PUSB_PIPE_INFO)info->ConnectionInfo->PipeList)[1], sizeof(sendToDeviceDescData.EndpointDescriptor[0]) );
+				memcpy(&sendToDeviceDescData.EndpointDescriptor[0], &((PUSB_PIPE_INFO)info->ConnectionInfo->PipeList)[0], sizeof(sendToDeviceDescData.EndpointDescriptor[0]) );
+				memcpy(&sendToDeviceDescData.EndpointDescriptor[1], &((PUSB_PIPE_INFO)info->ConnectionInfo->PipeList)[1], sizeof(sendToDeviceDescData.EndpointDescriptor[0]) );
 
-			strncpy_s(sendToDeviceDescData.DeviceId, info->UsbDeviceProperties->DeviceId, 21 );
-			strcpy_s(sendToDeviceDescData.DeviceDesc, info->UsbDeviceProperties->DeviceDesc);
-			strncpy_s(sendToDeviceDescData.HwId, info->UsbDeviceProperties->HwId, 21 );
-			strcpy_s(sendToDeviceDescData.Service, info->UsbDeviceProperties->Service);
-			strcpy_s(sendToDeviceDescData.DeviceClass, info->UsbDeviceProperties->DeviceClass);
+				strncpy_s(sendToDeviceDescData.DeviceId, info->UsbDeviceProperties->DeviceId, 21 );
+				strcpy_s(sendToDeviceDescData.DeviceDesc, info->UsbDeviceProperties->DeviceDesc);
+				strncpy_s(sendToDeviceDescData.HwId, info->UsbDeviceProperties->HwId, 21 );
+				strcpy_s(sendToDeviceDescData.Service, info->UsbDeviceProperties->Service);
+				strcpy_s(sendToDeviceDescData.DeviceClass, info->UsbDeviceProperties->DeviceClass);
 			}
 
 			// Add error description if ConnectionStatus is other than NoDeviceConnected / DeviceConnected
