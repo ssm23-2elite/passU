@@ -278,30 +278,36 @@ int main()
 {
 	CHAR  statusText[128];
 	ULONG devicesConnected;
+	int i = 0;
 
 	gHubList.DeviceInfo = INVALID_HANDLE_VALUE;
     InitializeListHead(&gHubList.ListHead);
     gDeviceList.DeviceInfo = INVALID_HANDLE_VALUE;
     InitializeListHead(&gDeviceList.ListHead);
 
-	// 모든 USB 디바이스 열거
-    //
-	EnumerateHostControllers(&devicesConnected);
+	for( i  = 0 ; i < 2 ; i++ )
+	{
+		// 모든 USB 디바이스 열거
+		//
+		EnumerateHostControllers(&devicesConnected);
 
-	// 상태 업데이트 및 출력
-    //
-    memset(statusText, 0, sizeof(statusText));
-    StringCchPrintf(statusText, sizeof(statusText),
-#ifdef H264_SUPPORT
-    "UVC Spec Version: %d.%d Version: %d.%d Devices Connected: %d   Hubs Connected: %d",
-    UVC_SPEC_MAJOR_VERSION, UVC_SPEC_MINOR_VERSION, USBVIEW_MAJOR_VERSION, USBVIEW_MINOR_VERSION,
-    devicesConnected, TotalHubs);
-#else
-    "Devices Connected: %d   Hubs Connected: %d",
-    devicesConnected, TotalHubs);
-#endif
+		// 상태 업데이트 및 출력
+		//
+		memset(statusText, 0, sizeof(statusText));
+		StringCchPrintf(statusText, sizeof(statusText),
+	#ifdef H264_SUPPORT
+		"UVC Spec Version: %d.%d Version: %d.%d Devices Connected: %d   Hubs Connected: %d",
+		UVC_SPEC_MAJOR_VERSION, UVC_SPEC_MINOR_VERSION, USBVIEW_MAJOR_VERSION, USBVIEW_MINOR_VERSION,
+		devicesConnected, TotalHubs);
+	#else
+		"Devices Connected: %d   Hubs Connected: %d",
+		devicesConnected, TotalHubs);
+	#endif
 
-	printf("%s", statusText);
+		printf("%s", statusText);
+
+		getchar();
+	}
 
 	return 0;
 }
@@ -653,7 +659,7 @@ EnumerateHostController (
         hcInfoInList = CONTAINING_RECORD(listEntry,
                                          USBHOSTCONTROLLERINFO,
                                          ListEntry);
-
+		/*
         if (strcmp(driverKeyName, hcInfoInList->DriverKey) == 0)
         {
             // 이미 리스트에 존재 즉, 열거 안함
@@ -662,7 +668,7 @@ EnumerateHostController (
             FREE(hcInfo);
             return;
         }
-
+		*/
         listEntry = listEntry->Flink;
     }
 
@@ -2393,7 +2399,7 @@ EnumerateHubPorts (
                 (PUSBDEVICEINFO)info,
                 info->StringDescs,
                 info->ConnectionInfoV2);
-	
+			
             StringCchPrintf(leafName, sizeof(leafName), "[Port%d] ", index);
 
             // Add error description if ConnectionStatus is other than NoDeviceConnected / DeviceConnected
