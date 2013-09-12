@@ -508,11 +508,11 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send(buf, sizeof(CPACKET));
 
 			if(clientP->pad3 == STATUS_PC) {
-				//GetPassUSBDesc();
-				//
-				//if(GetPassUSBDescSuc == TRUE) {
-				//	SendUSBInfo(((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos)));
-				//}
+				GetPassUSBDesc();
+				
+				if(GetPassUSBDescSuc == TRUE) {
+					SendUSBInfo(((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos)));
+				}
 			}
 		} else if(clientP->bye == 1){ // bye packet 을 클라이언트에서 받았을 때
 			// 굿바이패킷이면

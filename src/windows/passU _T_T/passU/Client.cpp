@@ -185,7 +185,7 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	switch(pCopyDataStruct->dwData){
 	case 2: // USB
 		removeDevice();
-		OnDisconnect();
+		//OnDisconnect();
 
 		break;
 
