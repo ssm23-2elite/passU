@@ -13,6 +13,7 @@
 #define new DEBUG_NEW
 #endif
 
+#define WM_TRAY_NOTIFICATION (WM_USER + 1023)
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -32,6 +33,9 @@ protected:
 	// 구현입니다.
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	//	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	//	afx_msg void OnTraymenuAbout();
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
@@ -72,8 +76,13 @@ BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CPassUDlg::OnTcnSelchangeTab1)
 	ON_BN_CLICKED(IDC_BUTTON1, &CPassUDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CPassUDlg::OnBnClickedButton2)
+	ON_MESSAGE(WM_TRAY_NOTIFICATION, &CPassUDlg::OnTrayNotification)
 	ON_WM_DESTROY()
 	ON_WM_COPYDATA()
+	ON_COMMAND(ID_TRAYMENU_OPEN, &CPassUDlg::OnTraymenuOpen)
+	ON_COMMAND(ID_TRAYMENU_ABOUT, &CPassUDlg::OnTraymenuAbout)
+	ON_WM_SIZE()
+	ON_COMMAND(ID_TRAYMENU_CLOSE, &CPassUDlg::OnTraymenuClose)
 END_MESSAGE_MAP()
 
 
@@ -513,6 +522,18 @@ void CPassUDlg::Accept(void)
 		AfxMessageBox(_T("Accept Failed"));
 		return ;
 	}
+		
+	NOTIFYICONDATA nid;
+	ZeroMemory(&nid, sizeof(nid));
+	nid.cbSize = sizeof(nid);
+	nid.uID = 0;
+	nid.hWnd = GetSafeHwnd();
+	BOOL bRet = ::Shell_NotifyIcon(NIM_DELETE, &nid); //트레이아이콘 제거
+	if(!bRet)
+	{
+		AfxMessageBox("트레이 아이콘 제거 실패");
+	}
+	AfxGetApp()->m_pMainWnd->ShowWindow(SW_SHOW); //윈도우 활성화
 
 	m_pSockList.AddTail(pChild);
 }
@@ -570,7 +591,7 @@ void CPassUDlg::CleanUp(void)
 
 		COPYDATASTRUCT CDS;
 
-		CDS.dwData = 2;
+		CDS.dwData = 3;
 		CDS.cbData = sizeof(CPACKET);
 		CDS.lpData = &tmp;
 
@@ -642,7 +663,21 @@ void CPassUDlg::OnStartServer()
 	//Nagle 알고리즘 해제
 	const char opt_val = true;
 	setsockopt(*m_pServer, IPPROTO_TCP, TCP_NODELAY, &opt_val, sizeof(opt_val));
-	//AfxMessageBox(_T("InitServer"));
+
+	NOTIFYICONDATA nid;
+	ZeroMemory(&nid, sizeof(nid));
+	
+	nid.cbSize = sizeof(nid);
+	nid.uID = 0;
+	nid.hWnd = GetSafeHwnd();
+	nid.uFlags = NIF_INFO | NIF_ICON | NIF_TIP | NIF_MESSAGE;
+	nid.hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	lstrcpy( nid.szInfoTitle, _T( "PassU" ) ); //풍선의 타이틀.
+	lstrcpy( nid.szInfo, "PassU 서버가 실행되었습니다." );
+	lstrcpy(nid.szTip, "PassU Server");
+	nid.uCallbackMessage = WM_TRAY_NOTIFICATION;
+	BOOL bRet = ::Shell_NotifyIcon(NIM_ADD,&nid); //트레이 아이콘 등록
+	AfxGetApp()->m_pMainWnd->ShowWindow(SW_HIDE); //윈도우 감추기
 }
 
 void CPassUDlg::OnBnClickedButton1()
@@ -737,6 +772,21 @@ void CPassUDlg::OnConnectStart(void)
 		MSG_CLIENT, 0, STATUS_PC, 1, 0, ipFirst, ipSecond, ipThird, ipForth, nWidth, nHeight);
 
 	m_pClient->Send((LPCSTR *)&buf, SIZEOFPACKET); // 헬로 패킷 보냄
+
+	NOTIFYICONDATA nid;
+	ZeroMemory(&nid, sizeof(nid));
+	
+	nid.cbSize = sizeof(nid);
+	nid.uID = 0;
+	nid.hWnd = GetSafeHwnd();
+	nid.uFlags = NIF_INFO | NIF_ICON | NIF_TIP | NIF_MESSAGE;
+	nid.hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	lstrcpy( nid.szInfoTitle, _T( "PassU" ) ); //풍선의 타이틀.
+	lstrcpy( nid.szInfo, "PassU 클라이언트가 실행되었습니다." );
+	lstrcpy(nid.szTip, "PassU Client");
+	nid.uCallbackMessage = WM_TRAY_NOTIFICATION;
+	BOOL bRet = ::Shell_NotifyIcon(NIM_ADD,&nid); //트레이 아이콘 등록
+	AfxGetApp()->m_pMainWnd->ShowWindow(SW_HIDE); //윈도우 감추기
 }
 
 void CPassUDlg::ClientCleanUp(void)
@@ -997,10 +1047,10 @@ BOOL CPassUDlg::PreTranslateMessage(MSG* pMsg)
 LRESULT CPassUDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
-		if(m_SorC == TRUE && message == WM_DEVICECHANGE && m_pSockList.GetCount() != 0){
-			TRACE("USB 꽂았음\n");
-			USBDeviceChange(wParam, lParam);
-		}
+	if(m_SorC == TRUE && message == WM_DEVICECHANGE && m_pSockList.GetCount() != 0){
+		TRACE("USB 꽂았음\n");
+		USBDeviceChange(wParam, lParam);
+	}
 	return CDialogEx::DefWindowProc(message, wParam, lParam);
 }
 
@@ -1031,3 +1081,81 @@ BOOL CPassUDlg::USBDeviceChange(UINT uEvent, DWORD dwEventData)
 	}
 	return TRUE;
 }
+
+LRESULT CPassUDlg::OnTrayNotification(WPARAM wParam, LPARAM lParam)
+{
+	switch(lParam)
+	{
+	case WM_LBUTTONDOWN:
+		OnTraymenuOpen();
+
+		break;
+	case WM_RBUTTONDOWN:
+		{
+			CPoint ptMouse;
+			::GetCursorPos(&ptMouse);
+			CMenu menu;
+			menu.LoadMenu(IDR_TRAY_MENU);
+			CMenu *pMenu = menu.GetSubMenu(0); //활성화 할 메뉴 지정
+			pMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON,
+				ptMouse.x, ptMouse.y, AfxGetMainWnd());
+		}
+		break;
+	}
+	return 1;
+}
+
+void CPassUDlg::OnTraymenuOpen()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+	NOTIFYICONDATA nid;
+	ZeroMemory(&nid, sizeof(nid));
+	nid.cbSize = sizeof(nid);
+	nid.uID = 0;
+	nid.hWnd = GetSafeHwnd();
+	BOOL bRet = ::Shell_NotifyIcon(NIM_DELETE, &nid); //트레이아이콘 제거
+	if(!bRet)
+	{
+		AfxMessageBox("트레이 아이콘 제거 실패");
+	}
+	AfxGetApp()->m_pMainWnd->ShowWindow(SW_SHOW); //윈도우 활성화
+	AfxGetApp()->m_pMainWnd->ShowWindow(SW_SHOWNORMAL);  // 최대크기만들기
+}
+
+void CPassUDlg::OnTraymenuClose()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+	AfxGetApp()->m_pMainWnd->SendMessage(WM_CLOSE);
+}
+
+void CPassUDlg::OnTraymenuAbout()
+{
+	// TODO: 여기에 명령 처리기 코드를 추가합니다.
+	CAboutDlg dlgAbout;
+	dlgAbout.DoModal();
+}
+
+
+void CPassUDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CDialogEx::OnSize(nType, cx, cy);
+
+	if(nType == SIZE_MINIMIZED) {
+		NOTIFYICONDATA nid;
+		ZeroMemory(&nid, sizeof(nid));
+	
+		nid.cbSize = sizeof(nid);
+		nid.uID = 0;
+		nid.hWnd = GetSafeHwnd();
+		nid.uFlags = NIF_INFO | NIF_ICON | NIF_TIP | NIF_MESSAGE;
+		nid.hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+		lstrcpy( nid.szInfoTitle, _T( "PassU" ) ); //풍선의 타이틀.
+		lstrcpy( nid.szInfo, "PassU가 최소화 되었습니다.\n화면을 다시 보려면 클릭하세요." );
+		lstrcpy( nid.szTip, "PassU" );
+		nid.uCallbackMessage = WM_TRAY_NOTIFICATION;
+		BOOL bRet = ::Shell_NotifyIcon(NIM_ADD,&nid); //트레이 아이콘 등록
+		AfxGetApp()->m_pMainWnd->ShowWindow(SW_HIDE); //윈도우 감추기
+	}
+	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
+}
+

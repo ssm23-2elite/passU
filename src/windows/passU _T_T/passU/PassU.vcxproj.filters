@@ -66,6 +66,9 @@
     <ClInclude Include="vndrlist.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Splash.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -95,6 +98,9 @@
     <ClCompile Include="PassUClientSocket.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Splash.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PassU.rc">
@@ -121,6 +127,9 @@
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="res\phone.bmp">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="res\splash.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>

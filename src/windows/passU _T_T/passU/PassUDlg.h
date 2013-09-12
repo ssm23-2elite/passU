@@ -90,6 +90,7 @@ public:
 
 	CButton m_CBtn_Start;
 	CButton m_CBtn_Stop;
+	afx_msg LRESULT OnTrayNotification(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnDestroy();
@@ -101,4 +102,8 @@ public:
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	afx_msg void OnTraymenuOpen();
+	afx_msg void OnTraymenuAbout();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnTraymenuClose();
 };

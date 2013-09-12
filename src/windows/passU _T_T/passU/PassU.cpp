@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "PassU.h"
 #include "PassUDlg.h"
+#include "Splash.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -75,6 +76,9 @@ BOOL CPassUApp::InitInstance()
 	// TODO: 이 문자열을 회사 또는 조직의 이름과 같은
 	// 적절한 내용으로 수정해야 합니다.
 	SetRegistryKey(_T("로컬 응용 프로그램 마법사에서 생성된 응용 프로그램"));
+	CSplash splash;
+
+	splash.DoModal();
 
 	CPassUDlg dlg;
 	m_pMainWnd = &dlg;
