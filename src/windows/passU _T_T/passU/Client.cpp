@@ -31,7 +31,7 @@ BOOLEAN GetDeviceStackName( struct _GUID * pGuid, char ** ppDeviceName, int inde
 typedef struct
 {
 	USB_DEVICE_DESCRIPTOR			 DeviceDescriptor;
-    USB_CONFIGURATION_DESCRIPTOR	 ConfigDesc;
+	USB_CONFIGURATION_DESCRIPTOR	 ConfigDesc;
 	USB_INTERFACE_DESCRIPTOR	     InterfaceDesc;
 	USB_ENDPOINT_DESCRIPTOR	         EndpointDescriptor[2];
 	CHAR DeviceId[50];
@@ -39,7 +39,7 @@ typedef struct
 	CHAR HwId[80];
 	CHAR Service[20];
 	CHAR DeviceClass[20];
-	
+
 } USBSENDDEVICEDESC, *PUSBSENDDEVICEDESC;
 
 USBSENDDEVICEDESC receivedDeviceDescData;
@@ -60,31 +60,31 @@ IMPLEMENT_DYNAMIC(CClient, CDialogEx)
 
 
 /***
- * 32bit 인지 64bit인지 확인
- */
+* 32bit 인지 64bit인지 확인
+*/
 typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 
 LPFN_ISWOW64PROCESS fnIsWow64Process;
 
 BOOL IsWow64()
 {
-    BOOL bIsWow64 = FALSE;
+	BOOL bIsWow64 = FALSE;
 
-    //IsWow64Process is not available on all supported versions of Windows.
-    //Use GetModuleHandle to get a handle to the DLL that contains the function
-    //and GetProcAddress to get a pointer to the function if available.
+	//IsWow64Process is not available on all supported versions of Windows.
+	//Use GetModuleHandle to get a handle to the DLL that contains the function
+	//and GetProcAddress to get a pointer to the function if available.
 
-    fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress(
-        GetModuleHandle(TEXT("kernel32")),"IsWow64Process");
+	fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress(
+		GetModuleHandle(TEXT("kernel32")),"IsWow64Process");
 
-    if(NULL != fnIsWow64Process)
-    {
-        if (!fnIsWow64Process(GetCurrentProcess(),&bIsWow64))
-        {
-            //handle error
-        }
-    }
-    return bIsWow64;
+	if(NULL != fnIsWow64Process)
+	{
+		if (!fnIsWow64Process(GetCurrentProcess(),&bIsWow64))
+		{
+			//handle error
+		}
+	}
+	return bIsWow64;
 }
 
 
@@ -137,13 +137,13 @@ void CClient::OnDisconnect(void) // 서버가 닫혔을 때 실행되는 함수
 void CClient::OnBnClickedConnect() // Connect 버튼을 눌렀을 때
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	
+
 
 
 	UpdateData();
 
 	m_IpAddressCtrl.GetAddress(ipFirst, ipSecond, ipThird, ipForth);
-	
+
 	m_address.Format(_T("%d.%d.%d.%d"), ipFirst, ipSecond, ipThird, ipForth);
 	if(m_address.GetLength() < 9 || m_address.GetAt(0) == '0' || m_address.GetAt(m_address.GetLength() - 1) == '0'){
 		AfxMessageBox(_T("IP 주소를 올바르게 입력하세요."));
@@ -154,7 +154,7 @@ void CClient::OnBnClickedConnect() // Connect 버튼을 눌렀을 때
 	CPassUDlg * pMainDlg = (CPassUDlg *)::AfxGetMainWnd();
 	pMainDlg->m_CBtn_Start.EnableWindow(TRUE);
 	m_CBtn_Cancel.EnableWindow(TRUE);
-	
+
 	OnConnectServer();
 }
 
@@ -163,7 +163,7 @@ void CClient::OnBnClickedCancel()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_cBtn_connect.EnableWindow(TRUE);
-	
+
 	CPassUDlg * pMainDlg = (CPassUDlg *)::AfxGetMainWnd();
 	pMainDlg->m_CBtn_Start.EnableWindow(FALSE);
 
@@ -184,14 +184,12 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	switch(pCopyDataStruct->dwData){
 	case 2: // USB
-		removeDevice();
-		//OnDisconnect();
-
+		ExecuteProcess("usbdepart.bat","");
 		break;
 
 	case 3: // client
 		cPacket = (CPACKET *)pCopyDataStruct->lpData; // 구조체 연결
-		
+
 		if(cPacket->hello == 1){ // hello packet에 대한 ACK가 왔을 때
 			// Client ID를 부여받는다.
 			client_ID = cPacket->c_id;
@@ -203,13 +201,91 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	case 4:
 		dPacket = (DPACKET *) pCopyDataStruct->lpData; // 구조체 연결
 		memcpy(&receivedDeviceDescData, &dPacket->usbdesc, sizeof(USBSENDDEVICEDESC));
-		
+
 		if(IsWow64() == FALSE) { // 32bit이면 usb 삽입 ㄱㄱ {
 			addDevice();
+			ExecuteProcess("usbpart.bat", "");
 		}
 		break;
 	}
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
+}
+
+// 운영체제가 xp 이상인가.
+BOOL CClient::OSVersionXPOver()
+{
+ DWORD dwVersion, dwMajorVersion, dwMinorVersion, dwBuild;
+    dwVersion = GetVersion();
+ 
+    // Get the Windows version.
+    dwMajorVersion = (DWORD)(LOBYTE(LOWORD(dwVersion)));
+    dwMinorVersion = (DWORD)(HIBYTE(LOWORD(dwVersion)));
+    // Get the build number.
+    if (dwVersion < 0x80000000)              
+        dwBuild = (DWORD)(HIWORD(dwVersion));
+    else                                      // Windows Me/98/95
+        dwBuild =  0;
+
+ return dwMajorVersion >= 6 ? TRUE : FALSE; 
+}
+
+BOOL CClient::ExecuteProcess(CString FilePath, CString Parameter)
+{ 
+	//TCHAR path[1024] = {0,};
+	//::GetModuleFileName(NULL, path, 1024);
+	BOOL bRes = FALSE;
+
+	if(FilePath.Compare( "usbdepart.bat" ) == 0) {
+		removeDevice();
+	}
+
+	if(OSVersionXPOver())
+	{
+		// 관리자 모드로 실행
+		CString sRun;
+		STARTUPINFO si;
+		PROCESS_INFORMATION pi;
+		ZeroMemory(&si, sizeof(si));
+		si.cb = sizeof(si);
+		si.lpDesktop = "winsta0\\default";
+		ZeroMemory(&pi, sizeof(pi));
+		sRun = FilePath;
+		sRun += Parameter;
+		// start the child process
+		if (!CreateProcess(NULL, // no module name (use command line)
+			(LPSTR)(LPCSTR)sRun, // Command line
+			NULL, // Process handle not inheritate
+			NULL, // Thread handle not inheritate
+			FALSE, // Set handle inheritance to FALSE
+			0, // No creation flags
+			NULL, // Use parent's environment block
+			NULL, // Use parent's starting directory
+			&si, // Pointer STARTUPINFO structure
+			&pi) // Pointer to PROCESS_INFORMATION structure
+			)
+		{
+#ifdef _DEBBUG
+			fprintf(Filelog, "CreateProcess Failed (%d)\n", GetLastError());
+			Filelog.flush();
+#endif
+			return FALSE;
+		}
+		// wait until child process exits
+		WaitForSingleObject(pi.hProcess, INFINITE);
+		// Close process and thread handles;
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+
+	}
+	else
+	{
+		//xp 이하이므로 그냥 호출.
+		if( ::ShellExecute(NULL, _T("open"), FilePath, Parameter, NULL, SW_SHOW) == (HINSTANCE)HINSTANCE_ERROR)
+			bRes = FALSE;
+		else
+			bRes = TRUE;
+	}
+	return bRes;
 }
 
 int addDevice(void)
@@ -336,3 +412,4 @@ BOOLEAN GetDeviceStackName( struct _GUID * pGuid, char ** ppDeviceName, int inde
 	*ppDeviceName = pDeviceName;
 	return TRUE;
 }
+

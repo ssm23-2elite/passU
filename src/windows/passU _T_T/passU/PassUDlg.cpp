@@ -529,10 +529,6 @@ void CPassUDlg::Accept(void)
 	nid.uID = 0;
 	nid.hWnd = GetSafeHwnd();
 	BOOL bRet = ::Shell_NotifyIcon(NIM_DELETE, &nid); //트레이아이콘 제거
-	if(!bRet)
-	{
-		AfxMessageBox("트레이 아이콘 제거 실패");
-	}
 	AfxGetApp()->m_pMainWnd->ShowWindow(SW_SHOW); //윈도우 활성화
 
 	m_pSockList.AddTail(pChild);
@@ -708,6 +704,16 @@ void CPassUDlg::OnBnClickedButton2()
 		m_CBtn_Start.EnableWindow(FALSE);
 		m_CBtn_Stop.EnableWindow(FALSE);
 		m_tab2.m_CBtn_Cancel.EnableWindow(TRUE);
+		
+		DPACKET packet;
+		ZeroMemory(&packet, sizeof(DPACKET));
+
+		COPYDATASTRUCT CDS;
+
+		CDS.dwData = 2; // receiveData
+		CDS.cbData = sizeof(DPACKET);
+		CDS.lpData = &packet;
+		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 	}
 
 	m_tab2.EnableWindow(TRUE);
@@ -1114,10 +1120,7 @@ void CPassUDlg::OnTraymenuOpen()
 	nid.uID = 0;
 	nid.hWnd = GetSafeHwnd();
 	BOOL bRet = ::Shell_NotifyIcon(NIM_DELETE, &nid); //트레이아이콘 제거
-	if(!bRet)
-	{
-		AfxMessageBox("트레이 아이콘 제거 실패");
-	}
+	
 	AfxGetApp()->m_pMainWnd->ShowWindow(SW_SHOW); //윈도우 활성화
 	AfxGetApp()->m_pMainWnd->ShowWindow(SW_SHOWNORMAL);  // 최대크기만들기
 }
