@@ -36,7 +36,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CTabCtrl m_Tab;
-	BOOL isFirst;
 	int whereisPoint;
 	CServer m_tab1;
 	CClient m_tab2;
@@ -49,9 +48,6 @@ public:
 	// 전체 스크린 구함
 	int nWidth;
 	int nHeight;
-	
-	POINT oldPoint;
-	POINT currentPoint;
 
 	BOOL m_allowSend; // 클라이언트에 정보를 보낼지 말지를 결정하는 FLAG
 	BOOL bWait;
@@ -62,14 +58,13 @@ public:
 	//dll의 handle
 	HWND dllWnd;
 
-
 	typedef struct tagHEVENT{
 		int type;
 		int keyCode;
 		int updown;
 		WPARAM data;
 		LPARAM lParam;
-	}HEVENT;
+	} HEVENT;
 
 	CPassUClientSocket *m_pClient;
 	CPassUServerSocket *m_pServer;
@@ -91,14 +86,12 @@ public:
 	CButton m_CBtn_Start;
 	CButton m_CBtn_Stop;
 	afx_msg LRESULT OnTrayNotification(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnBnClickedButton1();
-	afx_msg void OnBnClickedButton2();
 	afx_msg void OnDestroy();
 	void OnConnectStart(void);
 	void ClientCleanUp(void);
 	void ReceiveClientData(CPassUClientSocket * s);
 	void CloseClient(CPassUClientSocket * s);
-	void OnArrivedScreenEdge(MPACKET *packet, BOOL bClient, int position);
+	afx_msg LRESULT OnArrivedScreenEdge(WPARAM wParam, LPARAM lParam);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
@@ -107,4 +100,6 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnTraymenuClose();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnBnClickedStart();
+	afx_msg void OnBnClickedStop();
 };

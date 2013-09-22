@@ -84,7 +84,8 @@ public:
 	void SendUSBInfo(CPassUChildSocket *s);
 	void RemoveUSBInfo(CPassUChildSocket *s);
 	void OnChangeLocationInfo(int index);
-	void bindWatingClient(int btn_index, int client_index);
+	void bindWatingClient(int status, int btn_index, int client_index);
+	void unbindWatingClient(int position);
 	void OnDisconnectedClient(int client_index);
 	
 	afx_msg void OnBnClickedButton1();

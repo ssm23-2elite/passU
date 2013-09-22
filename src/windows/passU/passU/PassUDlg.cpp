@@ -65,8 +65,8 @@ void CPassUDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TAB1, m_Tab);
-	DDX_Control(pDX, IDC_BUTTON1, m_CBtn_Start);
-	DDX_Control(pDX, IDC_BUTTON2, m_CBtn_Stop);
+	DDX_Control(pDX, IDC_START, m_CBtn_Start);
+	DDX_Control(pDX, IDC_STOP, m_CBtn_Stop);
 }
 
 BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
@@ -74,9 +74,8 @@ BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CPassUDlg::OnTcnSelchangeTab1)
-	ON_BN_CLICKED(IDC_BUTTON1, &CPassUDlg::OnBnClickedButton1)
-	ON_BN_CLICKED(IDC_BUTTON2, &CPassUDlg::OnBnClickedButton2)
 	ON_MESSAGE(WM_TRAY_NOTIFICATION, &CPassUDlg::OnTrayNotification)
+	ON_MESSAGE(WM_ARRIVED_SCREEN_EDGE, &CPassUDlg::OnArrivedScreenEdge)
 	ON_WM_DESTROY()
 	ON_WM_COPYDATA()
 	ON_COMMAND(ID_TRAYMENU_OPEN, &CPassUDlg::OnTraymenuOpen)
@@ -84,6 +83,8 @@ BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
 	ON_WM_SIZE()
 	ON_COMMAND(ID_TRAYMENU_CLOSE, &CPassUDlg::OnTraymenuClose)
 	ON_WM_TIMER()
+	ON_BN_CLICKED(IDC_START, &CPassUDlg::OnBnClickedStart)
+	ON_BN_CLICKED(IDC_STOP, &CPassUDlg::OnBnClickedStop)
 END_MESSAGE_MAP()
 
 
@@ -147,12 +148,6 @@ BOOL CPassUDlg::OnInitDialog()
 
 	// 처음에는 클라이언트에 정보를 보내지 않는다.
 	m_allowSend = FALSE;
-
-	currentPoint.x = 0;
-	currentPoint.y = 0;
-	oldPoint.x = 0;
-	oldPoint.y = 0;
-
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -312,17 +307,6 @@ int CPassUDlg::ParseData(char *buf, int len)
 		MPACKET packet;
 
 		ParseMouseData(buf, &packet);
-
-		if(oldPoint.x == 0 && oldPoint.y == 0) {
-			oldPoint.x = packet.xCoord;
-			oldPoint.y = packet.yCoord;
-		} else if( abs(oldPoint.x - packet.xCoord) > nWidth / 2 ||
-			abs(oldPoint.y - packet.yCoord) > nHeight / 2 ) {
-				return -1;
-		}
-
-		oldPoint.x = packet.xCoord;
-		oldPoint.y = packet.yCoord;
 		COPYDATASTRUCT CDS;
 
 		CDS.dwData = 2; // receiveData
@@ -566,10 +550,6 @@ void CPassUDlg::CleanUp(void)
 			pChild = (CPassUChildSocket *)m_pSockList.RemoveHead();
 			delete pChild;
 		}
-
-		m_pSockList.RemoveAll();
-
-
 	} else{
 		if(m_pClient == NULL)
 			return ;
@@ -584,11 +564,11 @@ void CPassUDlg::CleanUp(void)
 		char buf[1024];
 		ZeroMemory(buf, sizeof(buf));
 		sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
-			MSG_CLIENT, m_tab2.client_ID, STATUS_PC, 0, 1, 0, 0, 0, 0, 0, 0);
+			CONNECTED_CLIENT, m_tab2.client_ID, STATUS_PC, 0, 1, 0, 0, 0, 0, 0, 0);
 
 		COPYDATASTRUCT CDS;
 
-		CDS.dwData = 3;
+		CDS.dwData = CONNECTED_CLIENT;
 		CDS.cbData = sizeof(CPACKET);
 		CDS.lpData = &tmp;
 
@@ -619,7 +599,6 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s){ // 클라이언트쪽에서 종료하였을
 			Invalidate();
 
 			m_tab1.btn_Bind[(m_tab1.clientInfo[i]).getPosition()] = 0;
-
 
 			tmpStr.Format(_T("%d , IP : %s"), m_tab1.clientInfo[i].clientID, m_tab1.clientInfo[i].m_address);
 			// 리스트 컨트롤에서 삭제
@@ -675,52 +654,6 @@ void CPassUDlg::OnStartServer()
 	nid.uCallbackMessage = WM_TRAY_NOTIFICATION;
 	BOOL bRet = ::Shell_NotifyIcon(NIM_ADD,&nid); //트레이 아이콘 등록
 	AfxGetApp()->m_pMainWnd->ShowWindow(SW_HIDE); //윈도우 감추기
-}
-
-void CPassUDlg::OnBnClickedButton1()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if(m_SorC){
-		OnStartServer();
-		m_tab2.EnableWindow(FALSE);
-	} else{
-		OnConnectStart();
-		m_tab2.m_CBtn_Cancel.EnableWindow(FALSE);
-		m_tab2.m_connectFlag = TRUE;
-		m_tab1.EnableWindow(FALSE);
-	}
-
-	m_CBtn_Start.EnableWindow(FALSE);
-	m_CBtn_Stop.EnableWindow(TRUE);
-}
-
-void CPassUDlg::OnBnClickedButton2()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
-	if(m_SorC){
-		m_CBtn_Start.EnableWindow(TRUE);
-		m_CBtn_Stop.EnableWindow(FALSE);
-	} else{
-		m_CBtn_Start.EnableWindow(FALSE);
-		m_CBtn_Stop.EnableWindow(FALSE);
-		m_tab2.m_CBtn_Cancel.EnableWindow(TRUE);
-		
-		DPACKET packet;
-		ZeroMemory(&packet, sizeof(DPACKET));
-
-		COPYDATASTRUCT CDS;
-
-		CDS.dwData = 2; // receiveData
-		CDS.cbData = sizeof(DPACKET);
-		CDS.lpData = &packet;
-		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-	}
-
-	m_tab2.EnableWindow(TRUE);
-	m_tab1.EnableWindow(TRUE);
-	CleanUp();
-	//CDialog::OnCancel();
 }
 
 void CPassUDlg::OnDestroy()
@@ -853,12 +786,12 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 
 		COPYDATASTRUCT CDS;
 
-		CDS.dwData = 3; // client
+		CDS.dwData = CONNECTED_CLIENT; // client
 		CDS.cbData = sizeof(CPACKET);
 		CDS.lpData = &packet;
 		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
-	} else if(msgType == MSG_DATA) {
+	} else if(msgType == MSG_DATA && USE_USB == TRUE) {
 		DPACKET packet;
 		ZeroMemory(&packet, sizeof(DPACKET));
 
@@ -872,7 +805,7 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 
 		COPYDATASTRUCT CDS;
 
-		CDS.dwData = 4; // receiveData
+		CDS.dwData = START_SERVER; // receiveData
 		CDS.cbData = sizeof(DPACKET);
 		CDS.lpData = &packet;
 		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
@@ -882,7 +815,7 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 
 		COPYDATASTRUCT CDS;
 
-		CDS.dwData = 2; // receiveData
+		CDS.dwData = STOP_SERVER; // receiveData
 		CDS.cbData = sizeof(DPACKET);
 		CDS.lpData = &packet;
 		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
@@ -894,7 +827,7 @@ void CPassUDlg::CloseClient(CPassUClientSocket * s)
 	COPYDATASTRUCT CDS;
 	CPACKET tmp;
 
-	CDS.dwData = 2;
+	CDS.dwData = STOP_SERVER;
 	CDS.cbData = sizeof(CPACKET);
 	CDS.lpData = &tmp;
 
@@ -950,67 +883,10 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
 		int i = 0;
 
-		if(mEVENT->xCoord <= 2){ // 화면 왼쪽에 붙을 때
-			if((whereisPoint == 5) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 3에 되어 있을 때(4번 버튼)
-				mEVENT->xCoord = nWidth - 20;
-				OnArrivedScreenEdge(mEVENT, TRUE, 4);
-				m_allowSend = TRUE;
-			} else if((whereisPoint == 6) && (m_tab1.btn_Bind[5] != 0)){ // 6번버튼에 바인딩되어있을 때
-				m_allowSend = FALSE;
-				mEVENT->xCoord = nWidth - 20;
-				OnArrivedScreenEdge(mEVENT, FALSE, 5);
-			}
-		} else if(mEVENT->yCoord <= 2) { // 화면 위쪽에 붙을 때
-			if((whereisPoint == 5) && (m_tab1.btn_Bind[1] != 0)){ // 바인딩이 2번버튼에있을때
-				mEVENT->yCoord = nHeight - 20;
-				OnArrivedScreenEdge(mEVENT, TRUE, 2);
-				m_allowSend = TRUE;
-			} else if((whereisPoint == 8) && (m_tab1.btn_Bind[7] != 0)){ // 8번 버튼에 바인딩되어있을 때
-				m_allowSend = FALSE;
-				mEVENT->yCoord = nHeight - 20;
-				OnArrivedScreenEdge(mEVENT, FALSE, 5);
-			}
-		} else if(mEVENT->xCoord >= nWidth - 2){	 // 화면 오른 쪽에 붙을 때
-			if((whereisPoint == 5) && (m_tab1.btn_Bind[5] != 0)){ // 바인딩이 6번버튼에 있을 때
-				mEVENT->xCoord = 20;
-				OnArrivedScreenEdge(mEVENT, TRUE, 6);
-				m_allowSend = TRUE;
-			} else if((whereisPoint == 4) && (m_tab1.btn_Bind[3] != 0)){ // 바인딩이 4번 버튼에 있을 때
-				m_allowSend = FALSE;
-				mEVENT->xCoord = 20;
-				OnArrivedScreenEdge(mEVENT, FALSE, 5);
-			}
-		} else if(mEVENT->yCoord >= nHeight - 2){ // 화면 아래쪽에 붙을 때
-			if((whereisPoint == 5) && (m_tab1.btn_Bind[7] != 0)){ // 바인딩이 8번 버튼에 있을 때
-				m_allowSend = TRUE;
-				mEVENT->yCoord = 20;
-				OnArrivedScreenEdge(mEVENT, TRUE, 8);
-			} else if((whereisPoint == 2) && (m_tab1.btn_Bind[1] != 0)){ // 바인딩이 2번 버튼에 되어 있을 때
-				mEVENT->yCoord = 20;
-				OnArrivedScreenEdge(mEVENT, FALSE, 5);
-				m_allowSend = FALSE;
-			}
-		}
-
 		if(m_allowSend == TRUE){ // 평소에는 클라이언트에 전송을 안하다가 서버가 아닌 다른곳으로 갔을때만 한다.
 			// 클라이언트 좌표 전환. 
 			// 서버 해상도 : 클라이언트 해상도 = 서버좌표 : 클라이언트 좌표 형식으로 변환
 			// Client 좌표 = (서버좌표 * 클라이언트 해상도[ Client ID ]) / 서버해상도
-			//											   Client ID = btn_Bind[ 버튼인덱스 ]
-			/*if(isFirst == TRUE) {
-				// 입력무시하는 행위를 1초동안 해야함
-				AfxMessageBox("FALSE");
-
-				SetTimer(1, 1000, NULL);
-				bWait = TRUE;
-				while(bWait) {
-
-				}
-				// 1초..
-				AfxMessageBox("TRUE");
-				isFirst = FALSE;
-			} 
-			*/
 			mEVENT->xCoord = (mEVENT->xCoord * m_tab1.client_nWidth[m_tab1.btn_Bind[whereisPoint - 1]]) / nWidth;
 			mEVENT->yCoord = (mEVENT->yCoord * m_tab1.client_nHeight[m_tab1.btn_Bind[whereisPoint - 1]]) / nHeight;
 
@@ -1035,22 +911,18 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	return CDialogEx::OnCopyData(pWnd, pCopyDataStruct);
 }
 
-void CPassUDlg::OnArrivedScreenEdge(MPACKET *packet, BOOL bClient, int position)
+LRESULT CPassUDlg::OnArrivedScreenEdge(WPARAM wParam, LPARAM lParam)
 {
-	isFirst = TRUE;
-	if(bClient == TRUE) {
-		::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0);
-		::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0);
-
+	BOOL forClient = wParam;
+	whereisPoint = lParam;
+	if(forClient == TRUE) {// SEND 할 수 있도록 바꿔주자
+		m_allowSend = TRUE;
 		HideCursorAll();
-	} else {
-		::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
-		::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
-
+	} else if(forClient == FALSE) {// SEND 하지 않도록 바꿔주자
+		m_allowSend = FALSE;
 		ShowCursorAll();
 	}
-
-	whereisPoint = position;		
+	return 1;
 }
 
 BOOL CPassUDlg::PreTranslateMessage(MSG* pMsg)
@@ -1085,7 +957,7 @@ BOOL CPassUDlg::USBDeviceChange(UINT uEvent, DWORD dwEventData)
 	{
 	case DBT_DEVICEARRIVAL:
 		// 새로운 장치 발생
-		CDS.dwData = 5; // Send New Device
+		CDS.dwData = NEW_USB; // Send New Device
 		CDS.cbData = sizeof(CPACKET);
 		CDS.lpData = &packet;
 		::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
@@ -1093,7 +965,7 @@ BOOL CPassUDlg::USBDeviceChange(UINT uEvent, DWORD dwEventData)
 	case DBT_DEVICEREMOVECOMPLETE:
 		// 장치 연결 해제
 		CPACKET packet;
-		CDS.dwData = 6; // Remove Device
+		CDS.dwData = REMOVE_USB; // Remove Device
 		CDS.cbData = sizeof(CPACKET);
 		CDS.lpData = &packet;
 		::SendMessage(m_tab1.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
@@ -1154,7 +1026,6 @@ void CPassUDlg::OnTraymenuAbout()
 	dlgAbout.DoModal();
 }
 
-
 void CPassUDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
@@ -1178,11 +1049,60 @@ void CPassUDlg::OnSize(UINT nType, int cx, int cy)
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }
 
-
-
 void CPassUDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	bWait = FALSE;
 	CDialogEx::OnTimer(nIDEvent);
+}
+
+void CPassUDlg::OnBnClickedStart()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	if(m_SorC){
+		OnStartServer();
+		m_tab2.EnableWindow(FALSE);
+	} else{
+		OnConnectStart();
+		m_tab2.m_CBtn_Cancel.EnableWindow(FALSE);
+		m_tab2.m_connectFlag = TRUE;
+		m_tab1.EnableWindow(FALSE);
+	}
+
+	m_CBtn_Start.EnableWindow(FALSE);
+	m_CBtn_Stop.EnableWindow(TRUE);
+}
+
+void CPassUDlg::OnBnClickedStop()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	if(m_SorC){
+		m_CBtn_Start.EnableWindow(TRUE);
+		m_CBtn_Stop.EnableWindow(FALSE);
+
+		::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
+		::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+
+		OnArrivedScreenEdge(FALSE, 5);
+	} else{
+		m_CBtn_Start.EnableWindow(FALSE);
+		m_CBtn_Stop.EnableWindow(FALSE);
+		m_tab2.m_CBtn_Cancel.EnableWindow(TRUE);
+		
+		DPACKET packet;
+		ZeroMemory(&packet, sizeof(DPACKET));
+
+		COPYDATASTRUCT CDS;
+
+		CDS.dwData = STOP_SERVER; // receiveData
+		CDS.cbData = sizeof(DPACKET);
+		CDS.lpData = &packet;
+		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	}
+
+	m_tab2.EnableWindow(TRUE);
+	m_tab1.EnableWindow(TRUE);
+	CleanUp();
+	//CDialog::OnCancel();
 }

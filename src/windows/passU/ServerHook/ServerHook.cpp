@@ -3,14 +3,16 @@
 #include <afxwin.h>
 #include <Windows.h>
 
-#define WM_KEYBOARD_FALSE	WM_USER + 1001
-#define WM_MOUSE_FALSE	WM_USER + 1002
-#define WM_KEYBOARD_TRUE	WM_USER + 1003
-#define WM_MOUSE_TRUE	WM_USER + 1004
+#define WM_KEYBOARD_FALSE		WM_USER + 1001
+#define WM_MOUSE_FALSE			WM_USER + 1002
+#define WM_KEYBOARD_TRUE		WM_USER + 1003
+#define WM_MOUSE_TRUE			WM_USER + 1004
+#define WM_BINDED_CLIENT		WM_USER + 1005
+#define WM_UNBINDED_CLIENT		WM_USER + 1006
+#define WM_ARRIVED_SCREEN_EDGE	WM_USER + 1007
 
 HINSTANCE g_hInstance;		// Instance Handle
 CRITICAL_SECTION cs;
-
 
 HHOOK	g_hKeyboardHook;	// KeyBoard Hook Handle
 HHOOK	g_hMouseHook;		// Mouse Hook Handle
@@ -26,8 +28,10 @@ BOOL m_overFlag = FALSE; // 커서가 클라이언트 쪽으로 넘어간 것을 확인하는 변수 /
 BOOL bLMouseDown = FALSE;
 BOOL bRMouseDown = FALSE;
 BOOL bMMouseDown = FALSE;
-BOOL m_mouse = TRUE;
-BOOL m_keyboard = TRUE;
+BOOL BLOCK = FALSE;
+
+int btn_Bind[9]; // 각각의 index는 버튼 번호, 그 안의 값은 ClientID
+int whereisPoint;
 
 char *szMessageString(int ID);
 
@@ -72,18 +76,12 @@ extern "C" __declspec(dllexport)
 	LRESULT CALLBACK KeyboardHookProc(int nCode, WPARAM wParam, LPARAM lParam)
 {				
 	HWND hwnd = FindWindow(NULL, TEXT("PassU - Pass Your USB via Network"));
-	//HWND hWnd = NULL;
-
 	KBDLLHOOKSTRUCT *pKey = (KBDLLHOOKSTRUCT *)lParam;
-
-	//MessageBox(g_hWnd, "keyboardHook", "vkCode : ", MB_OK);
 
 	if(nCode<0)
 		return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 
 	if(wParam == WM_KEYDOWN ){
-		//TRACE("" + m_keyboard);
-		//if(m_keyboard == TRUE){
 		COPYDATASTRUCT CDS;
 		HEVENT Event;
 
@@ -98,8 +96,8 @@ extern "C" __declspec(dllexport)
 		Event.lParam = lParam;
 
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-		if(!m_keyboard){
-			return 1;
+		if(BLOCK){
+			return TRUE;
 		}
 
 	} else if(wParam == WM_KEYUP){
@@ -118,9 +116,6 @@ extern "C" __declspec(dllexport)
 		Event.lParam = lParam;
 
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-		if(!m_keyboard){
-			return 1;
-		}
 	}
 	return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 }
@@ -158,15 +153,10 @@ extern "C" __declspec(dllexport)
 			tmp.relativeField = 0;
 			tmp.sendDev = 0;
 
-			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
-
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-			//TRACE("LBUTTONDOWN\n");
-
-			if(!m_mouse){
-				return 1;
+			if(BLOCK){
+				return TRUE;
 			}
-
 		} else if (wParam == WM_LBUTTONUP){ // 왼쪽 버튼 UP
 			bLMouseDown = FALSE;
 			CDS.dwData = 1;
@@ -184,15 +174,8 @@ extern "C" __declspec(dllexport)
 			tmp.recvDev = 0;
 			tmp.relativeField = 0;
 			tmp.sendDev = 0;
-			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
+
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-			//TRACE("LBUTTONUP\n");
-
-			//	MessageBox(g_hWnd, "LBUTTONUP", "WM_LBUTTONUP", MB_OK);
-
-			if(!m_mouse){
-				return 1;
-			}
 		} else if (wParam == WM_RBUTTONDOWN){ // 오른쪽 버튼 DOWN
 			bRMouseDown = TRUE;
 			CDS.dwData = 1;
@@ -210,14 +193,11 @@ extern "C" __declspec(dllexport)
 			tmp.recvDev = 0;
 			tmp.relativeField = 0;
 			tmp.sendDev = 0;
-			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
+
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-			//	TRACE("RBUTTONDOWN\n");
 
-			//	MessageBox(g_hWnd, "RBUTTONDOWN", "WM_RBUTTONDOWN", MB_OK);
-
-			if(!m_mouse){
-				return 1;
+			if(BLOCK){
+				return TRUE;
 			}
 		} else if(wParam == WM_RBUTTONUP){ // 오른쪽 버튼 UP
 			bRMouseDown = FALSE;
@@ -236,16 +216,8 @@ extern "C" __declspec(dllexport)
 			tmp.recvDev = 0;
 			tmp.relativeField = 0;
 			tmp.sendDev = 0;
-			//	TRACE("RBUTTONUP\n");
 
-			//TRACE("x : %d, y : %d\n", pt.x, pt.y);
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-
-			//	MessageBox(g_hWnd, "RBUTTONUP", "WM_RBUTTONUP", MB_OK);
-
-			if(!m_mouse){
-				return 1;
-			}
 		} else if(wParam == WM_MOUSEWHEEL){ // 휠 움직일 때
 			CDS.dwData = 1;
 			CDS.cbData = sizeof(tmp);
@@ -262,13 +234,11 @@ extern "C" __declspec(dllexport)
 			tmp.recvDev = 0;
 			tmp.relativeField = 0;
 			tmp.sendDev = 0;
-			//	TRACE("MOUSEWHEEL\n");
 
-			//	TRACE("x : %d, y : %d\n", pt.x, pt.y); 
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
-			if(!m_mouse){
-				return 1;
+			if(BLOCK){
+				return TRUE;
 			}
 		} else if(wParam == WM_MBUTTONDOWN){ // 휠 버튼 DOWN
 			bMMouseDown = TRUE;
@@ -287,14 +257,11 @@ extern "C" __declspec(dllexport)
 			tmp.relativeField = 0;
 			tmp.sendDev = 0;
 
-			//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
 
-			if(!m_mouse){
-				return 1;
+			if(BLOCK){
+				return TRUE;
 			}
-			//	TRACE("WHEELBUTTONDOWN\n");
-
 		} else if(wParam == WM_MBUTTONUP){ // 휠 버튼 UP
 			bMMouseDown = FALSE;
 			CDS.dwData = 1;
@@ -307,7 +274,6 @@ extern "C" __declspec(dllexport)
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
 
-			
 			tmp.updownFlag = 4; // up
 			tmp.deviceType = 0;
 			tmp.recvDev = 0;
@@ -315,11 +281,6 @@ extern "C" __declspec(dllexport)
 			tmp.sendDev = 0;
 			//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-
-			if(!m_mouse){
-				return 1;
-			}
-			//	TRACE("WHEELBUTTONUP\n");
 		} else if(wParam == WM_MOUSEMOVE){ // 마우스 이동
 			//TRACE("MOUSE MOVE EVENT");
 			CDS.dwData = 1;
@@ -338,13 +299,67 @@ extern "C" __declspec(dllexport)
 			tmp.relativeField = 0;
 			tmp.sendDev = 0;
 
+			int nWidth =  GetSystemMetrics(SM_CXSCREEN);
+			int nHeight =  GetSystemMetrics(SM_CYSCREEN);
+			if(pt.x <= 2 ) {
+				if((whereisPoint == 5) && (btn_Bind[3] != 0)) { // 왼쪽
+					::SetCursorPos(nWidth - 3, pt.y);
+					BLOCK = TRUE;
+					whereisPoint = 4;
+					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, TRUE, whereisPoint);
+					return TRUE;
+				} else if((whereisPoint == 6) && (btn_Bind[5] != 0)) {
+					::SetCursorPos(nWidth - 3, pt.y);
+					BLOCK = FALSE;
+					whereisPoint = 5;
+					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, FALSE, whereisPoint);
+					return TRUE;
+				}
+			} else if( pt.y <= 2 ) {
+				if((whereisPoint == 5) && (btn_Bind[1] != 0)) { // 위쪽
+					::SetCursorPos(pt.x, nHeight - 3);
+					BLOCK = TRUE;
+					whereisPoint = 2;
+					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, TRUE, whereisPoint);
+					return TRUE;
+				} else if((whereisPoint == 8) && (btn_Bind[7] != 0)) {
+					::SetCursorPos(pt.x, nHeight - 3);
+					BLOCK = FALSE;
+					whereisPoint = 5;
+					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, FALSE, whereisPoint);
+					return TRUE;
+				}
+			} else if( pt.x >= nWidth - 2 ) {
+				if((whereisPoint == 5) && (btn_Bind[5] != 0)) { // 오른쪽
+					::SetCursorPos(3, pt.y);
+					BLOCK = TRUE;
+					whereisPoint = 6;
+					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, TRUE, whereisPoint);
+					return TRUE;
+				} else if((whereisPoint == 4) && (btn_Bind[3] != 0)) {
+					::SetCursorPos(3, pt.y);
+					BLOCK = FALSE;
+					whereisPoint = 5;
+					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, FALSE, whereisPoint);
+					return TRUE;
+				}
+			} else if( pt.y >= nHeight - 2 ) {
+				if((whereisPoint == 5) && (btn_Bind[7] != 0)) { // 아래쪽
+					::SetCursorPos(pt.x, 3);
+					BLOCK = TRUE;
+					whereisPoint = 8;
+					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, TRUE, whereisPoint);
+					return TRUE;
+				} else if((whereisPoint == 2) && (btn_Bind[1] != 0)) {
+					::SetCursorPos(pt.x, 3);
+					BLOCK = FALSE;
+					whereisPoint = 5;
+					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, FALSE, whereisPoint);
+					return TRUE;
+				}
+			} 
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-			
 		}
-		//	} else
-		//		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
-
-
 		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
 }
 
@@ -369,8 +384,12 @@ extern "C" __declspec(dllexport)
 	HHOOK InstallMouseHook(){
 		g_hMouseHook = SetWindowsHookEx(WH_MOUSE_LL, MouseHookProc, g_hInstance, 0);
 
+	for(int i = 0 ; i < 9 ; i ++){
+		btn_Bind[i] = 0;
+	}
+	whereisPoint = 5;
 
-		return g_hMouseHook;
+	return g_hMouseHook;
 }
 
 /* _______________________________________________________________________________ 
@@ -424,20 +443,11 @@ BOOL CreateMsgWnd(HINSTANCE hInst, HWND *phWnd){
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uiMsg){
-	case WM_KEYBOARD_FALSE: // 키보드 무시 이벤트 
-		// 여기서 메세지 처리
-		m_keyboard = FALSE;
+	case WM_BINDED_CLIENT:
+		btn_Bind[wParam] = lParam;
 		break;
-	case WM_MOUSE_FALSE:
-		// 여기서 메세지 처리
-		m_mouse = FALSE;
-		break;
-	case WM_KEYBOARD_TRUE:
-		// 여기서 메세지 처리
-		m_keyboard = TRUE;
-		break;
-	case WM_MOUSE_TRUE:
-		m_mouse = TRUE;
+	case WM_UNBINDED_CLIENT:
+		btn_Bind[wParam] = 0;
 		break;
 	}
 

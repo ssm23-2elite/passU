@@ -211,13 +211,34 @@ void CServer::OnChangeLocationInfo(int index)
 }
 
 
-void CServer::bindWatingClient(int btn_index, int client_index)
+void CServer::bindWatingClient(int status, int btn_index, int client_index)
 {
 	// 클라이언트 index를 넣어줘서 버튼하고 binding시키는 것
-
+	// 처음에 클릭한 그림이 스마트폰인지 컴퓨터인지 걸러내서
+	// 컴퓨터이면 버튼에 컴퓨터 삽입, 스마트폰이면 버튼에 스마트폰 삽입
+	if(status == STATUS_PC){
+		m_cBtn[btn_index].SetBitmap(HBITMAP(m_bmp_monitor));
+	} else if(status == STATUS_MOBILE){
+		m_cBtn[btn_index].SetBitmap(HBITMAP(m_bmp_phone));
+	}
+					
 	btn_Bind[btn_index] = client_index;
 	clientInfo[client_index - 1].setPosition(btn_index);
+
+	UpdateData();
+	Invalidate();
+	RedrawWindow();
+	::SendMessage(dllWnd, WM_BINDED_CLIENT, btn_index, client_index);
 }
+
+void CServer::unbindWatingClient(int position)
+{
+	m_cBtn[position].SetBitmap(NULL);
+	btn_Bind[position] = 0;
+	RedrawWindow();
+	::SendMessage(dllWnd, WM_BINDED_CLIENT, position, 0);
+}
+
 
 void CServer::OnBnClickedButton1()
 {
@@ -271,9 +292,7 @@ void CServer::OnButtonClick(int position)
 	if(btn_Bind[position] != 0) {
 		if(AfxMessageBox(_T("삭제하시겠습니까?"), MB_YESNO | MB_ICONQUESTION)==IDYES)
 		{
-			m_cBtn[position].SetBitmap(NULL);
-			btn_Bind[position] = 0;
-			RedrawWindow();
+			unbindWatingClient(position);
 		}
 	}
 }
@@ -324,24 +343,11 @@ void CServer::OnLButtonUp(UINT nFlags, CPoint point)
 				point.y <= getCoord[i].rcNormalPosition.bottom &&
 				point.y >= getCoord[i].rcNormalPosition.top){ // 드래그 놓은 곳이 버튼 1일 때
 
-					// 처음에 클릭한 그림이 스마트폰인지 컴퓨터인지 걸러내서
-					// 컴퓨터이면 버튼에 컴퓨터 삽입, 스마트폰이면 버튼에 스마트폰 삽입
-					if(Item.lParam == STATUS_PC){
-						m_cBtn[i].SetBitmap(HBITMAP(m_bmp_monitor));
-					} else{
-						m_cBtn[i].SetBitmap(HBITMAP(m_bmp_phone));
-					}
-
-					//TRACE("%s\n", Item.pszText);
 					CString tmpStr = Item.pszText;
 					char c = tmpStr.GetAt(0);
 					int cid = c - '0';
 
-					bindWatingClient(i, cid); // 버튼에 클라이언트를 바인딩 시켜주는 함수
-
-					UpdateData();
-					Invalidate();
-					RedrawWindow();
+					bindWatingClient(Item.lParam, i, cid); // 버튼에 클라이언트를 바인딩 시켜주는 함수
 					break;
 			}
 		}
@@ -406,14 +412,12 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 	switch(pCopyDataStruct->dwData){
 	case KEYBOARD_DATA: // keyboard
-		//hEVENT = (tagHEVENT *) pCopyDataStruct->lpData; // hEvent 구조체 연결(후킹된 자료)
-
+		
 		break;
 
 
 	case MOUSE_DATA: // mouse
-		//mEVENT = (MPACKET *)pCopyDataStruct->lpData; // mEvent 구조체 연결(후킹된 자료)
-
+		
 		break;
 
 
@@ -471,7 +475,6 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 						m_waiting_client.InsertItem(&lvitem);
 						break;
 					} else if(clientP->pad3 == STATUS_MOBILE){
-
 						// Status 세팅
 						clientInfo[i].setStatus(STATUS_MOBILE);
 
@@ -523,7 +526,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
 			}
 
-			if(pMainDlg->m_pSockList.GetCount() == 0){
+			if(pMainDlg->m_pSockList.GetCount() == 0) {
 				uninstallKeyhook();
 				uninstallMousehook();
 			}
@@ -544,7 +547,6 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 						// clientID 에 해당하는 소켓을 얻는 구간
 						SendUSBInfo(s);
 					}
-
 					((CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos));
 				}
 			}
