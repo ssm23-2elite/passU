@@ -36,7 +36,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CTabCtrl m_Tab;
-
+	BOOL isFirst;
 	int whereisPoint;
 	CServer m_tab1;
 	CClient m_tab2;
@@ -54,7 +54,7 @@ public:
 	POINT currentPoint;
 
 	BOOL m_allowSend; // 클라이언트에 정보를 보낼지 말지를 결정하는 FLAG
-	
+	BOOL bWait;
 	void ShowCursorAll();
 	void HideCursorAll();
 	void DestroyCursorAll();
@@ -106,4 +106,5 @@ public:
 	afx_msg void OnTraymenuAbout();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnTraymenuClose();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };

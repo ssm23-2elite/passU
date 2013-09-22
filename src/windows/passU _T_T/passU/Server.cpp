@@ -507,7 +507,7 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				0, 0);
 			((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos))->Send(buf, sizeof(CPACKET));
 
-			if(clientP->pad3 == STATUS_PC) {
+			if(USE_USB == TRUE && clientP->pad3 == STATUS_PC) {
 				GetPassUSBDesc();
 				
 				if(GetPassUSBDescSuc == TRUE) {
@@ -530,35 +530,39 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		}
 		break;
 	case NEW_USB:
-		GetPassUSBDesc();
-		if(GetPassUSBDescSuc == TRUE) {
-			//POSITION tmp = pMainDlg->m_pSockList.GetHeadPosition();
+		if( USE_USB == TRUE ) {
+			GetPassUSBDesc();
+			if(GetPassUSBDescSuc == TRUE) {
+				//POSITION tmp = pMainDlg->m_pSockList.GetHeadPosition();
 			
-			s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
-			while(s->c_id != 0 && pos != NULL){
-				
 				s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
-				if(clientInfo[s->c_id - 1].getStatus() == STATUS_PC)
-				{
-					// clientID 에 해당하는 소켓을 얻는 구간
-					SendUSBInfo(s);
-				}
+				while(s->c_id != 0 && pos != NULL){
+				
+					s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
+					if(clientInfo[s->c_id - 1].getStatus() == STATUS_PC)
+					{
+						// clientID 에 해당하는 소켓을 얻는 구간
+						SendUSBInfo(s);
+					}
 
-				((CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos));
+					((CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos));
+				}
 			}
 		}
 		break;
 	case REMOVE_USB:
-		s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
-		while(s->c_id != 0 && pos != NULL){
+		if( USE_USB == TRUE ) {
 			s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
-			if(clientInfo[s->c_id - 1].getStatus() == STATUS_PC)
-			{
-				// clientID 에 해당하는 소켓을 얻는 구간
-				RemoveUSBInfo(s);
-			}
+			while(s->c_id != 0 && pos != NULL){
+				s =  ((CPassUChildSocket *)pMainDlg->m_pSockList.GetAt(pos));
+				if(clientInfo[s->c_id - 1].getStatus() == STATUS_PC)
+				{
+					// clientID 에 해당하는 소켓을 얻는 구간
+					RemoveUSBInfo(s);
+				}
 
-			((CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos));
+				((CPassUChildSocket *)pMainDlg->m_pSockList.GetNext(pos));
+			}
 		}
 		break;
 	}
@@ -567,30 +571,34 @@ BOOL CServer::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 void CServer::SendUSBInfo(CPassUChildSocket *s)
 {
-	DPACKET packet;
-	ZeroMemory(&packet, sizeof(DPACKET));
-	packet.msgType = MSG_DATA;
-	packet.len = sizeof(USBSENDDEVICEDESC);
-	memcpy(&packet.usbdesc, &sendToDeviceDescData, sizeof(USBSENDDEVICEDESC));
+	if( USE_USB == TRUE ) {
+		DPACKET packet;
+		ZeroMemory(&packet, sizeof(DPACKET));
+		packet.msgType = MSG_DATA;
+		packet.len = sizeof(USBSENDDEVICEDESC);
+		memcpy(&packet.usbdesc, &sendToDeviceDescData, sizeof(USBSENDDEVICEDESC));
 
-	char buf[4096];
-	int len = sprintf_s(buf, "%4d%4d", packet.msgType, packet.len);
-	memcpy(buf + 8, packet.usbdesc, packet.len);
-	s->Send((char*)&buf, 8 + sizeof(USBSENDDEVICEDESC));
+		char buf[4096];
+		int len = sprintf_s(buf, "%4d%4d", packet.msgType, packet.len);
+		memcpy(buf + 8, packet.usbdesc, packet.len);
+		s->Send((char*)&buf, 8 + sizeof(USBSENDDEVICEDESC));
+	}
 }
 
 void CServer::RemoveUSBInfo(CPassUChildSocket *s)
 {
-	DPACKET packet;
-	ZeroMemory(&packet, sizeof(DPACKET));
-	packet.msgType = MSG_REMOVE_USB;
-	packet.len = sizeof(USBSENDDEVICEDESC);
-	memcpy(&packet.usbdesc, &sendToDeviceDescData, sizeof(USBSENDDEVICEDESC));
+	if( USE_USB == TRUE ) {
+		DPACKET packet;
+		ZeroMemory(&packet, sizeof(DPACKET));
+		packet.msgType = MSG_REMOVE_USB;
+		packet.len = sizeof(USBSENDDEVICEDESC);
+		memcpy(&packet.usbdesc, &sendToDeviceDescData, sizeof(USBSENDDEVICEDESC));
 
-	char buf[4096];
-	int len = sprintf_s(buf, "%4d%4d", packet.msgType, packet.len);
-	memcpy(buf + 8, packet.usbdesc, packet.len);
-	s->Send((char*)&buf, 8 + sizeof(USBSENDDEVICEDESC));
+		char buf[4096];
+		int len = sprintf_s(buf, "%4d%4d", packet.msgType, packet.len);
+		memcpy(buf + 8, packet.usbdesc, packet.len);
+		s->Send((char*)&buf, 8 + sizeof(USBSENDDEVICEDESC));
+	}
 }
 void CServer::OnLvnBegindragList1(NMHDR *pNMHDR, LRESULT *pResult)
 {

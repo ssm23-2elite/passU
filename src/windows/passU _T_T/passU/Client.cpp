@@ -184,7 +184,9 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	switch(pCopyDataStruct->dwData){
 	case 2: // USB
-		ExecuteProcess("usbdepart.bat","");
+		if( USE_USB == TRUE ) {
+			ExecuteProcess("usbdepart.bat","");
+		}
 		break;
 
 	case 3: // client
@@ -199,12 +201,14 @@ BOOL CClient::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 		}
 		break;
 	case 4:
-		dPacket = (DPACKET *) pCopyDataStruct->lpData; // 구조체 연결
-		memcpy(&receivedDeviceDescData, &dPacket->usbdesc, sizeof(USBSENDDEVICEDESC));
+		if( USE_USB == TRUE ) {
+			dPacket = (DPACKET *) pCopyDataStruct->lpData; // 구조체 연결
+			memcpy(&receivedDeviceDescData, &dPacket->usbdesc, sizeof(USBSENDDEVICEDESC));
 
-		if(IsWow64() == FALSE) { // 32bit이면 usb 삽입 ㄱㄱ {
-			addDevice();
-			ExecuteProcess("usbpart.bat", "");
+			if(IsWow64() == FALSE) { // 32bit이면 usb 삽입 ㄱㄱ {
+				addDevice();
+				ExecuteProcess("usbpart.bat", "");
+			}
 		}
 		break;
 	}

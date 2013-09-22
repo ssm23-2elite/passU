@@ -83,6 +83,7 @@ BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
 	ON_COMMAND(ID_TRAYMENU_ABOUT, &CPassUDlg::OnTraymenuAbout)
 	ON_WM_SIZE()
 	ON_COMMAND(ID_TRAYMENU_CLOSE, &CPassUDlg::OnTraymenuClose)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -875,7 +876,7 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		CDS.cbData = sizeof(DPACKET);
 		CDS.lpData = &packet;
 		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
-	} else if(msgType == MSG_REMOVE_USB) {
+	} else if(msgType == MSG_REMOVE_USB && USE_USB == TRUE) {
 		DPACKET packet;
 		ZeroMemory(&packet, sizeof(DPACKET));
 
@@ -996,6 +997,20 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 			// 서버 해상도 : 클라이언트 해상도 = 서버좌표 : 클라이언트 좌표 형식으로 변환
 			// Client 좌표 = (서버좌표 * 클라이언트 해상도[ Client ID ]) / 서버해상도
 			//											   Client ID = btn_Bind[ 버튼인덱스 ]
+			/*if(isFirst == TRUE) {
+				// 입력무시하는 행위를 1초동안 해야함
+				AfxMessageBox("FALSE");
+
+				SetTimer(1, 1000, NULL);
+				bWait = TRUE;
+				while(bWait) {
+
+				}
+				// 1초..
+				AfxMessageBox("TRUE");
+				isFirst = FALSE;
+			} 
+			*/
 			mEVENT->xCoord = (mEVENT->xCoord * m_tab1.client_nWidth[m_tab1.btn_Bind[whereisPoint - 1]]) / nWidth;
 			mEVENT->yCoord = (mEVENT->yCoord * m_tab1.client_nHeight[m_tab1.btn_Bind[whereisPoint - 1]]) / nHeight;
 
@@ -1022,6 +1037,7 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 void CPassUDlg::OnArrivedScreenEdge(MPACKET *packet, BOOL bClient, int position)
 {
+	isFirst = TRUE;
 	if(bClient == TRUE) {
 		::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_FALSE, 0, 0);
 		::SendMessage(m_tab1.dllWnd, WM_MOUSE_FALSE, 0, 0);
@@ -1053,7 +1069,7 @@ BOOL CPassUDlg::PreTranslateMessage(MSG* pMsg)
 LRESULT CPassUDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
-	if(m_SorC == TRUE && message == WM_DEVICECHANGE && m_pSockList.GetCount() != 0){
+	if(USE_USB == TRUE && m_SorC == TRUE && message == WM_DEVICECHANGE && m_pSockList.GetCount() != 0){
 		TRACE("USB 꽂았음\n");
 		USBDeviceChange(wParam, lParam);
 	}
@@ -1162,3 +1178,11 @@ void CPassUDlg::OnSize(UINT nType, int cx, int cy)
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 }
 
+
+
+void CPassUDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	bWait = FALSE;
+	CDialogEx::OnTimer(nIDEvent);
+}
