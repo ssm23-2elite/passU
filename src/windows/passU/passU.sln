@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PassU", "passU\PassU.vcxproj", "{E1335E4A-F0C0-4BDA-9BF2-CA9734BD49C9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KeyHook", "KeyHook\KeyHook.vcxproj", "{6794E4D5-1211-4263-91D4-5A64E8890D4C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ServerHook", "ServerHook\ServerHook.vcxproj", "{6794E4D5-1211-4263-91D4-5A64E8890D4C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

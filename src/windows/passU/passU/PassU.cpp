@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "PassU.h"
 #include "PassUDlg.h"
+#include "Splash.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -39,6 +40,13 @@ CPassUApp theApp;
 
 BOOL CPassUApp::InitInstance()
 {
+	HANDLE hEvent;
+	hEvent = CreateEvent(NULL,FALSE,TRUE,AfxGetAppName());
+	if(GetLastError() == ERROR_ALREADY_EXISTS)
+	{
+		AfxMessageBox(_T("PassU가 이미 실행중입니다."));
+		return false; 
+	} 
 	// 응용 프로그램 매니페스트가 ComCtl32.dll 버전 6 이상을 사용하여 비주얼 스타일을
 	// 사용하도록 지정하는 경우, Windows XP 상에서 반드시 InitCommonControlsEx()가 필요합니다.
 	// InitCommonControlsEx()를 사용하지 않으면 창을 만들 수 없습니다.
@@ -75,6 +83,9 @@ BOOL CPassUApp::InitInstance()
 	// TODO: 이 문자열을 회사 또는 조직의 이름과 같은
 	// 적절한 내용으로 수정해야 합니다.
 	SetRegistryKey(_T("로컬 응용 프로그램 마법사에서 생성된 응용 프로그램"));
+	CSplash splash;
+
+	splash.DoModal();
 
 	CPassUDlg dlg;
 	m_pMainWnd = &dlg;

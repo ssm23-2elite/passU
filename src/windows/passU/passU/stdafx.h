@@ -61,7 +61,18 @@
 #define KEYBOARD_DATA	0
 #define MOUSE_DATA	1
 #define RECEIVE_DATA	2
+#define NEW_USB			5
+#define REMOVE_USB		6
 
 #define MSG_KEYBOARD	1
 #define MSG_MOUSE	2
 #define	MSG_CLIENT	3
+#define	MSG_DATA	4
+#define MSG_REMOVE_USB	5
+
+#define WM_KEYBOARD_FALSE	WM_USER + 1001
+#define WM_MOUSE_FALSE	WM_USER + 1002
+#define WM_KEYBOARD_TRUE	WM_USER + 1003
+#define WM_MOUSE_TRUE	WM_USER + 1004
+
+#define USE_USB FALSE

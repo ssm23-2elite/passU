@@ -36,7 +36,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CTabCtrl m_Tab;
-
+	BOOL isFirst;
+	int whereisPoint;
 	CServer m_tab1;
 	CClient m_tab2;
 	CWnd *m_pwndShow;
@@ -44,6 +45,23 @@ public:
 	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);
 	CClient m_tab_client;
 	CServer m_tab_server;
+
+	// 전체 스크린 구함
+	int nWidth;
+	int nHeight;
+	
+	POINT oldPoint;
+	POINT currentPoint;
+
+	BOOL m_allowSend; // 클라이언트에 정보를 보낼지 말지를 결정하는 FLAG
+	BOOL bWait;
+	void ShowCursorAll();
+	void HideCursorAll();
+	void DestroyCursorAll();
+	
+	//dll의 handle
+	HWND dllWnd;
+
 
 	typedef struct tagHEVENT{
 		int type;
@@ -57,14 +75,22 @@ public:
 	CPassUServerSocket *m_pServer;
 	CObList m_pSockList;
 	BOOL m_SorC;
+	BOOL USBDeviceChange(UINT uEvent, DWORD dwEventData);
 	void OnStartServer();
 	void Accept(void);
 	void ReceiveData(CPassUChildSocket * s);
+	int ParseData(char *buf, int len);
+	int ParseKeyboardData(char *buf, KPACKET *packet);
+	int ParseMouseData(char *buf, MPACKET *packet);
+	int ParseClientData(char *buf, CPACKET *packet);
+
+	int byteToint(char *data, int len);
 	void CloseChild(CPassUChildSocket *s);
 	void CleanUp(void);
 
 	CButton m_CBtn_Start;
 	CButton m_CBtn_Stop;
+	afx_msg LRESULT OnTrayNotification(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnDestroy();
@@ -72,5 +98,13 @@ public:
 	void ClientCleanUp(void);
 	void ReceiveClientData(CPassUClientSocket * s);
 	void CloseClient(CPassUClientSocket * s);
+	void OnArrivedScreenEdge(MPACKET *packet, BOOL bClient, int position);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	afx_msg void OnTraymenuOpen();
+	afx_msg void OnTraymenuAbout();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnTraymenuClose();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };

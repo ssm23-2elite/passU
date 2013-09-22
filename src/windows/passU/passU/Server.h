@@ -27,11 +27,16 @@ public:
 	CString serverIPAddress;
 	HINSTANCE hinstDLL; // DLL 로딩
 	HHOOK hHook; // HHOOK
-
+	CString strIpAddress;
 	CButton m_cBtn[9];
 
 	CClientInfo clientInfo[9]; // 각각의 index는 client ID
+	
+	// 클라이언트의 스크린 크기구함, 각각의 index는 client ID
+	int client_nWidth[9];
+	int client_nHeight[9];
 
+	HWND dllWnd;
 
 	BOOL m_keyBoardHook;
 	BOOL m_mouseHook;
@@ -61,11 +66,6 @@ public:
 	int m_x;
 	int m_y;
 
-	PACKET *p;
-	KPACKET *k;
-	MPACKET *m;
-	CPACKET *c;
-
 	typedef struct tagHEVENT{
 		int type;
 		int keyCode;
@@ -81,11 +81,12 @@ public:
 	CBitmap m_bmp_monitor;
 	CBitmap m_bmp_phone;
 
+	void SendUSBInfo(CPassUChildSocket *s);
+	void RemoveUSBInfo(CPassUChildSocket *s);
 	void OnChangeLocationInfo(int index);
 	void bindWatingClient(int btn_index, int client_index);
 	void OnDisconnectedClient(int client_index);
-	void OnArrivedScreenEdge(int position);
-
+	
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnBnClickedButton2();
 	afx_msg void OnBnClickedButton3();
@@ -98,12 +99,12 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
-	PACKET packMessage(int msgType, int sendDev, int recvDev, int deviceType, int relativeField, int updownFlag, int pad1, int keyCode, int pad2, int pad3, int pad4);
 	virtual BOOL OnInitDialog();
 	afx_msg void OnLvnBegindragList1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	int GetHitIndex(CPoint);
 	void MoveListItem(const INT _nSource, const INT _nDest);
+	void OnButtonClick(int position);
 
 	afx_msg void OnDestroy();
 };

@@ -36,4 +36,7 @@ public:
 	BYTE ipFirst, ipSecond, ipThird, ipForth;
 	PACKET *p;
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
+	BOOL ExecuteProcess(CString FilePath, CString Parameter);
+	BOOL OSVersionXPOver();
+	CButton m_CBtn_Cancel;
 };
