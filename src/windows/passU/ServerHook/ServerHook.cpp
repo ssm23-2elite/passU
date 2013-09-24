@@ -116,6 +116,9 @@ extern "C" __declspec(dllexport)
 		Event.lParam = lParam;
 
 		SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+		if(BLOCK){
+			return TRUE;
+		}
 	}
 	return CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);
 }
@@ -126,6 +129,9 @@ extern "C" __declspec(dllexport)
 		COPYDATASTRUCT CDS;
 		POINT pt = {0};
 		GetCursorPos(&pt);
+		PMSLLHOOKSTRUCT ms;
+		ms = (PMSLLHOOKSTRUCT) lParam;
+
 		int nWidth = GetSystemMetrics(SM_CXSCREEN);
 		int nHeight = GetSystemMetrics(SM_CYSCREEN);
 
@@ -226,7 +232,13 @@ extern "C" __declspec(dllexport)
 			tmp.msgType = 2; // mouse
 			tmp.updownFlag = 2; // up
 			tmp.leftRight = 2; // right
-			tmp.wheelFlag = 3;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move
+			int wheel = ms->mouseData >> 31;
+			if(wheel == 0){
+				tmp.wheelFlag = 3;  // 0 : wheel off, 1 : wheel btn down 2 : wheel btn up 3: wheel move up 4 : wheel move down
+			} else if(wheel == 1){
+				tmp.wheelFlag = 4;
+			}
+			
 			tmp.xCoord = pt.x;
 			tmp.yCoord = pt.y;
 

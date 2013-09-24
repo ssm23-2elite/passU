@@ -777,7 +777,11 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		} else if(packet.wheelFlag == 2){ // wheel btn down
 			mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, 0);
 		} else if(packet.wheelFlag == 3){ // wheel move
-			mouse_event(MOUSEEVENTF_WHEEL,  0, 0, 0, 5);
+			int tmp = 120;
+			mouse_event(MOUSEEVENTF_WHEEL,  0, 0, tmp, 0);
+		} else if(packet.wheelFlag == 4){ // wheel move
+			int tmp = -120;
+			mouse_event(MOUSEEVENTF_WHEEL,  0, 0, tmp, 0);
 		}
 	} else if(msgType == MSG_CLIENT){
 		CPACKET packet;
