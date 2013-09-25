@@ -201,7 +201,7 @@ BOOL CServer::OnInitDialog()
 	m_pDragImage = NULL;
 
 	//installKeyhook();
-	installMousehook();
+	//installMousehook();
 	return TRUE;
 }
 // CServer 메시지 처리기입니다.

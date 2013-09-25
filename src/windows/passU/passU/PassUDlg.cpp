@@ -85,6 +85,7 @@ BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_START, &CPassUDlg::OnBnClickedStart)
 	ON_BN_CLICKED(IDC_STOP, &CPassUDlg::OnBnClickedStop)
+//	ON_WM_INPUT()
 END_MESSAGE_MAP()
 
 
@@ -148,6 +149,8 @@ BOOL CPassUDlg::OnInitDialog()
 
 	// 처음에는 클라이언트에 정보를 보내지 않는다.
 	m_allowSend = FALSE;
+
+	
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 

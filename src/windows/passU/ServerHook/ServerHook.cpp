@@ -182,6 +182,9 @@ extern "C" __declspec(dllexport)
 			tmp.sendDev = 0;
 
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+			if(BLOCK){
+				return TRUE;
+			}
 		} else if (wParam == WM_RBUTTONDOWN){ // 오른쪽 버튼 DOWN
 			bRMouseDown = TRUE;
 			CDS.dwData = 1;
@@ -224,6 +227,9 @@ extern "C" __declspec(dllexport)
 			tmp.sendDev = 0;
 
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+			if(BLOCK){
+				return TRUE;
+			}
 		} else if(wParam == WM_MOUSEWHEEL){ // 휠 움직일 때
 			CDS.dwData = 1;
 			CDS.cbData = sizeof(tmp);
@@ -293,6 +299,10 @@ extern "C" __declspec(dllexport)
 			tmp.sendDev = 0;
 			//	TRACE("x : %d, y : %d\n", pt.x, pt.y);
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+			if(BLOCK){
+				return TRUE;
+			}
+
 		} else if(wParam == WM_MOUSEMOVE){ // 마우스 이동
 			//TRACE("MOUSE MOVE EVENT");
 			CDS.dwData = 1;
@@ -369,8 +379,9 @@ extern "C" __declspec(dllexport)
 					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, FALSE, whereisPoint);
 					return TRUE;
 				}
-			} 
+			}
 			SendMessage(hwnd, WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+
 		}
 		return CallNextHookEx(g_hMouseHook, nCode, wParam, lParam);
 }
