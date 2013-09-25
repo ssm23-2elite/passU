@@ -22,7 +22,7 @@ import android.util.Log;
 
 
 public class Util {
-	private static final boolean D = true;
+	private static final boolean D = false;
 	private final static String LOG = "Util";
 
 	public static String getLocalIpAddress()
