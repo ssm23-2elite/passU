@@ -1,4 +1,4 @@
 passU
 =====
 
-Pass Your USB via Network
+Pass Your devices via Network
