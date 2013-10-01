@@ -976,7 +976,7 @@ LRESULT CPassUDlg::OnArrivedScreenEdge(WPARAM wParam, LPARAM lParam)
 		while((m_tab1.btn_Bind[whereisPoint - 1] != s->c_id) && (pos != NULL)){
 			(CPassUChildSocket *)m_pSockList.GetNext(pos);
 			s =  ((CPassUChildSocket *)m_pSockList.GetAt(pos));
-		}
+		} 
 
 		((CPassUChildSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
 
