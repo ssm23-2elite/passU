@@ -85,7 +85,7 @@ BEGIN_MESSAGE_MAP(CPassUDlg, CDialogEx)
 	ON_WM_TIMER()
 	ON_BN_CLICKED(IDC_START, &CPassUDlg::OnBnClickedStart)
 	ON_BN_CLICKED(IDC_STOP, &CPassUDlg::OnBnClickedStop)
-//	ON_WM_INPUT()
+	//	ON_WM_INPUT()
 END_MESSAGE_MAP()
 
 
@@ -149,8 +149,8 @@ BOOL CPassUDlg::OnInitDialog()
 
 	// 처음에는 클라이언트에 정보를 보내지 않는다.
 	m_allowSend = FALSE;
+	isCursorShow = TRUE;
 
-	
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -207,10 +207,12 @@ HCURSOR CPassUDlg::OnQueryDragIcon()
 }
 
 void CPassUDlg::ShowCursorAll() {
+	isCursorShow = TRUE;
 	SystemParametersInfo(SPI_SETCURSORS, 0, NULL, 0);
 }
 
 void CPassUDlg::HideCursorAll() {
+	isCursorShow = FALSE;
 	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32512);    // IDC_ARROW
 	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32513);    // IDC_IBEAM
 	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32514);    // IDC_WAIT
@@ -510,7 +512,7 @@ void CPassUDlg::Accept(void)
 		AfxMessageBox(_T("Accept Failed"));
 		return ;
 	}
-		
+
 	NOTIFYICONDATA nid;
 	ZeroMemory(&nid, sizeof(nid));
 	nid.cbSize = sizeof(nid);
@@ -582,7 +584,8 @@ void CPassUDlg::CleanUp(void)
 	}
 }
 
-void CPassUDlg::CloseChild(CPassUChildSocket *s){ // 클라이언트쪽에서 종료하였을 때 호출되는 함수
+void CPassUDlg::CloseChild(CPassUChildSocket *s)
+{ // 클라이언트쪽에서 종료하였을 때 호출되는 함수
 
 	CPassUChildSocket *pChild;
 	POSITION pos = m_pSockList.GetHeadPosition();
@@ -645,7 +648,7 @@ void CPassUDlg::OnStartServer()
 
 	NOTIFYICONDATA nid;
 	ZeroMemory(&nid, sizeof(nid));
-	
+
 	nid.cbSize = sizeof(nid);
 	nid.uID = 0;
 	nid.hWnd = GetSafeHwnd();
@@ -718,7 +721,7 @@ void CPassUDlg::OnConnectStart(void)
 
 	NOTIFYICONDATA nid;
 	ZeroMemory(&nid, sizeof(nid));
-	
+
 	nid.cbSize = sizeof(nid);
 	nid.uID = 0;
 	nid.hWnd = GetSafeHwnd();
@@ -727,6 +730,7 @@ void CPassUDlg::OnConnectStart(void)
 	lstrcpy( nid.szInfoTitle, _T( "PassU" ) ); //풍선의 타이틀.
 	lstrcpy( nid.szInfo, "PassU 클라이언트가 실행되었습니다." );
 	lstrcpy(nid.szTip, "PassU Client");
+	HideCursorAll();
 	nid.uCallbackMessage = WM_TRAY_NOTIFICATION;
 	BOOL bRet = ::Shell_NotifyIcon(NIM_ADD,&nid); //트레이 아이콘 등록
 	AfxGetApp()->m_pMainWnd->ShowWindow(SW_HIDE); //윈도우 감추기
@@ -763,6 +767,19 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		MPACKET packet;
 
 		ParseMouseData(buf, &packet);
+
+		if(CursorFlag == TRUE) {
+
+		} else {
+			if(packet.xCoord <= 2 ||
+				packet.yCoord <= 2 ||
+				packet.xCoord >= nWidth - 2 ||
+				packet.yCoord >= nHeight - 2 ) {
+				HideCursorAll();
+			} else {
+				ShowCursorAll();
+			}
+		}
 
 		SetCursorPos(packet.xCoord, packet.yCoord);
 
@@ -826,6 +843,31 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		CDS.cbData = sizeof(DPACKET);
 		CDS.lpData = &packet;
 		::SendMessage(m_tab2.GetSafeHwnd(), WM_COPYDATA, 0, (LPARAM)(VOID *)&CDS);
+	} else if(msgType == MSG_RECEIVE) {
+		int a= 0;
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32512);    // IDC_ARROW
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32513);    // IDC_IBEAM
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32514);    // IDC_WAIT
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32515);    // IDC_CROSS
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32516);    // IDC_UPARROW
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32640);    // IDC_SIZE        
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32641);    // IDC_ICON
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32642);    // IDC_SIZENWSE
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32644);    // IDC_SIZEWE
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32645);    // IDC_SIZENS
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32643);    // IDC_SIZENESW            
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32646);    // IDC_SIZEALL
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32648);    // IDC_NO    
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32650);    // IDC_APPSTARTING
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32651);    // IDC_HELP
+
+		CursorFlag = TRUE;
+		cT = CTime::GetCurrentTime();
+		htimer = SetTimer(1, 1, NULL);
+		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	} else if(msgType == MSG_RETURN) {
+		int a = 1;
 	}
 }
 
@@ -920,14 +962,35 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 
 LRESULT CPassUDlg::OnArrivedScreenEdge(WPARAM wParam, LPARAM lParam)
 {
+	POSITION pos = m_pSockList.GetHeadPosition();
+
 	BOOL forClient = wParam;
 	whereisPoint = lParam;
 	if(forClient == TRUE) {// SEND 할 수 있도록 바꿔주자
+		char buf[1024];
+		ZeroMemory(buf, sizeof(buf));
+		sprintf_s(buf, "%4d", MSG_RECEIVE);
+
+		CPassUChildSocket * s = (CPassUChildSocket *)m_pSockList.GetAt(pos);
+
+		while((m_tab1.btn_Bind[whereisPoint - 1] != s->c_id) && (pos != NULL)){
+			(CPassUChildSocket *)m_pSockList.GetNext(pos);
+			s =  ((CPassUChildSocket *)m_pSockList.GetAt(pos));
+		}
+
+		((CPassUChildSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
+
 		m_allowSend = TRUE;
 		HideCursorAll();
 	} else if(forClient == FALSE) {// SEND 하지 않도록 바꿔주자
+		
 		m_allowSend = FALSE;
 		ShowCursorAll();
+
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32512);    // IDC_ARROW
+		CursorFlag = TRUE;
+		cT = CTime::GetCurrentTime();
+		htimer = SetTimer(1, 1, NULL);
 	}
 	return 1;
 }
@@ -1015,7 +1078,7 @@ void CPassUDlg::OnTraymenuOpen()
 	nid.uID = 0;
 	nid.hWnd = GetSafeHwnd();
 	BOOL bRet = ::Shell_NotifyIcon(NIM_DELETE, &nid); //트레이아이콘 제거
-	
+
 	AfxGetApp()->m_pMainWnd->ShowWindow(SW_SHOW); //윈도우 활성화
 	AfxGetApp()->m_pMainWnd->ShowWindow(SW_SHOWNORMAL);  // 최대크기만들기
 }
@@ -1040,7 +1103,7 @@ void CPassUDlg::OnSize(UINT nType, int cx, int cy)
 	if(nType == SIZE_MINIMIZED) {
 		NOTIFYICONDATA nid;
 		ZeroMemory(&nid, sizeof(nid));
-	
+
 		nid.cbSize = sizeof(nid);
 		nid.uID = 0;
 		nid.hWnd = GetSafeHwnd();
@@ -1060,6 +1123,21 @@ void CPassUDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	bWait = FALSE;
+
+	if(CursorFlag == TRUE)
+	{
+
+		CTime cT2 = CTime::GetCurrentTime();
+		CTimeSpan ts = cT2 - cT;
+
+		if(ts.GetTotalSeconds() > 2)
+		{
+			CursorFlag = FALSE;
+			if(isCursorShow)
+				SystemParametersInfo(SPI_SETCURSORS,0,NULL,0);
+			KillTimer(htimer);
+		}
+	}
 	CDialogEx::OnTimer(nIDEvent);
 }
 
@@ -1090,13 +1168,11 @@ void CPassUDlg::OnBnClickedStop()
 
 		::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
 		::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
-
-		OnArrivedScreenEdge(FALSE, 5);
 	} else{
 		m_CBtn_Start.EnableWindow(FALSE);
 		m_CBtn_Stop.EnableWindow(FALSE);
 		m_tab2.m_CBtn_Cancel.EnableWindow(TRUE);
-		
+
 		DPACKET packet;
 		ZeroMemory(&packet, sizeof(DPACKET));
 

@@ -69,6 +69,8 @@
 #define	MSG_CLIENT	3
 #define	MSG_DATA	4
 #define MSG_REMOVE_USB	5
+#define MSG_RECEIVE 6
+#define MSG_RETURN 7
 
 #define STOP_SERVER 2
 #define CONNECTED_CLIENT 3

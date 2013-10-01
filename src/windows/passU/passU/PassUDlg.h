@@ -55,6 +55,13 @@ public:
 	void HideCursorAll();
 	void DestroyCursorAll();
 	
+	// 커서 이미지 관련 Flag
+	BOOL CursorFlag;
+	BOOL isCursorShow;
+    // 타이머 설정을 위한 변수
+    UINT htimer;
+	CTime cT; 
+
 	//dll의 handle
 	HWND dllWnd;
 

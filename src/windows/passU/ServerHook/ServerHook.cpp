@@ -328,12 +328,14 @@ extern "C" __declspec(dllexport)
 					::SetCursorPos(nWidth - 3, pt.y);
 					BLOCK = TRUE;
 					whereisPoint = 4;
+					mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, TRUE, whereisPoint);
 					return TRUE;
 				} else if((whereisPoint == 6) && (btn_Bind[5] != 0)) {
 					::SetCursorPos(nWidth - 3, pt.y);
 					BLOCK = FALSE;
 					whereisPoint = 5;
+					mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, FALSE, whereisPoint);
 					return TRUE;
 				}
@@ -342,12 +344,14 @@ extern "C" __declspec(dllexport)
 					::SetCursorPos(pt.x, nHeight - 3);
 					BLOCK = TRUE;
 					whereisPoint = 2;
+					mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, TRUE, whereisPoint);
 					return TRUE;
 				} else if((whereisPoint == 8) && (btn_Bind[7] != 0)) {
 					::SetCursorPos(pt.x, nHeight - 3);
 					BLOCK = FALSE;
 					whereisPoint = 5;
+					mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, FALSE, whereisPoint);
 					return TRUE;
 				}
@@ -356,12 +360,14 @@ extern "C" __declspec(dllexport)
 					::SetCursorPos(3, pt.y);
 					BLOCK = TRUE;
 					whereisPoint = 6;
+					mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, TRUE, whereisPoint);
 					return TRUE;
 				} else if((whereisPoint == 4) && (btn_Bind[3] != 0)) {
 					::SetCursorPos(3, pt.y);
 					BLOCK = FALSE;
 					whereisPoint = 5;
+					mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, FALSE, whereisPoint);
 					return TRUE;
 				}
@@ -370,12 +376,14 @@ extern "C" __declspec(dllexport)
 					::SetCursorPos(pt.x, 3);
 					BLOCK = TRUE;
 					whereisPoint = 8;
+					mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, TRUE, whereisPoint);
 					return TRUE;
 				} else if((whereisPoint == 2) && (btn_Bind[1] != 0)) {
 					::SetCursorPos(pt.x, 3);
 					BLOCK = FALSE;
 					whereisPoint = 5;
+					mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
 					SendMessage(hwnd, WM_ARRIVED_SCREEN_EDGE, FALSE, whereisPoint);
 					return TRUE;
 				}
