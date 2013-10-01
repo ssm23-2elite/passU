@@ -93,8 +93,8 @@ public class Packet {
 	public class Wheel_Flag{
 		public static final int INVALID = -1;
 		public static final int WHEEL_OFF = 0;
-		public static final int WHEEL_ON = 1;
-		public static final int WHEEL_MOVE = 2;
+		public static final int WHEEL_DOWN = 3;
+		public static final int WHEEL_UP = 4;
 	}
 	
 	public class Hello{

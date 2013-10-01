@@ -70,6 +70,7 @@ public class KeyCodeMap {
 		M.put(WindowsKeyCode.KEY_SPACE, NativeKeyCode.KEY_SPACE);
 		M.put(WindowsKeyCode.VK_OEM_102, NativeKeyCode.KEY_BACKSLASH);		
 		M.put(WindowsKeyCode.KEY_HANGUEL, NativeKeyCode.KEY_HANGEUL);
+		M.put(WindowsKeyCode.KEY_KANA, NativeKeyCode.KEY_HANGEUL);
 		M.put(WindowsKeyCode.KEY_SPACE, NativeKeyCode.KEY_SPACE);
 		M.put(WindowsKeyCode.VK_DOT, NativeKeyCode.KEY_DOT);
 		M.put(WindowsKeyCode.VK_SLASH, NativeKeyCode.KEY_SLASH);
@@ -77,5 +78,6 @@ public class KeyCodeMap {
 		M.put(WindowsKeyCode.VK_SEMICOLON, NativeKeyCode.KEY_SEMICOLON);
 		M.put(WindowsKeyCode.VK_GRAVE, NativeKeyCode.KEY_GRAVE);
 		M.put(WindowsKeyCode.VK_APOSTROPHE, NativeKeyCode.KEY_APOSTROPHE);
+		M.put(WindowsKeyCode.VK_LEFT_SHIFT, NativeKeyCode.KEY_LEFTSHIFT);
 	}
 }

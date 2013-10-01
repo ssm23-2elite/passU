@@ -226,6 +226,7 @@ void CPassUDlg::HideCursorAll() {
 	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32643);    // IDC_SIZENESW            
 	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32646);    // IDC_SIZEALL
 	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32648);    // IDC_NO    
+	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32649);    // IDC_NO    
 	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32650);    // IDC_APPSTARTING
 	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32651);    // IDC_HELP
 }
@@ -717,7 +718,8 @@ void CPassUDlg::OnConnectStart(void)
 	sprintf_s(buf, "%4d%4d%4d%1d%1d%4d%4d%4d%4d%5d%5d",
 		MSG_CLIENT, 0, STATUS_PC, 1, 0, ipFirst, ipSecond, ipThird, ipForth, nWidth, nHeight);
 
-	m_pClient->Send((LPCSTR *)&buf, SIZEOFPACKET); // Çï·Î ÆÐÅ¶ º¸³¿
+	if(m_pClient != NULL)
+		m_pClient->Send((LPCSTR *)&buf, SIZEOFPACKET); // Çï·Î ÆÐÅ¶ º¸³¿
 
 	NOTIFYICONDATA nid;
 	ZeroMemory(&nid, sizeof(nid));
@@ -859,6 +861,7 @@ void CPassUDlg::ReceiveClientData(CPassUClientSocket * s)
 		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32643);    // IDC_SIZENESW            
 		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32646);    // IDC_SIZEALL
 		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32648);    // IDC_NO    
+		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32649);    // IDC_NO    
 		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32650);    // IDC_APPSTARTING
 		::SetSystemCursor(::LoadCursorFromFile("animated_pasu.ani"), 32651);    // IDC_HELP
 
@@ -922,7 +925,8 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 					s = (CPassUChildSocket *)m_pSockList.GetAt(pos);
 				}
 
-				((CPassUChildSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
+				if(pos != NULL)
+					((CPassUChildSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
 				break;
 			}
 		}
@@ -951,8 +955,8 @@ BOOL CPassUDlg::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct)
 				(CPassUChildSocket *)m_pSockList.GetNext(pos);
 				s =  ((CPassUChildSocket *)m_pSockList.GetAt(pos));
 			}
-
-			((CPassUChildSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
+			if(pos != NULL)
+					((CPassUChildSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
 		}
 
 		break;
@@ -977,8 +981,8 @@ LRESULT CPassUDlg::OnArrivedScreenEdge(WPARAM wParam, LPARAM lParam)
 			(CPassUChildSocket *)m_pSockList.GetNext(pos);
 			s =  ((CPassUChildSocket *)m_pSockList.GetAt(pos));
 		} 
-
-		((CPassUChildSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
+		if(pos != NULL)
+			((CPassUChildSocket *)m_pSockList.GetAt(pos))->Send(buf, SIZEOFPACKET);
 
 		m_allowSend = TRUE;
 		HideCursorAll();

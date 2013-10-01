@@ -73,7 +73,6 @@ public class PassU extends Activity {
 				printOutput("Welcome to PassU");
 				HideBackground();
 				AR.getInstance().m_Service.onViewInit();
-				AR.getInstance().m_Service.ShowCursor();
 			} else if(PassUIntent.ACTION_DEVICE_OPEN_FAILED.equals(action)) {
 				printOutput("Device open failed\nis Rooted device?");
 			} else if(PassUIntent.ACTION_DISCONNECTED.equals(action)) {

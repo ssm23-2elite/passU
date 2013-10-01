@@ -133,9 +133,7 @@ public class WindowsKeyCode {
 	public static final int KEY_NUMLOCK = 0x90;
 	public static final int KEY_SCROLL = 0x91;
 
-	
-	
-	
+	public static final int VK_LEFT_SHIFT = 0xA0;
 	public static final int VK_OEM_102 = 0xE2;
 	public static final int VK_OEM_COMMA = 0xBC;
 	

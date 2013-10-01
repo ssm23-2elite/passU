@@ -128,7 +128,6 @@ public class NativeKeyCode {
 
 	public static final int KEY_KPCOMMA = 121;
 	public static final int KEY_HANGEUL = 122;
-	public static final int KEY_HANGUEL = KEY_HANGEUL;
 	public static final int KEY_HANJA = 123;
 	public static final int KEY_YEN = 124;
 	public static final int KEY_LEFTMETA = 125;

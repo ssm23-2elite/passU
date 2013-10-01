@@ -179,12 +179,21 @@ public class PassUSocket implements PacketListener {
 					mVirtEventListener.onKeyUp(keyCode);
 			} else if( packet.getUpdownFlag() == Packet.Updown_Flag.KEYDOWN ) {
 				Integer keyCode = KeyCodeMap.M.get(packet.getKeyCode());
-				if(keyCode != null) mVirtEventListener.onKeyDown(keyCode);
+				if(keyCode != null)
 					mVirtEventListener.onKeyDown(keyCode);
 			}
 		} else if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.MOUSE ) {
 			mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
 			AR.getInstance().m_Service.Update(packet.getXCoordinate(), packet.getYCoordinate(), true);
+			
+			if(packet.getXCoordinate() <= 3 ||
+					packet.getYCoordinate() <= 3 ||
+					packet.getXCoordinate() >= AR.width - 3 ||
+					packet.getYCoordinate() >= AR.height - 3) {
+				AR.getInstance().m_Service.HideCursor();
+			} else {
+				AR.getInstance().m_Service.ShowCursor();
+			}
 			
 			if( packet.getLeftRight() == Packet.LeftRight.LEFT ) {
 				if( packet.getUpdownFlag() == Packet.Updown_Flag.UP ) {

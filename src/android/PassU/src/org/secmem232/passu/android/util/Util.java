@@ -190,7 +190,9 @@ public class Util {
 	}
 	
 	public static int getCursorResource(String name) {
-		if("Gold Arrow".equals(name)) {
+		if("Basic Cursor".equals(name)) {
+			return R.drawable.cursor_basiccursor;
+		} else if("Gold Arrow".equals(name)) {
 			return R.drawable.cursor_goldarrow;
 		} else if("Blue Arrow".equals(name)) {
 			return R.drawable.cursor_bluearrow;
