@@ -145,10 +145,10 @@ void CClient::OnBnClickedConnect() // Connect 버튼을 눌렀을 때
 	m_IpAddressCtrl.GetAddress(ipFirst, ipSecond, ipThird, ipForth);
 
 	m_address.Format(_T("%d.%d.%d.%d"), ipFirst, ipSecond, ipThird, ipForth);
-	if(m_address.GetLength() < 9 || m_address.GetAt(0) == '0' || m_address.GetAt(m_address.GetLength() - 1) == '0'){
+	/*if(m_address.GetLength() < 9 || m_address.GetAt(0) == '0' || m_address.GetAt(m_address.GetLength() - 1) == '0'){
 		AfxMessageBox(_T("IP 주소를 올바르게 입력하세요."));
 		return ;
-	}
+	}*/
 
 	m_cBtn_connect.EnableWindow(FALSE);
 	CPassUDlg * pMainDlg = (CPassUDlg *)::AfxGetMainWnd();

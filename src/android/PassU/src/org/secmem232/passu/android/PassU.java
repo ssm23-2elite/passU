@@ -97,7 +97,7 @@ public class PassU extends Activity {
 		edit_ip = (EditText)findViewById(R.id.edit_ip);
 		btn_setting = (Button)findViewById(R.id.btn_setting);
 		
-		edit_ip.setText("211.189.20.139:30000");
+		edit_ip.setText("192.168.1.100:30000");
 		btn_connect.setOnClickListener( new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {

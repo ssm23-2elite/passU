@@ -480,6 +480,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 	case WM_UNBINDED_CLIENT:
 		btn_Bind[wParam] = 0;
 		break;
+	case WM_KEYBOARD_TRUE:
+		BLOCK = FALSE;
+		break;
 	}
 
 	return DefWindowProc(hWnd, uiMsg, wParam, lParam);

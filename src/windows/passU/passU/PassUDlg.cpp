@@ -592,7 +592,7 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s)
 	POSITION pos = m_pSockList.GetHeadPosition();
 
 	CString tmpStr;
-	DestroyCursorAll();
+	ShowCursorAll();
 	m_allowSend = FALSE;
 	::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
 	::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
@@ -629,12 +629,11 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s)
 
 		if(pChild == s){
 			m_pSockList.RemoveAt(pos);
-			delete	pChild;
 			break;
 		}
 		m_pSockList.GetNext(pos);
 	}
-
+	whereisPoint = 5;
 }
 
 void CPassUDlg::OnStartServer()

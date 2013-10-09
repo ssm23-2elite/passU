@@ -174,13 +174,22 @@ public class PassUSocket implements PacketListener {
 		Log.w(LOG, packet.toString());
 		if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.KEYBOARD ) {
 			if( packet.getUpdownFlag() == Packet.Updown_Flag.KEYUP ) {
-				Integer keyCode = KeyCodeMap.M.get(packet.getKeyCode());
-				if(keyCode != null)
-					mVirtEventListener.onKeyUp(keyCode);
+				if(packet.getKeyCode() == WindowsKeyCode.KEY_HANGUL) {
+					// 한글 키 예외처리
+					
+				} else {
+					Integer keyCode = KeyCodeMap.M.get(packet.getKeyCode());
+					if(keyCode != null)
+						mVirtEventListener.onKeyUp(keyCode);
+				}
 			} else if( packet.getUpdownFlag() == Packet.Updown_Flag.KEYDOWN ) {
-				Integer keyCode = KeyCodeMap.M.get(packet.getKeyCode());
-				if(keyCode != null)
-					mVirtEventListener.onKeyDown(keyCode);
+				if(packet.getKeyCode() == WindowsKeyCode.KEY_HANGUL) {
+					// 한글 키 예외처리
+				} else {
+					Integer keyCode = KeyCodeMap.M.get(packet.getKeyCode());
+					if(keyCode != null)
+						mVirtEventListener.onKeyDown(keyCode);
+				}
 			}
 		} else if( packet.getHeader().getMessageType() == PacketHeader.Message_Type.MOUSE ) {
 			mVirtEventListener.onSetCoordinates(packet.getXCoordinate(), packet.getYCoordinate());
