@@ -7,6 +7,7 @@
 #include "PassUDlg.h"
 #include "afxdialogex.h"
 #include "PassUClientSocket.h"
+#include "PassUTransparentDlg.h"
 #include <Dbt.h>
 
 #ifdef _DEBUG
@@ -94,7 +95,7 @@ END_MESSAGE_MAP()
 BOOL CPassUDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-
+	tdlgIsCreated = FALSE;
 	// 시스템 메뉴에 "정보..." 메뉴 항목을 추가합니다.
 
 	// IDM_ABOUTBOX는 시스템 명령 범위에 있어야 합니다.
@@ -150,7 +151,7 @@ BOOL CPassUDlg::OnInitDialog()
 	// 처음에는 클라이언트에 정보를 보내지 않는다.
 	m_allowSend = FALSE;
 	isCursorShow = TRUE;
-
+	
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -208,11 +209,16 @@ HCURSOR CPassUDlg::OnQueryDragIcon()
 
 void CPassUDlg::ShowCursorAll() {
 	isCursorShow = TRUE;
+	if(m_SorC && tdlgIsCreated) 
+		tdlg->ShowWindow(SW_HIDE);
 	SystemParametersInfo(SPI_SETCURSORS, 0, NULL, 0);
 }
 
 void CPassUDlg::HideCursorAll() {
 	isCursorShow = FALSE;
+	if(m_SorC && tdlgIsCreated)
+		tdlg->ShowWindow(SW_SHOW);
+
 	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32512);    // IDC_ARROW
 	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32513);    // IDC_IBEAM
 	::SetSystemCursor(::LoadCursorFromFile("trans.cur"), 32514);    // IDC_WAIT
@@ -587,17 +593,15 @@ void CPassUDlg::CleanUp(void)
 
 void CPassUDlg::CloseChild(CPassUChildSocket *s)
 { // 클라이언트쪽에서 종료하였을 때 호출되는 함수
-
+	int i;
 	CPassUChildSocket *pChild;
 	POSITION pos = m_pSockList.GetHeadPosition();
 
 	CString tmpStr;
 	ShowCursorAll();
 	m_allowSend = FALSE;
-	::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
-	::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
-
-	for(int i = 0 ; i < 9 ; i ++){
+	
+	for(i = 0 ; i < 9 ; i ++){
 		if(m_tab1.clientInfo[i].clientID == s->c_id){
 
 			m_tab1.m_cBtn[((m_tab1.clientInfo[i]).getPosition())].SetBitmap(NULL);
@@ -606,6 +610,7 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s)
 			Invalidate();
 
 			m_tab1.btn_Bind[(m_tab1.clientInfo[i]).getPosition()] = 0;
+			::SendMessage(m_tab1.dllWnd, WM_CHILDCLOSE, (m_tab1.clientInfo[i]).getPosition(), 0);
 
 			tmpStr.Format(_T("%d , IP : %s"), m_tab1.clientInfo[i].clientID, m_tab1.clientInfo[i].m_address);
 			// 리스트 컨트롤에서 삭제
@@ -623,7 +628,7 @@ void CPassUDlg::CloseChild(CPassUChildSocket *s)
 			break;
 		}
 	}
-
+	
 	while(pos != NULL){
 		pChild = (CPassUChildSocket *)m_pSockList.GetAt(pos);
 
@@ -665,10 +670,12 @@ void CPassUDlg::OnStartServer()
 void CPassUDlg::OnDestroy()
 {
 	if(m_SorC){ // Server일 시
+		delete tdlg;
 		CleanUp();
 	} else{
 		CleanUp();
 	}
+	
 	DestroyCursorAll();
 	CDialogEx::OnDestroy();
 	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
@@ -1148,6 +1155,10 @@ void CPassUDlg::OnBnClickedStart()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_SorC){
+		tdlg = new CPassUTransparentDlg;
+		tdlg->Create(IDD_TRANSPARENT, GetDesktopWindow());
+		tdlg->ShowWindow(SW_HIDE);
+		tdlgIsCreated = TRUE;
 		OnStartServer();
 		m_tab2.EnableWindow(FALSE);
 	} else{
@@ -1169,8 +1180,7 @@ void CPassUDlg::OnBnClickedStop()
 		m_CBtn_Start.EnableWindow(TRUE);
 		m_CBtn_Stop.EnableWindow(FALSE);
 
-		::SendMessage(m_tab1.dllWnd, WM_KEYBOARD_TRUE, 0, 0);
-		::SendMessage(m_tab1.dllWnd, WM_MOUSE_TRUE, 0, 0);
+		::SendMessage(m_tab1.dllWnd, WM_INPUTDEVICE_TRUE, 0, 0);
 	} else{
 		m_CBtn_Start.EnableWindow(FALSE);
 		m_CBtn_Stop.EnableWindow(FALSE);
@@ -1192,3 +1202,4 @@ void CPassUDlg::OnBnClickedStop()
 	CleanUp();
 	//CDialog::OnCancel();
 }
+

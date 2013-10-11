@@ -111,6 +111,7 @@
     <ClInclude Include="PassUClientSocket.h" />
     <ClInclude Include="PassUDlg.h" />
     <ClInclude Include="PassUServerSocket.h" />
+    <ClInclude Include="PassUTransparentDlg.h" />
     <ClInclude Include="PictureEx.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Server.h" />
@@ -130,6 +131,7 @@
     <ClCompile Include="PassUClientSocket.cpp" />
     <ClCompile Include="PassUDlg.cpp" />
     <ClCompile Include="PassUServerSocket.cpp" />
+    <ClCompile Include="PassUTransparentDlg.cpp" />
     <ClCompile Include="PictureEx.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Splash.cpp" />

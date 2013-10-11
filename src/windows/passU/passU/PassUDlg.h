@@ -8,6 +8,7 @@
 #include "Client.h"
 #include "afxwin.h"
 #include "PassUClientSocket.h"
+#include "PassUTransparentDlg.h"
 
 
 // CPassUDlg 대화 상자
@@ -44,7 +45,8 @@ public:
 	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);
 	CClient m_tab_client;
 	CServer m_tab_server;
-
+	CPassUTransparentDlg *tdlg;
+	BOOL tdlgIsCreated;
 	// 전체 스크린 구함
 	int nWidth;
 	int nHeight;

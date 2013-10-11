@@ -5,8 +5,8 @@
 
 #define WM_KEYBOARD_FALSE		WM_USER + 1001
 #define WM_MOUSE_FALSE			WM_USER + 1002
-#define WM_KEYBOARD_TRUE		WM_USER + 1003
-#define WM_MOUSE_TRUE			WM_USER + 1004
+#define WM_CHILDCLOSE			WM_USER + 1003
+#define WM_INPUTDEVICE_TRUE		WM_USER + 1004
 #define WM_BINDED_CLIENT		WM_USER + 1005
 #define WM_UNBINDED_CLIENT		WM_USER + 1006
 #define WM_ARRIVED_SCREEN_EDGE	WM_USER + 1007
@@ -480,7 +480,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uiMsg, WPARAM wParam, LPARAM lParam)
 	case WM_UNBINDED_CLIENT:
 		btn_Bind[wParam] = 0;
 		break;
-	case WM_KEYBOARD_TRUE:
+	case WM_CHILDCLOSE:
+		btn_Bind[wParam] = 0;
+		whereisPoint = 5;
+		BLOCK = FALSE;
+		break;
+	case WM_INPUTDEVICE_TRUE:
 		BLOCK = FALSE;
 		break;
 	}
