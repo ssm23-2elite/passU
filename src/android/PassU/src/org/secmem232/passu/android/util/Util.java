@@ -16,6 +16,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -25,6 +26,18 @@ public class Util {
 	private static final boolean D = false;
 	private final static String LOG = "Util";
 
+	public static String getIP(Context context) {
+		// TODO Auto-generated method stub
+		SharedPreferences pref = context.getSharedPreferences("prof", 0);
+		return pref.getString( "ip", "" );
+	}
+
+	public static void setIP(Context context, String password) {
+		Editor edit = context.getSharedPreferences("prof", 0).edit();
+		edit.putString( "ip", password );
+		edit.commit();
+	}
+	
 	public static String getLocalIpAddress()
 	{
 		try {

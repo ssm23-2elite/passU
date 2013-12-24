@@ -27,29 +27,28 @@ public class PassU extends Activity {
 	private Button btn_connect;
 	private EditText edit_ip;
 	private Button btn_setting;
-	
+	private String ip;
 	private IPassU mPassUSvc;
 	private ServiceConnection conn = new ServiceConnection() {
 		
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			if(D.D) Log.w(LOG, "onServiceConnected");
+			ip = edit_ip.getText().toString();
+			
 			mPassUSvc = IPassU.Stub.asInterface(service);
 			try {
 				// Remote connected requested?
-				String ipport = edit_ip.getText().toString();
-				String ip = ipport.split(":")[0];
-				int port = Integer.parseInt(ipport.split(":")[1]);
 				
 				// Connect to server when client is not connected to server
 				if(!mPassUSvc.isConnected()){
-					if(D.D) Log.i(LOG, "Remote-connect requested to " + ip + ":" + port);
-					onConnectRequested(ip, port);
+					if(D.D) Log.i(LOG, "Remote-connect requested to " + ip);
+					onConnectRequested(ip, 30000);
 				} else {
 					if(D.D) Log.e(LOG, "Client already connected to server!");
 				}
 			} catch (ArrayIndexOutOfBoundsException e) {
-				printOutput("Insert IP:PORT");
+				printOutput("Insert IP Address");
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
@@ -71,6 +70,7 @@ public class PassU extends Activity {
 			String action = intent.getAction();
 			if(PassUIntent.ACTION_CONNECTED.equals(action)){
 				printOutput("Welcome to PassU");
+				Util.setIP(PassU.this, ip);
 				HideBackground();
 				AR.getInstance().m_Service.onViewInit();
 			} else if(PassUIntent.ACTION_DEVICE_OPEN_FAILED.equals(action)) {
@@ -97,14 +97,12 @@ public class PassU extends Activity {
 		edit_ip = (EditText)findViewById(R.id.edit_ip);
 		btn_setting = (Button)findViewById(R.id.btn_setting);
 		
-		edit_ip.setText("192.168.1.100:30000");
+		edit_ip.setText(Util.getIP(PassU.this));
 		btn_connect.setOnClickListener( new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				String ipport = edit_ip.getText().toString();
-				String ip = ipport.split(":")[0];
-				int port = Integer.parseInt(ipport.split(":")[1]);
-				tryConnect(ip, port);
+				ip = edit_ip.getText().toString();
+				tryConnect(ip, 30000);
 			}
 		});
 		
