@@ -11,7 +11,7 @@
         android:layout_width="52dp"
         android:layout_height="52dp"
         android:layout_marginRight="10dp"
-        android:src="@drawable/cursor_basiccursor"
+        android:src="@drawable/cursor_basic"
         android:padding="10dp" />
 
     <LinearLayout

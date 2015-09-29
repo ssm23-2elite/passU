@@ -5,7 +5,7 @@
     <PreferenceCategory
         android:key="mouse"
         android:title="MOUSE" >
-        <org.secmem232.passu.android.setting.CursorListPreference
+        <org.sec.passd.android.setting.CursorListPreference
             android:dialogTitle="마우스커서 아이콘"
             android:key="mouseicon"
             android:entries="@array/cursors"
@@ -130,6 +130,6 @@
         <Preference
             android:key="about"
             android:selectable="false"
-            android:title="passU		(version: 1.0.0)" />
+            android:title="passD		(version: 2.0.0)" />
     </PreferenceCategory>
 </PreferenceScreen>

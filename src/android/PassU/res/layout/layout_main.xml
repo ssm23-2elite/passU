@@ -6,27 +6,27 @@
     android:paddingBottom="10dp">
     <ImageView 
         android:layout_centerInParent="true"
-        android:src="@drawable/background"
+        android:src="@drawable/back"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:alpha="0.4"
         />
     <TextView 
-        	android:id="@+id/passU"
+        	android:id="@+id/passD"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:text="passU"
+		    android:text="passD"
 		    android:padding="5dp"
 		    android:textSize="30sp"
 		    android:textColor="#000000"/>
     <TextView 
-        	android:layout_toRightOf="@id/passU"
+        	android:layout_toRightOf="@id/passD"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:text="(pass your USB via Network)"
+		    android:text="(pass your Devices via Network)"
 		    android:textSize="15sp"
 		    android:layout_marginLeft="10dp"
-		    android:layout_alignBaseline="@id/passU"
+		    android:layout_alignBaseline="@id/passD"
 		    android:textColor="#000000"/>
      
 	<LinearLayout 
@@ -50,7 +50,6 @@
 		    android:alpha="0.9"
 		    android:textSize="20dp"
 		    android:hint="127.0.0.1"
-		    android:background="@drawable/check_small"
 		    android:layout_marginLeft="30dp"
 		    android:layout_marginRight="30dp"
 		    android:layout_marginBottom="30dp"
@@ -65,7 +64,6 @@
 		    android:id="@+id/btn_connect"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:background="@drawable/btn_click"
 		    android:text="Connect"
 		    android:textColor="#000000"
 		    android:textSize="20dp"

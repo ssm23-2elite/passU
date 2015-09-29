@@ -13,16 +13,16 @@
     
     <string-array name="cursors">
         <item>Basic Cursor</item>
-        <item>Gold Arrow</item>
-        <item>Blue Arrow</item>
+        <item>Black Cursor</item>
+        <item>Blue Cursor</item>
         <item>Leaf</item>
         <item>Sword</item>
         <item>Finger</item>
     </string-array>
     <string-array name="cursor_values">
         <item>Basic Cursor</item>
-        <item>Gold Arrow</item>
-        <item>Blue Arrow</item>
+        <item>Black Cursor</item>
+        <item>Blue Cursor</item>
         <item>Leaf</item>
         <item>Sword</item>
         <item>Finger</item>
